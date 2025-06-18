@@ -1,31 +1,24 @@
 from sqlalchemy.orm import Session
-from app.models.todo import ToDo
-
-def create_todo(db: Session, data):
-    db_todo = ToDo(**data.dict())
-    db.add(db_todo)
+from app.models.event import Event
+def create_event(db: Session, data):
+    db_event = Event(**data.dict())
+    db.add(db_event)
     db.commit()
-    db.refresh(db_todo)
-    return db_todo
-
-def get_todos(db: Session):
-    return db.query(ToDo).all()
-
-def get_todo(db: Session, todo_id: str):
-    return db.query(ToDo).filter(ToDo.id == todo_id).first()
-
-def update_todo(db: Session, todo_id: str, data):
-    db_todo = get_todo(db, todo_id)
-    if not db_todo:
+    db.refresh(db_event)
+    return db_event
+def get_events(db: Session):
+    return db.query(Event).all()
+def update_event(db: Session, event_id: str, data):
+    db_event = db.query(Event).filter(Event.id == event_id).first()
+    if not db_event:
         return None
     for key, value in data.dict().items():
-        setattr(db_todo, key, value)
+        setattr(db_event, key, value)
     db.commit()
-    return db_todo
-
-def delete_todo(db: Session, todo_id: str):
-    db_todo = get_todo(db, todo_id)
-    if db_todo:
-        db.delete(db_todo)
+    return db_event
+def delete_event(db: Session, event_id: str):
+    db_event = db.query(Event).filter(Event.id == event_id).first()
+    if db_event:
+        db.delete(db_event)
         db.commit()
-    return db_todo
+    return db_event

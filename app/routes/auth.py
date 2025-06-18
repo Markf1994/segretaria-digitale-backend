@@ -5,10 +5,8 @@ from app.schemas.user import UserCreate
 from app.crud import user
 from jose import jwt
 import os
-
 SECRET_KEY = os.getenv("SECRET_KEY", "secret")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
-
 router = APIRouter(tags=["Auth"])
 
 def get_db():
@@ -17,7 +15,6 @@ def get_db():
         yield db
     finally:
         db.close()
-
 @router.post("/login")
 def login(form_data: UserCreate, db: Session = Depends(get_db)):
     db_user = user.get_user_by_email(db, form_data.email)
