@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import SessionLocal
-from app.schemas import user as user_schema
-from app.crud import user as user_crud
+from app.schemas.user import UserCreate
+from app.crud import user
 from jose import jwt
 import os
 
@@ -19,9 +19,9 @@ def get_db():
         db.close()
 
 @router.post("/login")
-def login(form_data: user_schema.UserCreate, db: Session = Depends(get_db)):
-    db_user = user_crud.get_user_by_email(db, form_data.email)
-    if not db_user or not user_crud.verify_password(form_data.password, db_user.hashed_password):
+def login(form_data: UserCreate, db: Session = Depends(get_db)):
+    db_user = user.get_user_by_email(db, form_data.email)
+    if not db_user or not user.verify_password(form_data.password, db_user.hashed_password):
         raise HTTPException(status_code=400, detail="Invalid credentials")
     token = jwt.encode({"sub": db_user.email}, SECRET_KEY, algorithm=ALGORITHM)
     return {"access_token": token, "token_type": "bearer"}
