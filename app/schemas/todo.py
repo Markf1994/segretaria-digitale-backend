@@ -6,4 +6,4 @@ class ToDoCreate(BaseModel):
 class ToDoResponse(ToDoCreate):
     id: str
     class Config:
-        from_attributes = True
+        orm_mode = True
