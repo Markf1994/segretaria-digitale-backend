@@ -32,9 +32,12 @@ The API will be available at `http://localhost:8000/` by default.
 
 ## Running tests
 
-This repository does not currently include automated tests. If you add tests,
-install `pytest` in your virtual environment and run:
+Tests are located in the `tests/` directory. After installing the
+dependencies simply run:
 
 ```bash
 pytest
 ```
+
+The test suite uses a temporary SQLite database, so no additional
+configuration is required.

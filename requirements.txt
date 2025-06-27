@@ -9,3 +9,4 @@ python-jose[cryptography]
 email-validator
 apscheduler
 psycopg2-binary
+pytest
