@@ -11,7 +11,7 @@ This repository contains a FastAPI backend used by Segretaria Digitale.
    source .venv/bin/activate
    pip install -r requirements.txt
    ```
-3. Create a `.env` file or export the required environment variables (see below).
+3. Copy `.env.example` to `.env` and adjust the values as needed.
 
 ## Required environment variables
 
