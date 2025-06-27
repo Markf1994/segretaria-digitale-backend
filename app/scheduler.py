@@ -10,7 +10,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 def sample_job() -> None:
     """Job that runs periodically and prints a message to the console."""
-    print("Sample scheduler job executed")
+    # print("Sample scheduler job executed")
+    pass
 
 
 scheduler = BackgroundScheduler()
