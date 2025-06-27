@@ -5,7 +5,7 @@ from app.schemas.user import UserCreate
 from app.crud import user
 from jose import jwt
 import os
-SECRET_KEY = os.getenv("SECRET_KEY", "secret")
+SECRET_KEY = os.environ["SECRET_KEY"]
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 router = APIRouter(tags=["Auth"])
 
