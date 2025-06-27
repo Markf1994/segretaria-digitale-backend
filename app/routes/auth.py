@@ -17,6 +17,12 @@ router = APIRouter(tags=["Auth"])
 
 @router.post("/login")
 def login(form_data: UserCreate, db: Session = Depends(get_db)):
+    """Authenticate a user and issue a JWT access token.
+
+    The provided credentials are validated against the stored user data.
+    On success the generated token and token type are returned, otherwise a
+    400 HTTP error is raised.
+    """
     db_user = user.get_user_by_email(db, form_data.email)
     if not db_user or not user.verify_password(form_data.password, db_user.hashed_password):
         raise HTTPException(status_code=400, detail="Invalid credentials")
