@@ -23,16 +23,6 @@ If asynchronous database access becomes necessary later on, add `asyncpg` to
 - `ALGORITHM` – (optional) algorithm used for JWT; defaults to `HS256`.
 - `ACCESS_TOKEN_EXPIRE_MINUTES` – (optional) lifetime of access tokens in minutes; defaults to `30`.
 
-### Email configuration (optional)
-
-The `app.utils.email` module can send basic emails using SMTP. Configure the
-following variables if you wish to use this functionality:
-
-- `SMTP_HOST` – address of the SMTP server.
-- `SMTP_PORT` – (optional) port number, defaults to `587`.
-- `SMTP_USER` – username for authentication (if required).
-- `SMTP_PASSWORD` – password for authentication (if required).
-
 ## Running the server
 
 After installing dependencies and setting the environment variables, start the
