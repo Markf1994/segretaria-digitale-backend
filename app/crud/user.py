@@ -8,6 +8,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def create_user(db: Session, email: str, password: str):
+    """Create and return a new user with a hashed password."""
     existing_user = db.query(User).filter(User.email == email).first()
     if existing_user:
         raise HTTPException(status_code=409, detail="Email already registered")
@@ -18,7 +19,13 @@ def create_user(db: Session, email: str, password: str):
     db.commit()
     db.refresh(db_user)
     return db_user
+
+
 def get_user_by_email(db: Session, email: str):
+    """Return a user instance matching ``email`` or ``None``."""
     return db.query(User).filter(User.email == email).first()
+
+
 def verify_password(plain_password, hashed_password):
+    """Return ``True`` if the plaintext password matches the hashed one."""
     return pwd_context.verify(plain_password, hashed_password)

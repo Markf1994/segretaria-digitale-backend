@@ -7,6 +7,7 @@ router = APIRouter(prefix="/users", tags=["Users"])
 
 @router.post("/", response_model=UserResponse)
 def create_user_route(user_data: UserCreate, db: Session = Depends(get_db)):
+    """Register a new user if the email is not already taken."""
     existing_user = user.get_user_by_email(db, user_data.email)
     if existing_user:
         raise HTTPException(status_code=409, detail="Email already registered")
