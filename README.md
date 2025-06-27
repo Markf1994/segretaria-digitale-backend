@@ -13,6 +13,9 @@ This repository contains a FastAPI backend used by Segretaria Digitale.
    ```
 3. Copy `.env.example` to `.env` and adjust the values as needed.
 
+If asynchronous database access becomes necessary later on, add `asyncpg` to
+`requirements.txt` and configure SQLAlchemy with its async engine.
+
 ## Required environment variables
 
 - `DATABASE_URL` – connection string for the PostgreSQL database.
