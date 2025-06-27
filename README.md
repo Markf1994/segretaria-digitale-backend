@@ -29,3 +29,12 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
 The API will be available at `http://localhost:8000/` by default.
+
+## Running tests
+
+This repository does not currently include automated tests. If you add tests,
+install `pytest` in your virtual environment and run:
+
+```bash
+pytest
+```
