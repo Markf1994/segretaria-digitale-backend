@@ -2,14 +2,16 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import Base, engine
 from app.routes import users, auth, events, todo, determinazioni
+from app import scheduler
 
 app = FastAPI()
 
 
 @app.on_event("startup")
 def on_startup() -> None:
-    """Create database tables on application startup."""
+    """Create database tables and start the scheduler on startup."""
     Base.metadata.create_all(bind=engine)
+    scheduler.start()
 
 app.add_middleware(
     CORSMiddleware,
@@ -24,3 +26,9 @@ app.include_router(auth.router)
 app.include_router(events.router)
 app.include_router(todo.router)
 app.include_router(determinazioni.router)
+
+
+@app.on_event("shutdown")
+def on_shutdown() -> None:
+    """Shutdown background services when the application stops."""
+    scheduler.shutdown()
