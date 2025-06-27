@@ -1,4 +1,9 @@
-"""Utility functions for sending email via SMTP."""
+"""Utility functions for sending email via SMTP.
+
+`send_email` provides a very small wrapper around :class:`smtplib.SMTP` that
+loads connection details from environment variables.  It is intentionally simple
+so that it can be reused in background jobs or request handlers.
+"""
 
 import os
 import smtplib
