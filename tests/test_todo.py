@@ -6,8 +6,6 @@ os.environ["DATABASE_URL"] = "sqlite:///./test.db"
 
 from app.main import app
 
-from tests.test_users import setup_db  # reuse fixture
-
 client = TestClient(app)
 
 def test_create_todo(setup_db):

@@ -4,7 +4,6 @@ from fastapi.testclient import TestClient
 os.environ["DATABASE_URL"] = "sqlite:///./test.db"
 
 from app.main import app
-from tests.test_users import setup_db
 
 client = TestClient(app)
 
