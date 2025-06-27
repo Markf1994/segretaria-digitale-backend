@@ -1,17 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.database import SessionLocal
+from app.dependencies import get_db
 from app.schemas.determinazione import DeterminazioneCreate, DeterminazioneResponse
 from app.crud import determinazione
 
 router = APIRouter(prefix="/determinazioni", tags=["Determinazioni"])
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 @router.post("/", response_model=DeterminazioneResponse)
 def create_determinazione_route(data: DeterminazioneCreate, db: Session = Depends(get_db)):

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.database import SessionLocal
+from app.dependencies import get_db
 from app.schemas.user import UserCreate
 from app.crud import user
 from jose import jwt
@@ -13,12 +13,6 @@ if not SECRET_KEY:
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 router = APIRouter(tags=["Auth"])
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 @router.post("/login")
 def login(form_data: UserCreate, db: Session = Depends(get_db)):
     db_user = user.get_user_by_email(db, form_data.email)

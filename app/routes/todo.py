@@ -1,17 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.database import SessionLocal
+from app.dependencies import get_db
 from app.schemas.todo import ToDoCreate, ToDoResponse
 from app.crud import todo
 
 router = APIRouter(prefix="/todo", tags=["ToDo"])
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 @router.post("/", response_model=ToDoResponse)
 def create_todo_route(data: ToDoCreate, db: Session = Depends(get_db)):
