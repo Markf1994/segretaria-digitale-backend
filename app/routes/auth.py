@@ -18,7 +18,9 @@ def get_db():
 @router.post("/login")
 def login(form_data: UserCreate, db: Session = Depends(get_db)):
     db_user = user.get_user_by_email(db, form_data.email)
-    if not db_user or not user.verify_password(form_data.password, db_user.hashed_password):
+    if not db_user or not user.verify_password(
+        form_data.password.get_secret_value(), db_user.hashed_password
+    ):
         raise HTTPException(status_code=400, detail="Invalid credentials")
     token = jwt.encode({"sub": db_user.email}, SECRET_KEY, algorithm=ALGORITHM)
     return {"access_token": token, "token_type": "bearer"}

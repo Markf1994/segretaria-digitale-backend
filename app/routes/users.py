@@ -13,5 +13,7 @@ def get_db():
         db.close()
 @router.post("/", response_model=UserResponse)
 def create_user_route(user_data: UserCreate, db: Session = Depends(get_db)):
-    db_user = user.create_user(db, user_data.email, user_data.password)
+    db_user = user.create_user(
+        db, user_data.email, user_data.password.get_secret_value()
+    )
     return db_user
