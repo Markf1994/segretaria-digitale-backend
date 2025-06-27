@@ -59,3 +59,8 @@ pytest
 
 The test suite uses a temporary SQLite database, so no additional
 configuration is required.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
