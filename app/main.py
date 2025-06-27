@@ -20,3 +20,9 @@ app.include_router(auth.router)
 app.include_router(events.router)
 app.include_router(todo.router)
 app.include_router(determinazioni.router)
+
+
+@app.get("/")
+async def read_root():
+    """Health check endpoint to confirm the service is running."""
+    return {"message": "Service is running"}
