@@ -5,7 +5,7 @@ This repository contains a FastAPI backend used by Segretaria Digitale.
 ## Setup
 
 1. Ensure you have **Python 3.10+** installed.
-2. Create a virtual environment and install dependencies:
+2. Create a virtual environment and install dependencies (including `httpx`):
    ```bash
    python3 -m venv .venv
    source .venv/bin/activate
