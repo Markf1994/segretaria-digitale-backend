@@ -1,9 +1,17 @@
 from sqlalchemy.orm import Session
+from fastapi import HTTPException
 from app.models.user import User
 from passlib.context import CryptContext
 import uuid
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
 def create_user(db: Session, email: str, password: str):
+    existing_user = db.query(User).filter(User.email == email).first()
+    if existing_user:
+        raise HTTPException(status_code=409, detail="Email already registered")
+
     hashed_password = pwd_context.hash(password)
     db_user = User(id=str(uuid.uuid4()), email=email, hashed_password=hashed_password)
     db.add(db_user)
