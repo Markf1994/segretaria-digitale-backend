@@ -3,9 +3,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.database import Base, engine
 from app.routes import users, auth, events, todo, determinazioni
 
-Base.metadata.create_all(bind=engine)
-
 app = FastAPI()
+
+
+@app.on_event("startup")
+def on_startup() -> None:
+    """Create database tables on application startup."""
+    Base.metadata.create_all(bind=engine)
 
 app.add_middleware(
     CORSMiddleware,
