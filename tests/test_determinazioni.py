@@ -1,6 +1,5 @@
 import os
 from fastapi.testclient import TestClient
-import pytest
 
 os.environ["DATABASE_URL"] = "sqlite:///./test.db"
 
