@@ -6,12 +6,16 @@ define a function and register it with ``scheduler.add_job``.
 """
 
 from apscheduler.schedulers.background import BackgroundScheduler
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 def sample_job() -> None:
-    """Job that runs periodically and prints a message to the console."""
-    # print("Sample scheduler job executed")
-    pass
+    """Job that runs periodically and logs a message."""
+    logger.info("Sample scheduler job executed")
+
 
 
 scheduler = BackgroundScheduler()

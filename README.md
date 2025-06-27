@@ -35,8 +35,10 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 The API will be available at `http://localhost:8000/` by default.
 
 The application starts a small background scheduler defined in
-`app/scheduler.py`. By default it runs a job every minute that prints a message
-to the console. You can modify or add jobs in that module to suit your needs.
+`app/scheduler.py`. By default it runs a job every minute that logs a message.
+You can edit `sample_job` or remove the `scheduler.add_job` line in that file
+to disable the task. Alternatively comment out the call to `scheduler.start()`
+in `app/main.py` to disable the scheduler entirely.
 
 ## Running tests
 
