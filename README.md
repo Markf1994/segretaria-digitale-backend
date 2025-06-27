@@ -18,6 +18,7 @@ This repository contains a FastAPI backend used by Segretaria Digitale.
 - `DATABASE_URL` – connection string for the PostgreSQL database.
 - `SECRET_KEY` – secret key used to sign JWT tokens.
 - `ALGORITHM` – (optional) algorithm used for JWT; defaults to `HS256`.
+- `ACCESS_TOKEN_EXPIRE_MINUTES` – (optional) lifetime of access tokens in minutes; defaults to `30`.
 
 ### Email configuration (optional)
 
