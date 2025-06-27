@@ -1,7 +1,5 @@
 import os
-from datetime import datetime
 from fastapi.testclient import TestClient
-import pytest
 
 # Use same test database
 os.environ["DATABASE_URL"] = "sqlite:///./test.db"
