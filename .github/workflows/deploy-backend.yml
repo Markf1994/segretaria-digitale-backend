@@ -1,0 +1,49 @@
+name: Deploy Backend on Render
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    env:
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+      NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+      RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+      RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install Neon CLI
+      run: npm install -g @neondatabase/cli
+
+    - name: Login to Neon
+      run: neon login --api-key "$NEON_API_KEY"
+
+    - name: Get Neon connection string
+      id: neon
+      run: |
+        echo "DATABASE_URL=$(neon projects connection-string $NEON_PROJECT_ID --type basic)" >> $GITHUB_ENV
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Run migrations
+      run: alembic upgrade head
+      env:
+        DATABASE_URL: ${{ env.DATABASE_URL }}
+
+    - name: Deploy to Render
+      run: |
+        curl -X POST https://api.render.com/v1/services/${{ env.RENDER_SERVICE_ID }}/deploys \
+             -H "Accept: application/json" \
+             -H "Content-Type: application/json" \
+             -H "Authorization: Bearer $RENDER_API_KEY" \
+             -d '{}'
