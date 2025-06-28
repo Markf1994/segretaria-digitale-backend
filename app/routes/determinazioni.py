@@ -4,7 +4,7 @@ from app.dependencies import get_db
 from app.schemas.determinazione import DeterminazioneCreate, DeterminazioneResponse
 from app.crud import determinazione
 
-router = APIRouter(prefix="/determinazioni", tags=["Determinazioni"])
+router = APIRouter(prefix="/determinazioni", tags=["Determinazioni"],trailing_slash=False)
 
 @router.post("/", response_model=DeterminazioneResponse)
 def create_determinazione_route(data: DeterminazioneCreate, db: Session = Depends(get_db)):
