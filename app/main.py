@@ -4,7 +4,7 @@ from app.database import Base, engine
 from app.routes import users, auth, events, todo, determinazioni
 from app import scheduler
 
-app = FastAPI()
+app = FastAPI(redirect_slashes=False)
 
 
 @app.on_event("startup")
