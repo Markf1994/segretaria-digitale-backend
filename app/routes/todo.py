@@ -4,7 +4,7 @@ from app.dependencies import get_db
 from app.schemas.todo import ToDoCreate, ToDoResponse
 from app.crud import todo
 
-router = APIRouter(prefix="/todo", tags=["ToDo"])
+router = APIRouter(prefix="/todo", tags=["ToDo"],trailing_slash=False)
 
 @router.post("/", response_model=ToDoResponse)
 def create_todo_route(data: ToDoCreate, db: Session = Depends(get_db)):
