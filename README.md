@@ -23,6 +23,7 @@ If asynchronous database access becomes necessary later on, add `asyncpg` to
 - `ALGORITHM` – (optional) algorithm used for JWT; defaults to `HS256`.
 - `ACCESS_TOKEN_EXPIRE_MINUTES` – (optional) lifetime of access tokens in minutes; defaults to `30`.
 - `PDF_UPLOAD_ROOT` – directory where uploaded PDF files are stored.
+- `GOOGLE_CREDENTIALS_JSON` – JSON credentials (or path to a JSON file) for Google APIs.
 
 ## Running the server
 
@@ -40,6 +41,20 @@ The application starts a small background scheduler defined in
 You can edit `sample_job` or remove the `scheduler.add_job` line in that file
 to disable the task. Alternatively comment out the call to `scheduler.start()`
 in `app/main.py` to disable the scheduler entirely.
+
+## Google Calendar integration
+
+Set `GOOGLE_CREDENTIALS_JSON` to the JSON credentials (or the path to a JSON
+file) authorized to access Google Calendar. The application will load either an
+OAuth token or service account key depending on the credentials provided.
+
+Use the endpoint:
+
+```bash
+GET /calendar
+```
+
+The response is the raw list of events returned by the Google Calendar API.
 
 ## Running tests
 
