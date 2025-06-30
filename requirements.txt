@@ -9,5 +9,3 @@ apscheduler
 psycopg2-binary
 pytest
 httpx
-google-api-python-client
-google-auth

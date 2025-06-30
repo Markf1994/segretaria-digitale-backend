@@ -23,8 +23,6 @@ If asynchronous database access becomes necessary later on, add `asyncpg` to
 - `ALGORITHM` – (optional) algorithm used for JWT; defaults to `HS256`.
 - `ACCESS_TOKEN_EXPIRE_MINUTES` – (optional) lifetime of access tokens in minutes; defaults to `30`.
 - `PDF_UPLOAD_ROOT` – directory where uploaded PDF files are stored.
-- `GOOGLE_CREDENTIALS_JSON` – JSON credentials (or path to a JSON file) for Google APIs.
-- `GOOGLE_DRIVE_FOLDER_ID` – (optional) restrict Drive listings to this folder.
 
 ## Running the server
 
@@ -42,22 +40,6 @@ The application starts a small background scheduler defined in
 You can edit `sample_job` or remove the `scheduler.add_job` line in that file
 to disable the task. Alternatively comment out the call to `scheduler.start()`
 in `app/main.py` to disable the scheduler entirely.
-
-## Google Drive integration
-
-Set `GOOGLE_CREDENTIALS_JSON` to the JSON credentials (or a path to a file)
-authorized to access Drive. When the optional `GOOGLE_DRIVE_FOLDER_ID` is
-defined, the `/drive` endpoint will list only the files contained in that
-folder.
-
-Use the endpoint:
-
-```bash
-GET /drive
-```
-
-The response is the raw list returned by the Google Drive API (``id``, ``name``
-and ``mimeType`` fields).
 
 ## Running tests
 
