@@ -28,9 +28,9 @@ app.include_router(todo.router)
 app.include_router(determinazioni.router)
 app.include_router(pdfs.router)
 
-from app.crud.pdffile import UPLOAD_ROOT
+from app.crud.pdffile import get_upload_root
 from fastapi.staticfiles import StaticFiles
-app.mount("/uploads", StaticFiles(directory=UPLOAD_ROOT), name="uploads")
+app.mount("/uploads", StaticFiles(directory=get_upload_root()), name="uploads")
 
 
 @app.on_event("shutdown")

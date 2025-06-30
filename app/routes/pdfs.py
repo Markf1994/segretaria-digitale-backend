@@ -28,8 +28,8 @@ async def upload_pdf(
 
 @router.get("/{filename}")
 def get_pdf(filename: str):
-    from app.crud.pdffile import UPLOAD_ROOT
-    path = os.path.join(UPLOAD_ROOT, filename)
+    from app.crud.pdffile import get_upload_root
+    path = os.path.join(get_upload_root(), filename)
     if not os.path.exists(path):
         raise HTTPException(404)
     return FileResponse(path, media_type="application/pdf", filename=filename)
