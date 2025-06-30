@@ -24,6 +24,7 @@ def update_determinazione(db: Session, determinazione_id: str, data):
     for key, value in data.dict().items():
         setattr(db_det, key, value)
     db.commit()
+    db.refresh(db_det)
     return db_det
 
 

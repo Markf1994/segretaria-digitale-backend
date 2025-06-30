@@ -26,7 +26,7 @@ def test_update_event(setup_db):
         "/events/",
         json={
             "titolo": "Old",
-            "descrizione": "",
+            "descrizione": "Start",
             "data_ora": "2023-01-01T09:00:00",
             "is_public": False,
         },
@@ -36,13 +36,15 @@ def test_update_event(setup_db):
         f"/events/{event_id}",
         json={
             "titolo": "New",
-            "descrizione": "",
+            "descrizione": "Updated",
             "data_ora": "2023-01-02T10:00:00",
             "is_public": True,
         },
     )
     assert response.status_code == 200
-    assert response.json()["titolo"] == "New"
+    data = response.json()
+    assert data["titolo"] == "New"
+    assert data["descrizione"] == "Updated"
 
 
 def test_list_events(setup_db):

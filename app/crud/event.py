@@ -24,6 +24,7 @@ def update_event(db: Session, event_id: str, data):
     for key, value in data.dict().items():
         setattr(db_event, key, value)
     db.commit()
+    db.refresh(db_event)
     return db_event
 
 
