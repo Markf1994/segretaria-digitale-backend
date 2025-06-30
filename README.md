@@ -23,6 +23,8 @@ If asynchronous database access becomes necessary later on, add `asyncpg` to
 - `ALGORITHM` – (optional) algorithm used for JWT; defaults to `HS256`.
 - `ACCESS_TOKEN_EXPIRE_MINUTES` – (optional) lifetime of access tokens in minutes; defaults to `30`.
 - `PDF_UPLOAD_ROOT` – directory where uploaded PDF files are stored.
+- `GOOGLE_CREDENTIALS_JSON` – JSON credentials (or path) for Google APIs.
+- `GOOGLE_CALENDAR_ID` – ID of the calendar to read events from.
 
 ## Database migrations
 
@@ -68,6 +70,21 @@ pytest
 
 The test suite uses a temporary SQLite database, so no additional
 configuration is required.
+
+## Dashboard endpoint
+
+The `/dashboard/upcoming` route aggregates local events, personal todos and
+Google Calendar items. The optional query parameter `days` limits the lookup
+window (default `7`). Authentication is required.
+
+Example:
+
+```bash
+GET /dashboard/upcoming?days=5
+```
+
+The response is a chronologically ordered list where each item contains a
+`kind` field (`event`, `todo` or `google`) and a `data_ora` timestamp.
 
 ## License
 

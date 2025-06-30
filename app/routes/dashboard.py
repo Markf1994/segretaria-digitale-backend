@@ -1,0 +1,53 @@
+from datetime import datetime, timedelta
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
+from app.dependencies import get_db, get_current_user
+from app.models.user import User
+from app.schemas.event import EventResponse
+from app.schemas.todo import ToDoResponse
+from app.crud import event, todo
+from app.services.google_calendar import list_upcoming_events
+
+router = APIRouter(prefix="/dashboard", tags=["Dashboard"], trailing_slash=False)
+
+
+@router.get("/upcoming")
+def upcoming_events(
+    days: int = 7,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    now = datetime.utcnow()
+    limit = now + timedelta(days=days)
+
+    ev_items = [
+        {**EventResponse.from_orm(ev).dict(), "kind": "event"}
+        for ev in event.get_events(db)
+        if now <= ev.data_ora <= limit
+    ]
+
+    todo_items = []
+    for td in todo.get_todos(db, current_user):
+        if now <= td.scadenza <= limit:
+            data = ToDoResponse.from_orm(td).dict()
+            data.pop("user_id", None)
+            data["data_ora"] = data.pop("scadenza")
+            data["kind"] = "todo"
+            todo_items.append(data)
+
+    gcal_raw = list_upcoming_events(days)
+    gcal_items = [
+        {**g, "kind": "google"}
+        for g in gcal_raw
+        if now <= g.get("data_ora") <= limit
+    ]
+
+    combined = ev_items + todo_items + gcal_items
+    combined.sort(key=lambda x: x["data_ora"])
+    # Convert datetimes to ISO strings for JSON response
+    for item in combined:
+        if isinstance(item.get("data_ora"), datetime):
+            item["data_ora"] = item["data_ora"].isoformat()
+    return combined
+
