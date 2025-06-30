@@ -6,15 +6,18 @@ from fastapi import UploadFile
 from app.models.pdffile import PDFFile
 from app.schemas.pdffile import PDFFileCreate
 
-UPLOAD_ROOT = os.getenv("PDF_UPLOAD_ROOT", "uploads/pdfs")
 
-os.makedirs(UPLOAD_ROOT, exist_ok=True)
+def get_upload_root() -> str:
+    """Return the path where PDF files should be stored."""
+    root = os.getenv("PDF_UPLOAD_ROOT", "uploads/pdfs")
+    os.makedirs(root, exist_ok=True)
+    return root
 
 
 def create(db: Session, *, obj_in: PDFFileCreate, file: UploadFile) -> PDFFile:
     ext = os.path.splitext(file.filename)[1]
     fname = f"{uuid.uuid4()}{ext}"
-    path = os.path.join(UPLOAD_ROOT, fname)
+    path = os.path.join(get_upload_root(), fname)
     with open(path, "wb") as fp:
         shutil.copyfileobj(file.file, fp)
 
