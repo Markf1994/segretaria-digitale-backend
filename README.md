@@ -24,6 +24,22 @@ If asynchronous database access becomes necessary later on, add `asyncpg` to
 - `ACCESS_TOKEN_EXPIRE_MINUTES` – (optional) lifetime of access tokens in minutes; defaults to `30`.
 - `PDF_UPLOAD_ROOT` – directory where uploaded PDF files are stored.
 
+## Database migrations
+
+This project uses **Alembic** to manage database schema changes. With
+`DATABASE_URL` configured, apply pending migrations using:
+
+```bash
+alembic upgrade head
+```
+
+After modifying the models, create a new revision and upgrade:
+
+```bash
+alembic revision --autogenerate -m "<message>"
+alembic upgrade head
+```
+
 ## Running the server
 
 After installing dependencies and setting the environment variables, start the
