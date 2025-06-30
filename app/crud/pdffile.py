@@ -21,6 +21,9 @@ def create(db: Session, *, obj_in: PDFFileCreate, file: UploadFile) -> PDFFile:
     with open(path, "wb") as fp:
         shutil.copyfileobj(file.file, fp)
 
+    # Explicitly close the uploaded file to release resources
+    file.file.close()
+
     db_obj = PDFFile(title=obj_in.title, filename=fname)
     db.add(db_obj)
     db.commit()
