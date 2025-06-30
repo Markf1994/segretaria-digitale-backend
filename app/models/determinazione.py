@@ -6,6 +6,6 @@ class Determinazione(Base):
     id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
     capitolo = Column(String, nullable=False)
     numero = Column(String, nullable=False)
-    descrizione = Column(String, nullable=True)
+    descrizione = Column(String, nullable=False)
     somma = Column(Float, nullable=False)
     scadenza = Column(DateTime, nullable=False)
