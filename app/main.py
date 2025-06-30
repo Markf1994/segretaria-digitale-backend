@@ -2,16 +2,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import Base, engine
 from app.routes import users, auth, events, todo, determinazioni, pdfs, dashboard
-from app import scheduler
 
 app = FastAPI(redirect_slashes=False)
 
 
 @app.on_event("startup")
 def on_startup() -> None:
-    """Create database tables and start the scheduler on startup."""
+    """Create database tables on startup."""
     Base.metadata.create_all(bind=engine)
-    scheduler.start()
 
 app.add_middleware(
     CORSMiddleware,
@@ -32,9 +30,3 @@ app.include_router(dashboard.router)
 from app.crud.pdffile import get_upload_root
 from fastapi.staticfiles import StaticFiles
 app.mount("/uploads", StaticFiles(directory=get_upload_root()), name="uploads")
-
-
-@app.on_event("shutdown")
-def on_shutdown() -> None:
-    """Shutdown background services when the application stops."""
-    scheduler.shutdown()
