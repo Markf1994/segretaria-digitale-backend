@@ -22,6 +22,7 @@ If asynchronous database access becomes necessary later on, add `asyncpg` to
 - `SECRET_KEY` – secret key used to sign JWT tokens.
 - `ALGORITHM` – (optional) algorithm used for JWT; defaults to `HS256`.
 - `ACCESS_TOKEN_EXPIRE_MINUTES` – (optional) lifetime of access tokens in minutes; defaults to `30`.
+- `PDF_UPLOAD_ROOT` – directory where uploaded PDF files are stored.
 
 ## Running the server
 
