@@ -25,6 +25,7 @@ def update_todo(db: Session, todo_id: str, data, user: User):
     for key, value in data.dict().items():
         setattr(db_todo, key, value)
     db.commit()
+    db.refresh(db_todo)
     return db_todo
 
 
