@@ -1,0 +1,48 @@
+import os
+from fastapi.testclient import TestClient
+
+os.environ["DATABASE_URL"] = "sqlite:///./test.db"
+
+from app.main import app
+
+client = TestClient(app)
+
+
+def test_upload_pdf_and_list(setup_db, tmp_path):
+    pdf_path = tmp_path / "sample.pdf"
+    pdf_path.write_bytes(b"%PDF-1.4 test")
+    with open(pdf_path, "rb") as fh:
+        res = client.post(
+            "/pdf",
+            data={"title": "Doc"},
+            files={"file": ("sample.pdf", fh, "application/pdf")},
+        )
+    assert res.status_code == 201
+    body = res.json()
+    assert body["title"] == "Doc"
+    assert "filename" in body
+
+    list_res = client.get("/pdf")
+    assert list_res.status_code == 200
+    assert len(list_res.json()) == 1
+
+    get_res = client.get(f"/pdf/{body['filename']}")
+    assert get_res.status_code == 200
+    assert get_res.headers["content-type"] == "application/pdf"
+
+
+def test_upload_invalid_content_type(setup_db, tmp_path):
+    txt_path = tmp_path / "sample.txt"
+    txt_path.write_text("hello")
+    with open(txt_path, "rb") as fh:
+        res = client.post(
+            "/pdf",
+            data={"title": "Bad"},
+            files={"file": ("sample.txt", fh, "text/plain")},
+        )
+    assert res.status_code == 400
+
+
+def test_get_pdf_not_found(setup_db):
+    res = client.get("/pdf/missing.pdf")
+    assert res.status_code == 404
