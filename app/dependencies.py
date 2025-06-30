@@ -1,8 +1,12 @@
 from typing import Generator
 
 from sqlalchemy.orm import Session
+from fastapi import Depends, Header, HTTPException
+from jose import jwt, JWTError
+import os
 
 from .database import SessionLocal
+from .models.user import User
 
 
 def get_db() -> Generator[Session, None, None]:
@@ -11,3 +15,31 @@ def get_db() -> Generator[Session, None, None]:
         yield db
     finally:
         db.close()
+
+
+def get_current_user(
+    db: Session = Depends(get_db),
+    authorization: str = Header(..., alias="Authorization"),
+) -> User:
+    """Return the authenticated ``User`` based on the JWT token."""
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Invalid authorization header")
+
+    token = authorization.split(" ", 1)[1]
+    secret = os.getenv("SECRET_KEY")
+    if not secret:
+        raise HTTPException(status_code=500, detail="Secret key not configured")
+    algorithm = os.getenv("ALGORITHM", "HS256")
+
+    try:
+        payload = jwt.decode(token, secret, algorithms=[algorithm])
+        email = payload.get("sub")
+        if not email:
+            raise HTTPException(status_code=401, detail="Invalid token payload")
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        raise HTTPException(status_code=401, detail="User not found")
+    return user
