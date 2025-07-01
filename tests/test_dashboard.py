@@ -31,6 +31,7 @@ def test_dashboard_upcoming(monkeypatch, setup_db):
             "data_ora": (now + timedelta(days=1)).isoformat(),
             "is_public": True,
         },
+        headers=headers,
     )
     client.post(
         "/events/",
@@ -40,6 +41,7 @@ def test_dashboard_upcoming(monkeypatch, setup_db):
             "data_ora": (now + timedelta(days=8)).isoformat(),
             "is_public": True,
         },
+        headers=headers,
     )
 
     client.post(

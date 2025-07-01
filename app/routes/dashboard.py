@@ -23,7 +23,7 @@ def upcoming_events(
 
     ev_items = [
         {**EventResponse.from_orm(ev).dict(), "kind": "event"}
-        for ev in event.get_events(db)
+        for ev in event.get_events(db, current_user)
         if now <= ev.data_ora <= limit
     ]
 

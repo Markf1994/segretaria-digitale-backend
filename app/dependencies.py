@@ -43,3 +43,13 @@ def get_current_user(
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
     return user
+
+
+def get_optional_user(
+    db: Session = Depends(get_db),
+    authorization: str | None = Header(None, alias="Authorization"),
+) -> User | None:
+    """Return the authenticated ``User`` if credentials are provided."""
+    if authorization is None:
+        return None
+    return get_current_user(db=db, authorization=authorization)

@@ -26,6 +26,7 @@ def upgrade() -> None:
         sa.Column('descrizione', sa.String(), nullable=True),
         sa.Column('data_ora', sa.DateTime(), nullable=False),
         sa.Column('is_public', sa.Boolean(), nullable=True),
+        sa.Column('user_id', sa.String(), sa.ForeignKey('users.id'), nullable=False),
     )
     op.create_index('ix_events_id', 'events', ['id'])
 
