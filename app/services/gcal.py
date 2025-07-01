@@ -11,16 +11,21 @@ Richiede:
 
 import os
 from datetime import date, time
+from functools import lru_cache
+
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 import googleapiclient.errors as gerr
 
 # ------------------------------------------------------------------- credenziali
-CREDS = service_account.Credentials.from_service_account_file(
-    os.getenv("GOOGLE_CREDENTIALS_JSON"),
-    scopes=["https://www.googleapis.com/auth/calendar"],
-)
-GCAL = build("calendar", "v3", credentials=CREDS)
+@lru_cache()
+def get_client():
+    """Return a Google Calendar client built from service account credentials."""
+    creds = service_account.Credentials.from_service_account_file(
+        os.getenv("GOOGLE_CREDENTIALS_JSON"),
+        scopes=["https://www.googleapis.com/auth/calendar"],
+    )
+    return build("calendar", "v3", credentials=creds)
 
 # ------------------------------------------------------------------- calendar ID
 EVENT_CAL_ID = os.getenv("G_EVENT_CAL_ID")   # già in uso per gli altri eventi
@@ -59,15 +64,16 @@ def sync_shift_event(turno):
         "colorId": "11" if turno.tipo == "STRAORD" else "10",  # rosso / blu
     }
 
+    gcal = get_client()
     try:
-        GCAL.events().update(
+        gcal.events().update(
             calendarId=SHIFT_CAL_ID,
             eventId=evt_id,
             body=body,
         ).execute()
     except gerr.HttpError as e:
         if e.resp.status == 404:              # evento non esiste → crealo
-            GCAL.events().insert(
+            gcal.events().insert(
                 calendarId=SHIFT_CAL_ID,
                 body=body,
                 sendUpdates="none",
@@ -80,8 +86,9 @@ def delete_shift_event(turno_id):
     Elimina dal calendario Turni l'evento legato al turno rimosso.
     Ignora l'errore 404 se l'evento era già assente.
     """
+    gcal = get_client()
     try:
-        GCAL.events().delete(
+        gcal.events().delete(
             calendarId=SHIFT_CAL_ID,
             eventId=f"shift-{turno_id}",
         ).execute()

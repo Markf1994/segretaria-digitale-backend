@@ -13,10 +13,7 @@ from fastapi import HTTPException, status
 
 from app.models.turno import Turno          # modello ORM
 from app.schemas.turno import TurnoIn       # Pydantic (input)
-from app.services.gcal import (
-    sync_shift_event,
-    delete_shift_event,
-)
+from app.services import gcal
 
 # ------------------------------------------------------------------------------
 def upsert_turno(db: Session, payload: TurnoIn) -> Turno:
@@ -56,7 +53,7 @@ def upsert_turno(db: Session, payload: TurnoIn) -> Turno:
 
     # 4. sincronizza l’evento Google Calendar
     try:
-        sync_shift_event(rec)
+        gcal.sync_shift_event(rec)
     except Exception as exc:
         # non bloccare l’operazione DB se G-Cal fallisce, ma loggare
         # (puoi sostituire con logger.error)
@@ -71,7 +68,7 @@ def remove_turno(db: Session, turno_id: UUID) -> None:
     Elimina turno dal DB e rimuove l'evento corrispondente dal calendario Google.
     """
     # 1. cancella evento su Google (ignora 404 se era già sparito)
-    delete_shift_event(turno_id)
+    gcal.delete_shift_event(turno_id)
 
     # 2. cancella record dal DB
     deleted = db.query(Turno).filter_by(id=turno_id).delete()
