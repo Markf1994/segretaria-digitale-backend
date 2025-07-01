@@ -84,3 +84,35 @@ def test_delete_turno(setup_db):
     list_res = client.get("/orari/")
     assert list_res.status_code == 200
     assert list_res.json() == []
+
+
+def test_shift_event_summary_email(setup_db):
+    headers, user_id = auth_user("cal@example.com")
+
+    captured = {}
+
+    class DummyClient:
+        def events(self):
+            class Events:
+                def update(self, calendarId=None, eventId=None, body=None):
+                    captured["body"] = body
+                    return MagicMock(execute=MagicMock())
+
+            return Events()
+
+    with patch("app.services.gcal.get_client", return_value=DummyClient()):
+        client.post(
+            "/orari/",
+            json={
+                "user_id": user_id,
+                "giorno": "2023-05-05",
+                "slot1": {"inizio": "08:00:00", "fine": "12:00:00"},
+                "slot2": None,
+                "slot3": None,
+                "tipo": "NORMALE",
+                "note": "",
+            },
+            headers=headers,
+        )
+
+    assert captured["body"]["summary"] == "cal@example.com"
