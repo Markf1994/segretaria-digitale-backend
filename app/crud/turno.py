@@ -10,6 +10,9 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
+import logging
+
+logger = logging.getLogger(__name__)
 
 from app.models.turno import Turno          # modello ORM
 from app.models.user import User
@@ -57,8 +60,7 @@ def upsert_turno(db: Session, payload: TurnoIn) -> Turno:
         gcal.sync_shift_event(rec)
     except Exception as exc:
         # non bloccare l’operazione DB se G-Cal fallisce, ma loggare
-        # (puoi sostituire con logger.error)
-        print("Errore sync calendario:", exc)
+        logger.error("Errore sync calendario: %s", exc)
 
     return rec
 
