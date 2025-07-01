@@ -1,23 +1,35 @@
 # app/services/gcal.py
-import os, json
+"""
+Helper unico per interagire con i due calendari Google:
+– calendario Eventi   (G_EVENT_CAL_ID)
+– calendario Turni    (G_SHIFT_CAL_ID)
+Richiede:
+  GOOGLE_CREDENTIALS_JSON=/percorso/service_account.json
+  G_EVENT_CAL_ID=…@group.calendar.google.com
+  G_SHIFT_CAL_ID=…@group.calendar.google.com
+"""
+
+import os
 from datetime import date, time
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 import googleapiclient.errors as gerr
 
-# 1.  credenziali ----------------------------------------------------------------
+# ------------------------------------------------------------------- credenziali
 CREDS = service_account.Credentials.from_service_account_file(
     os.getenv("GOOGLE_CREDENTIALS_JSON"),
     scopes=["https://www.googleapis.com/auth/calendar"],
 )
 GCAL = build("calendar", "v3", credentials=CREDS)
 
-# 2.  ID dei due calendari (ambiente) -------------------------------------------
-EVENT_CAL_ID  = os.getenv("G_EVENT_CAL_ID")   # già esistente
-SHIFT_CAL_ID  = os.getenv("G_SHIFT_CAL_ID")   # <-- nuovo calendario Turni
+# ------------------------------------------------------------------- calendar ID
+EVENT_CAL_ID = os.getenv("G_EVENT_CAL_ID")   # già in uso per gli altri eventi
+SHIFT_CAL_ID = os.getenv("G_SHIFT_CAL_ID")   # nuovo calendario “Turni di Servizio”
+
+# ------------------------------------------------------------------- utilità
 def iso_dt(d: date, t: time) -> str:
     """2025-07-01 + 08:30 -> '2025-07-01T08:30:00+02:00'"""
-    tz = "+02:00"  # oppure leggi da settings/team
+    tz = "+02:00"  # forza fuso orario locale; se serve, calcolalo dinamicamente
     return f"{d.isoformat()}T{t.strftime('%H:%M')}:00{tz}"
 
 def first_non_null(*vals):
@@ -25,34 +37,54 @@ def first_non_null(*vals):
 
 def last_non_null(*vals):
     return next(v for v in reversed(vals) if v)
+
+# ------------------------------------------------------------------- sync turni
 def sync_shift_event(turno):
     """
-    Crea o aggiorna l'evento corrispondente a 'turno'
+    Crea o aggiorna l'evento relativo a un turno
     nel calendario 'Turni di Servizio'.
     """
-    evt_id = f"shift-{turno.id}"  # ID stabile = prefisso + UUID DB
+    evt_id = f"shift-{turno.id}"  # chiave stabile = prefisso + UUID DB
 
-    # pick primi/ultimi orari presenti
+    # orari: primo inizio disponibile, ultimo fine disponibile
     start = first_non_null(turno.inizio_1, turno.inizio_2, turno.inizio_3)
     end   = last_non_null(turno.fine_3, turno.fine_2, turno.fine_1)
 
     body = {
         "id": evt_id,
         "summary": f"{turno.user.cognome} {turno.user.nome}",
+        "description": turno.note or "",
         "start": {"dateTime": iso_dt(turno.giorno, start)},
         "end":   {"dateTime": iso_dt(turno.giorno, end)},
-        "description": turno.note or "",
-        "colorId": "11" if turno.tipo == "STRAORD" else "10",  # rosso/blu
+        "colorId": "11" if turno.tipo == "STRAORD" else "10",  # rosso / blu
     }
 
     try:
-        GCAL.events().update(calendarId=SHIFT_CAL_ID,
-                             eventId=evt_id, body=body).execute()
+        GCAL.events().update(
+            calendarId=SHIFT_CAL_ID,
+            eventId=evt_id,
+            body=body,
+        ).execute()
     except gerr.HttpError as e:
-        if e.resp.status == 404:                # evento non esiste ancora
-            GCAL.events().insert(calendarId=SHIFT_CAL_ID,
-                                 body=body).execute()
+        if e.resp.status == 404:              # evento non esiste → crealo
+            GCAL.events().insert(
+                calendarId=SHIFT_CAL_ID,
+                body=body,
+                sendUpdates="none",
+            ).execute()
         else:
             raise
-GCAL.events().delete(calendarId=SHIFT_CAL_ID,
-                     eventId=f"shift-{turno.id}").execute()
+
+def delete_shift_event(turno_id):
+    """
+    Elimina dal calendario Turni l'evento legato al turno rimosso.
+    Ignora l'errore 404 se l'evento era già assente.
+    """
+    try:
+        GCAL.events().delete(
+            calendarId=SHIFT_CAL_ID,
+            eventId=f"shift-{turno_id}",
+        ).execute()
+    except gerr.HttpError as e:
+        if e.resp.status != 404:
+            raise
