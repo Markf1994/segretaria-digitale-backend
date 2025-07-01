@@ -8,4 +8,5 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     todos = relationship("ToDo", back_populates="user")
     events = relationship("Event", back_populates="user")
+    turni = relationship("Turno", back_populates="user")
 

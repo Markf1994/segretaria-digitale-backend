@@ -1,7 +1,16 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import Base, engine
-from app.routes import users, auth, events, todo, determinazioni, pdfs, dashboard
+from app.routes import (
+    users,
+    auth,
+    events,
+    todo,
+    determinazioni,
+    pdfs,
+    dashboard,
+    turni,
+)
 
 # Enable automatic redirect so both `/path` and `/path/` work
 # Tests continue to use the canonical routes defined in the routers
@@ -27,6 +36,7 @@ app.include_router(events.router)
 app.include_router(todo.router)
 app.include_router(determinazioni.router)
 app.include_router(pdfs.router)
+app.include_router(turni.router)
 app.include_router(dashboard.router)
 
 from app.crud.pdffile import get_upload_root
