@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
 from app.models.turno import Turno          # modello ORM
+from app.models.user import User
 from app.schemas.turno import TurnoIn       # Pydantic (input)
 from app.services import gcal
 
@@ -78,3 +79,14 @@ def remove_turno(db: Session, turno_id: UUID) -> None:
             detail="Turno non trovato",
         )
     db.commit()
+
+
+# ------------------------------------------------------------------------------
+def get_turni(db: Session, user: User) -> list[Turno]:
+    """Return all ``Turno`` records for ``user`` ordered by date."""
+    return (
+        db.query(Turno)
+        .filter(Turno.user_id == user.id)
+        .order_by(Turno.giorno.asc())
+        .all()
+    )
