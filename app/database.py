@@ -1,5 +1,6 @@
 import os
 from sqlalchemy import create_engine
+from sqlalchemy.engine.url import make_url
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
@@ -8,11 +9,21 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     raise RuntimeError("DATABASE_URL environment variable not set")
 
-# Crea il motore SQLAlchemy con SSL richiesto
+# Determina gli argomenti di connessione in base allo schema della URL
+url = make_url(DATABASE_URL)
+if url.drivername.startswith("sqlite"):
+    connect_args = {"check_same_thread": False}
+else:
+    connect_args = {"sslmode": "require"}
+
+# Crea il motore SQLAlchemy con gli argomenti appropriati
 engine = create_engine(
     DATABASE_URL,
-    connect_args={"sslmode": "require"}
+    connect_args=connect_args
 )
+
+# Esporta gli argomenti di connessione per i test
+CONNECT_ARGS = connect_args
 
 # Configura la session factory
 SessionLocal = sessionmaker(
