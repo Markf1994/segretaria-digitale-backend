@@ -4,7 +4,7 @@ from app.dependencies import get_db, get_current_user, get_optional_user
 from app.models.user import User
 from app.schemas.event import EventCreate, EventResponse
 from app.crud import event
-router = APIRouter(prefix="/events", tags=["Events"],trailing_slash=False)
+router = APIRouter(prefix="/events", tags=["Events"])
 
 @router.post("/", response_model=EventResponse)
 def create_event_route(

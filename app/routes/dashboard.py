@@ -9,7 +9,7 @@ from app.schemas.todo import ToDoResponse
 from app.crud import event, todo
 from app.services.google_calendar import list_upcoming_events
 
-router = APIRouter(prefix="/dashboard", tags=["Dashboard"], trailing_slash=False)
+router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 
 
 @router.get("/upcoming")
