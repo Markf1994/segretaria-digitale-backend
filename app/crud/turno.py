@@ -1,10 +1,83 @@
-from app.services.gcal import sync_shift_event
+"""
+CRUD per i turni di servizio
+────────────────────────────
+• upsert_turno  → crea o aggiorna (1–3 intervalli) e sincronizza G-Calendar
+• remove_turno → elimina dal DB e dal calendario turni
+"""
 
+from __future__ import annotations
+from uuid import UUID
+
+from sqlalchemy.orm import Session
+from fastapi import HTTPException, status
+
+from app.models.turno import Turno          # modello ORM
+from app.schemas.turno import TurnoIn       # Pydantic (input)
+from app.services.gcal import (
+    sync_shift_event,
+    delete_shift_event,
+)
+
+# ------------------------------------------------------------------------------
 def upsert_turno(db: Session, payload: TurnoIn) -> Turno:
-    # ...  (logica esistente)
-    db.commit(); db.refresh(turno)
+    """
+    Crea un nuovo turno o aggiorna quello esistente per lo stesso user+giorno.
+    Dopo il commit sincronizza l’evento nel calendario “Turni di Servizio”.
+    """
+    # 1. recupera (o crea) il record
+    rec: Turno | None = (
+        db.query(Turno)
+        .filter_by(user_id=payload.user_id, giorno=payload.giorno)
+        .first()
+    )
+    if rec is None:
+        rec = Turno(user_id=payload.user_id, giorno=payload.giorno)
 
-    # ★ aggiungi questa riga
-    sync_shift_event(turno)
+    # 2. riempie i tre slot
+    rec.inizio_1, rec.fine_1 = payload.slot1.inizio, payload.slot1.fine
 
-    return turno
+    if payload.slot2:
+        rec.inizio_2, rec.fine_2 = payload.slot2.inizio, payload.slot2.fine
+    else:
+        rec.inizio_2 = rec.fine_2 = None
+
+    if payload.slot3:
+        rec.inizio_3, rec.fine_3 = payload.slot3.inizio, payload.slot3.fine
+    else:
+        rec.inizio_3 = rec.fine_3 = None
+
+    rec.tipo = payload.tipo            # NORMALE | STRAORD | FERIE
+    rec.note = payload.note
+
+    # 3. salva su database
+    db.add(rec)
+    db.commit()
+    db.refresh(rec)                    # ottieni id definitivo
+
+    # 4. sincronizza l’evento Google Calendar
+    try:
+        sync_shift_event(rec)
+    except Exception as exc:
+        # non bloccare l’operazione DB se G-Cal fallisce, ma loggare
+        # (puoi sostituire con logger.error)
+        print("Errore sync calendario:", exc)
+
+    return rec
+
+
+# ------------------------------------------------------------------------------
+def remove_turno(db: Session, turno_id: UUID) -> None:
+    """
+    Elimina turno dal DB e rimuove l'evento corrispondente dal calendario Google.
+    """
+    # 1. cancella evento su Google (ignora 404 se era già sparito)
+    delete_shift_event(turno_id)
+
+    # 2. cancella record dal DB
+    deleted = db.query(Turno).filter_by(id=turno_id).delete()
+    if not deleted:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Turno non trovato",
+        )
+    db.commit()
