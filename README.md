@@ -25,6 +25,8 @@ If asynchronous database access becomes necessary later on, add `asyncpg` to
 - `PDF_UPLOAD_ROOT` – directory where uploaded PDF files are stored.
 - `GOOGLE_CREDENTIALS_JSON` – JSON credentials (or path) for Google APIs.
 - `GOOGLE_CALENDAR_ID` – ID of the calendar to read events from.
+- `G_EVENT_CAL_ID` – ID of the Google Calendar used for event syncs.
+- `G_SHIFT_CAL_ID` – ID of the Google Calendar used for shift syncs.
 
 ## Database migrations
 
