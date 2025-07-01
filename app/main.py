@@ -3,7 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.database import Base, engine
 from app.routes import users, auth, events, todo, determinazioni, pdfs, dashboard
 
-app = FastAPI(redirect_slashes=False)
+# Enable automatic redirect so both `/path` and `/path/` work
+# Tests continue to use the canonical routes defined in the routers
+app = FastAPI()
 
 
 @app.on_event("startup")
