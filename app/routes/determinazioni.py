@@ -14,7 +14,8 @@ def create_determinazione_route(data: DeterminazioneCreate, db: Session = Depend
 @router.get("/", response_model=list[DeterminazioneResponse])
 def list_determinazioni(db: Session = Depends(get_db)):
     """Return all determinazioni stored in the database."""
-    return determinazione.get_determinazioni(db)
+    db_dets = determinazione.get_determinazioni(db)
+    return db_dets
 
 @router.put("/{determinazione_id}", response_model=DeterminazioneResponse)
 def update_determinazione_route(determinazione_id: str, data: DeterminazioneCreate, db: Session = Depends(get_db)):
