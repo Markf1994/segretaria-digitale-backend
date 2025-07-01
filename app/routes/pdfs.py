@@ -7,7 +7,7 @@ from app.schemas.pdffile import PDFFileCreate, PDFFileResponse
 from app.crud import pdffile as crud_pdffile
 import os
 
-router = APIRouter(prefix="/pdf", tags=["PDF"], trailing_slash=False)
+router = APIRouter(prefix="/pdf", tags=["PDF"])
 
 
 @router.get("", response_model=List[PDFFileResponse])

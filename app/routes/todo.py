@@ -5,7 +5,7 @@ from app.models.user import User
 from app.schemas.todo import ToDoCreate, ToDoResponse
 from app.crud import todo
 
-router = APIRouter(prefix="/todo", tags=["ToDo"],trailing_slash=False)
+router = APIRouter(prefix="/todo", tags=["ToDo"])
 
 @router.post("/", response_model=ToDoResponse)
 def create_todo_route(
