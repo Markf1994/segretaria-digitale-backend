@@ -10,12 +10,12 @@ import os
 router = APIRouter(prefix="/pdf", tags=["PDF"])
 
 
-@router.get("", response_model=List[PDFFileResponse])
+@router.get("/", response_model=List[PDFFileResponse])
 def list_pdfs(db: Session = Depends(get_db)):
     return crud_pdffile.get_multi(db)
 
 
-@router.post("", response_model=PDFFileResponse, status_code=201)
+@router.post("/", response_model=PDFFileResponse, status_code=201)
 async def upload_pdf(
     title: str = Form(...),
     file: UploadFile = File(...),

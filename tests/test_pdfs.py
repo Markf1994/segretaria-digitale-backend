@@ -13,7 +13,7 @@ def test_upload_pdf_and_list(setup_db, tmp_path):
     pdf_path.write_bytes(b"%PDF-1.4 test")
     with open(pdf_path, "rb") as fh:
         res = client.post(
-            "/pdf",
+            "/pdf/",
             data={"title": "Doc"},
             files={"file": ("sample.pdf", fh, "application/pdf")},
         )
@@ -22,7 +22,7 @@ def test_upload_pdf_and_list(setup_db, tmp_path):
     assert body["title"] == "Doc"
     assert "filename" in body
 
-    list_res = client.get("/pdf")
+    list_res = client.get("/pdf/")
     assert list_res.status_code == 200
     assert len(list_res.json()) == 1
 
@@ -36,7 +36,7 @@ def test_upload_invalid_content_type(setup_db, tmp_path):
     txt_path.write_text("hello")
     with open(txt_path, "rb") as fh:
         res = client.post(
-            "/pdf",
+            "/pdf/",
             data={"title": "Bad"},
             files={"file": ("sample.txt", fh, "text/plain")},
         )
