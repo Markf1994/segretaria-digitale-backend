@@ -120,6 +120,27 @@ def test_parse_excel_missing_column(tmp_path):
     db.close()
 
 
+def test_parse_excel_agente_without_db(tmp_path):
+    """Parsing fails when only the Agente column is present and no DB session is provided."""
+
+    df = pd.DataFrame([
+        {
+            "Agente": "Agent X",
+            "Data": "2023-01-05",
+            "Inizio1": "08:00:00",
+            "Fine1": "12:00:00",
+        }
+    ])
+    xls = tmp_path / "no_db.xlsx"
+    df.to_excel(xls, index=False)
+
+    with pytest.raises(HTTPException) as exc:
+        parse_excel(str(xls), None)
+
+    assert exc.value.status_code == 400
+    assert "Database session required" in exc.value.detail
+
+
 def test_df_to_pdf_creates_files_and_cleanup(tmp_path):
     rows = [
         {
