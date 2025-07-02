@@ -42,6 +42,8 @@ This project uses **Alembic** to manage database schema changes. With
 alembic upgrade head
 ```
 
+After pulling the latest changes, run `alembic upgrade head` again to apply the new migration.
+
 After modifying the models, create a new revision and upgrade:
 
 ```bash
