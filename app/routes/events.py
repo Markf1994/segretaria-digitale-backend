@@ -6,7 +6,7 @@ from app.schemas.event import EventCreate, EventResponse
 from app.crud import event
 router = APIRouter(prefix="/events", tags=["Events"])
 
-@router.post("/", response_model=EventResponse)
+@router.post("/", response_model=EventResponse, status_code=201)
 def create_event_route(
     data: EventCreate,
     db: Session = Depends(get_db),
