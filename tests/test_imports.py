@@ -79,3 +79,38 @@ def test_temp_files_removed_after_request(setup_db, tmp_path):
     assert not os.path.exists(captured['xlsx'])
     assert not os.path.exists(captured['html'])
     assert not os.path.exists(captured['pdf'])
+
+
+def test_import_xlsx_missing_columns_returns_400(setup_db, tmp_path):
+    """Uploading a file missing mandatory columns should return HTTP 400."""
+    _, _, nome = auth_user("missing@example.com")
+    # Create an Excel file without the ``Fine1`` column
+    df = pd.DataFrame([
+        {
+            "Agente": nome,
+            "Data": "2023-01-01",
+            "Inizio1": "08:00:00",
+        }
+    ])
+    xlsx_path = tmp_path / "shift.xlsx"
+    df.to_excel(xlsx_path, index=False)
+
+    def fake_from_file(html_path, pdf_path):
+        Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
+        return True
+
+    with patch("app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file):
+        with open(xlsx_path, "rb") as fh:
+            res = client.post(
+                "/import/xlsx",
+                files={
+                    "file": (
+                        "shift.xlsx",
+                        fh,
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    )
+                },
+            )
+    assert res.status_code == 400
+    body = res.json()
+    assert "Fine1" in body["detail"]
