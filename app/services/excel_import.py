@@ -6,7 +6,14 @@ from typing import List, Dict, Any
 
 
 def parse_excel(path: str) -> List[Dict[str, Any]]:
-    """Parse an Excel file into TurnoIn-compatible payloads."""
+    """Parse an Excel file into TurnoIn-compatible payloads.
+
+    Colonne obbligatorie / Required columns: ``Data``, ``User ID``,
+    ``Inizio1`` e ``Fine1``. Colonne facoltative / Optional: ``Inizio2``,
+    ``Fine2``, ``Inizio3``, ``Fine3``, ``Tipo`` e ``Note``.
+
+    :return: a list of dictionaries ready for the TurnoIn API.
+    """
     df = pd.read_excel(path)  # requires openpyxl
     rows: list[dict[str, Any]] = []
     for _, row in df.iterrows():
