@@ -26,7 +26,7 @@ async def import_xlsx(
 
     # 2 – parse Excel -> TurnoIn payloads
     try:
-        rows = parse_excel(tmp_path, db=db)
+        rows = parse_excel(tmp_path, db)
     except HTTPException:
         os.remove(tmp_path)
         raise

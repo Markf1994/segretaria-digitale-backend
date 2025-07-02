@@ -36,7 +36,7 @@ def test_parse_excel(tmp_path):
     xls = tmp_path / "sample.xlsx"
     df.to_excel(xls, index=False)
 
-    rows = parse_excel(str(xls))
+    rows = parse_excel(str(xls), None)
 
     assert rows == [
         {
@@ -79,7 +79,7 @@ def test_parse_excel_with_db(tmp_path):
     xls = tmp_path / "agent.xlsx"
     df.to_excel(xls, index=False)
 
-    rows = parse_excel(str(xls), db=db)
+    rows = parse_excel(str(xls), db)
 
     assert rows == [
         {
@@ -112,7 +112,7 @@ def test_parse_excel_missing_column(tmp_path):
     df.to_excel(xls, index=False)
 
     with pytest.raises(HTTPException) as exc:
-        parse_excel(str(xls), db=db)
+        parse_excel(str(xls), db)
 
     assert exc.value.status_code == 400
     assert "Missing columns" in exc.value.detail
