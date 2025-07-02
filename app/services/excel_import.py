@@ -1,10 +1,10 @@
 import pandas as pd
 import pdfkit
 import tempfile
-from typing import List, Dict, Any
+from typing import Any
 
 
-def parse_excel(path: str) -> List[Dict[str, Any]]:
+def parse_excel(path: str) -> list[dict[str, Any]]:
     """Parse an Excel file into TurnoIn-compatible payloads."""
     df = pd.read_excel(path)  # requires openpyxl
     rows: list[dict[str, Any]] = []
@@ -24,7 +24,7 @@ def parse_excel(path: str) -> List[Dict[str, Any]]:
     return rows
 
 
-def df_to_pdf(rows: List[Dict[str, Any]]) -> str:
+def df_to_pdf(rows: list[dict[str, Any]]) -> str:
     """Generate a PDF table from row payloads and return its path."""
     df = pd.DataFrame(rows)
     with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as tmp_html:
