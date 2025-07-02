@@ -5,7 +5,7 @@ class UserCreate(BaseModel):
     nome: str
 
 
-class UserLogin(BaseModel):
+class UserCredentials(BaseModel):
     email: str
     password: str
 class UserResponse(BaseModel):

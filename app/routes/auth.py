@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.dependencies import get_db
-from app.schemas.user import UserCreate, UserLogin
+from app.schemas.user import UserCreate, UserCredentials
 from app.crud import user
 from jose import jwt
 import os
@@ -16,7 +16,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30")
 router = APIRouter(tags=["Auth"])
 
 @router.post("/login")
-def login(form_data: UserLogin, db: Session = Depends(get_db)):
+def login(form_data: UserCredentials, db: Session = Depends(get_db)):
     """Authenticate a user and issue a JWT access token.
 
     The provided credentials are validated against the stored user data.
