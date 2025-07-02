@@ -25,10 +25,7 @@ async def import_xlsx(
         tmp_path = tmp.name
 
     # 2 – parse Excel -> TurnoIn payloads
-    try:
-        rows = parse_excel(tmp_path)
-    finally:
-        os.remove(tmp_path)
+    rows = parse_excel(tmp_path)
 
     # 3 – store/update each shift (DB + Google Calendar)
     for payload in rows:
@@ -37,4 +34,5 @@ async def import_xlsx(
     # 4 – generate PDF summary
     pdf_path = df_to_pdf(rows)
     background_tasks.add_task(os.remove, pdf_path)
+    background_tasks.add_task(os.remove, tmp_path)
     return FileResponse(pdf_path, filename="turni_settimana.pdf")
