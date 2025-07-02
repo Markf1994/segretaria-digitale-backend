@@ -10,7 +10,7 @@ Richiede:
 """
 
 import os
-from datetime import date, time
+from datetime import date, time, datetime
 from functools import lru_cache
 
 from google.oauth2 import service_account
@@ -34,7 +34,14 @@ SHIFT_CAL_ID = os.getenv("G_SHIFT_CAL_ID")   # nuovo calendario “Turni di Serv
 # ------------------------------------------------------------------- utilità
 def iso_dt(d: date, t: time) -> str:
     """2025-07-01 + 08:30 -> '2025-07-01T08:30:00+02:00'"""
-    tz = "+02:00"  # forza fuso orario locale; se serve, calcolalo dinamicamente
+    offset = datetime.now().astimezone().utcoffset()
+    if offset is None:
+        tz = "+00:00"
+    else:
+        total_minutes = int(offset.total_seconds() // 60)
+        sign = "+" if total_minutes >= 0 else "-"
+        h, m = divmod(abs(total_minutes), 60)
+        tz = f"{sign}{h:02d}:{m:02d}"
     return f"{d.isoformat()}T{t.strftime('%H:%M')}:00{tz}"
 
 def first_non_null(*vals):
