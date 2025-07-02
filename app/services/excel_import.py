@@ -22,21 +22,29 @@ def get_user_id(db: Session, agente: str) -> str:
     return str(user.id)
 
 
-def parse_excel(path: str, db: Session) -> List[Dict[str, Any]]:
+def parse_excel(path: str, db: Session | None = None) -> List[Dict[str, Any]]:
     """Parse an Excel file exported from Google Sheets.
 
-    The sheet must contain the columns ``Agente``, ``Data`` and ``Tipo`` in
-    addition to ``Inizio1``/``Fine1``. If present, ``Inizio2``/``Fine2`` will be
-    mapped to ``slot2`` while ``Straordinario inizio``/``Straordinario fine`` are
-    mapped to ``slot3``. ``Agente`` is resolved to a ``User.id`` using the
-    provided ``Session``.
+    The file may contain either a ``User ID`` column or an ``Agente`` column.
+    When ``Agente`` is present a database session is required in order to
+    resolve the user name to the corresponding ``User.id``. ``Inizio2``/``Fine2``
+    and ``Inizio3``/``Fine3`` (or ``Straordinario inizio``/``Straordinario fine``)
+    are mapped to ``slot2`` and ``slot3`` respectively.
 
-    :return: a list of dictionaries ready for the TurnoIn API.
+    :return: a list of dictionaries ready for the ``TurnoIn`` API.
     """
 
     df = pd.read_excel(path)  # requires openpyxl
 
-    required = {"Data", "User ID", "Inizio1", "Fine1"}
+    base_required = {"Data", "Inizio1", "Fine1"}
+
+    if "User ID" in df.columns:
+        required = base_required | {"User ID"}
+    elif "Agente" in df.columns:
+        required = base_required | {"Agente"}
+    else:
+        raise HTTPException(status_code=400, detail="Missing columns: {'User ID' or 'Agente'}")
+
     missing = required - set(df.columns)
     if missing:
         raise HTTPException(status_code=400, detail=f"Missing columns: {missing}")
@@ -44,14 +52,19 @@ def parse_excel(path: str, db: Session) -> List[Dict[str, Any]]:
     rows: list[dict[str, Any]] = []
 
     for _, row in df.iterrows():
-        user_id = get_user_id(db, row["Agente"])
+        if "User ID" in df.columns:
+            user_id = str(row["User ID"])
+        else:
+            if not db:
+                raise HTTPException(status_code=400, detail="Database session required to resolve 'Agente'")
+            user_id = get_user_id(db, row["Agente"])
 
         payload: dict[str, Any] = {
             "user_id": user_id,
             "giorno": row["Data"].date() if hasattr(row["Data"], "date") else row["Data"],
             "slot1": {"inizio": row["Inizio1"], "fine": row["Fine1"]},
             "tipo": row.get("Tipo", "NORMALE"),
-            "note": "",
+            "note": row.get("Note", ""),
         }
 
         if "Inizio2" in df.columns and not pd.isna(row.get("Inizio2")) and not pd.isna(row.get("Fine2")):
@@ -65,6 +78,15 @@ def parse_excel(path: str, db: Session) -> List[Dict[str, Any]]:
             payload["slot3"] = {
                 "inizio": row["Straordinario inizio"],
                 "fine": row["Straordinario fine"],
+            }
+        elif (
+            "Inizio3" in df.columns
+            and not pd.isna(row.get("Inizio3"))
+            and not pd.isna(row.get("Fine3"))
+        ):
+            payload["slot3"] = {
+                "inizio": row["Inizio3"],
+                "fine": row["Fine3"],
             }
 
         rows.append(payload)
