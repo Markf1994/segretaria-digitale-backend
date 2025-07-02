@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import pdfkit
 import tempfile
@@ -32,4 +33,5 @@ def df_to_pdf(rows: List[Dict[str, Any]]) -> str:
         html_path = tmp_html.name
     pdf_path = html_path.replace(".html", ".pdf")
     pdfkit.from_file(html_path, pdf_path)  # requires wkhtmltopdf installed
+    os.remove(html_path)
     return pdf_path

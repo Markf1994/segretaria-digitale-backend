@@ -1,7 +1,8 @@
-from fastapi import APIRouter, UploadFile, Depends
+from fastapi import APIRouter, UploadFile, Depends, BackgroundTasks
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 import tempfile
+import os
 
 from app.dependencies import get_db
 from app.schemas.turno import TurnoIn
@@ -14,6 +15,7 @@ router = APIRouter(prefix="/import", tags=["Import"])
 @router.post("/xlsx")
 async def import_xlsx(
     file: UploadFile,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
     """Import Excel shifts, sync them and return a PDF summary."""
@@ -31,4 +33,10 @@ async def import_xlsx(
 
     # 4 – generate PDF summary
     pdf_path = df_to_pdf(rows)
-    return FileResponse(pdf_path, filename="turni_settimana.pdf")
+    background_tasks.add_task(os.remove, pdf_path)
+    return FileResponse(
+        pdf_path,
+        filename="turni_settimana.pdf",
+        media_type="application/pdf",
+        background=background_tasks,
+    )

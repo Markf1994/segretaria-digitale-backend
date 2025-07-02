@@ -50,3 +50,31 @@ def test_import_xlsx_creates_turni_and_returns_pdf(setup_db, tmp_path):
     body = list_res.json()
     assert len(body) == 1
     assert body[0]["user_id"] == user_id
+
+
+def test_import_xlsx_removes_pdf_after_response(setup_db, tmp_path):
+    df = pd.DataFrame([
+        {
+            "User ID": "1",
+            "Data": "2023-01-01",
+            "Inizio1": "08:00:00",
+            "Fine1": "12:00:00",
+        }
+    ])
+    xlsx_path = tmp_path / "shift.xlsx"
+    df.to_excel(xlsx_path, index=False)
+
+    pdf_path = tmp_path / "summary.pdf"
+
+    def fake_df_to_pdf(rows):
+        pdf_path.write_bytes(b"%PDF-1.4 fake")
+        return str(pdf_path)
+
+    with patch("app.routes.imports.df_to_pdf", side_effect=fake_df_to_pdf):
+        with open(xlsx_path, "rb") as fh:
+            res = client.post(
+                "/import/xlsx",
+                files={"file": ("shift.xlsx", fh, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
+            )
+    assert res.status_code == 200
+    assert not pdf_path.exists()
