@@ -50,3 +50,31 @@ def test_import_xlsx_creates_turni_and_returns_pdf(setup_db, tmp_path):
     body = list_res.json()
     assert len(body) == 1
     assert body[0]["user_id"] == user_id
+
+
+def test_temp_files_removed_after_request(setup_db, tmp_path):
+    captured = {}
+
+    def fake_parse_excel(path):
+        captured['xlsx'] = path
+        return []
+
+    def fake_from_file(html_path, pdf_path):
+        captured['html'] = html_path
+        captured['pdf'] = pdf_path
+        Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
+        return True
+
+    with patch("app.routes.imports.parse_excel", side_effect=fake_parse_excel):
+        with patch("app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file):
+            dummy = tmp_path / "shift.xlsx"
+            dummy.write_bytes(b"data")
+            with open(dummy, "rb") as fh:
+                res = client.post(
+                    "/import/xlsx",
+                    files={"file": ("shift.xlsx", fh, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
+                )
+    assert res.status_code == 200
+    assert not os.path.exists(captured['xlsx'])
+    assert not os.path.exists(captured['html'])
+    assert not os.path.exists(captured['pdf'])
