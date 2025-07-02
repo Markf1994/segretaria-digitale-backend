@@ -34,14 +34,14 @@ def test_duplicate_user():
 def test_list_users():
     client.post(
         "/users/",
-        json={"email": "a@example.com", "password": "secret", "nome": "Test"},
+        json={"email": "a@example.com", "password": "secret", "nome": "Beta"},
     )
     client.post(
         "/users/",
-        json={"email": "b@example.com", "password": "secret", "nome": "Test"},
+        json={"email": "b@example.com", "password": "secret", "nome": "Alpha"},
     )
     response = client.get("/users/")
     assert response.status_code == 200
     data = response.json()
-    assert [u["email"] for u in data] == ["a@example.com", "b@example.com"]
+    assert [u["nome"] for u in data] == ["Alpha", "Beta"]
 
