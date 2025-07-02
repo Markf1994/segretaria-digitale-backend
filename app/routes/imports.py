@@ -1,7 +1,9 @@
 from fastapi import APIRouter, UploadFile, Depends
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
+from starlette.background import BackgroundTask
 import tempfile
+import os
 
 from app.dependencies import get_db
 from app.schemas.turno import TurnoIn
@@ -30,5 +32,18 @@ async def import_xlsx(
         crud_turno.upsert_turno(db, TurnoIn(**payload))
 
     # 4 – generate PDF summary
-    pdf_path = df_to_pdf(rows)
-    return FileResponse(pdf_path, filename="turni_settimana.pdf")
+    pdf_path, html_path = df_to_pdf(rows)
+
+    def cleanup(*paths: str) -> None:
+        for p in paths:
+            try:
+                os.remove(p)
+            except FileNotFoundError:
+                pass
+
+    background = BackgroundTask(cleanup, tmp_path, pdf_path, html_path)
+    return FileResponse(
+        pdf_path,
+        filename="turni_settimana.pdf",
+        background=background,
+    )

@@ -1,7 +1,8 @@
+import os
 import pandas as pd
 import pdfkit
 import tempfile
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 
 
 def parse_excel(path: str) -> List[Dict[str, Any]]:
@@ -24,12 +25,18 @@ def parse_excel(path: str) -> List[Dict[str, Any]]:
     return rows
 
 
-def df_to_pdf(rows: List[Dict[str, Any]]) -> str:
-    """Generate a PDF table from row payloads and return its path."""
+def df_to_pdf(rows: List[Dict[str, Any]]) -> Tuple[str, str]:
+    """Generate a PDF table from row payloads.
+
+    Returns a tuple with the PDF path and the temporary HTML path used during
+    conversion. Both files are created with ``delete=False`` so that they can be
+    cleaned up later by the caller.
+    """
     df = pd.DataFrame(rows)
     with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as tmp_html:
         df.to_html(tmp_html.name, index=False)
         html_path = tmp_html.name
-    pdf_path = html_path.replace(".html", ".pdf")
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
+        pdf_path = tmp_pdf.name
     pdfkit.from_file(html_path, pdf_path)  # requires wkhtmltopdf installed
-    return pdf_path
+    return pdf_path, html_path
