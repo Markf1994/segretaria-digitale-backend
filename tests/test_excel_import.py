@@ -58,6 +58,34 @@ def test_parse_excel(tmp_path):
     ]
 
 
+def test_parse_excel_straordinario(tmp_path):
+    df = pd.DataFrame([
+        {
+            "User ID": 3,
+            "Data": "2023-02-01",
+            "Inizio1": "08:00:00",
+            "Fine1": "12:00:00",
+            "Straordinario inizio": "20:00:00",
+            "Straordinario fine": "22:00:00",
+        }
+    ])
+    xls = tmp_path / "straordinario.xlsx"
+    df.to_excel(xls, index=False)
+
+    rows = parse_excel(str(xls), None)
+
+    assert rows == [
+        {
+            "user_id": "3",
+            "giorno": "2023-02-01",
+            "slot1": {"inizio": "08:00:00", "fine": "12:00:00"},
+            "slot3": {"inizio": "20:00:00", "fine": "22:00:00"},
+            "tipo": "NORMALE",
+            "note": "",
+        }
+    ]
+
+
 def test_parse_excel_with_db(tmp_path):
     """Ensure parsing works when resolving user names via a DB session."""
     from app.database import SessionLocal
