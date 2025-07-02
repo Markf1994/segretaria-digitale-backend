@@ -11,9 +11,9 @@ with patch("google.oauth2.service_account.Credentials.from_service_account_file"
 client = TestClient(app)
 
 
-def auth_user(email: str):
+def auth_user(email: str, nome: str = "Test"):
     resp = client.post(
-        "/users/", json={"email": email, "password": "secret", "nome": "Test"}
+        "/users/", json={"email": email, "password": "secret", "nome": nome}
     )
     user_id = resp.json()["id"]
     token = client.post(
@@ -89,7 +89,7 @@ def test_delete_turno(setup_db):
 
 
 def test_shift_event_summary_email(setup_db):
-    headers, user_id = auth_user("cal@example.com")
+    headers, user_id = auth_user("cal@example.com", nome="Calendar User")
 
     captured = {}
 
@@ -117,4 +117,4 @@ def test_shift_event_summary_email(setup_db):
             headers=headers,
         )
 
-    assert captured["body"]["summary"] == "cal@example.com"
+    assert captured["body"]["summary"] == "Calendar User"

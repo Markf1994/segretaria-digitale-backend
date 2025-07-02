@@ -64,7 +64,7 @@ def sync_shift_event(turno):
 
     body = {
         "id": evt_id,
-        "summary": turno.user.email,
+        "summary": turno.user.nome or turno.user.email.split("@")[0],
         "description": turno.note or "",
         "start": {"dateTime": iso_dt(turno.giorno, start)},
         "end":   {"dateTime": iso_dt(turno.giorno, end)},
