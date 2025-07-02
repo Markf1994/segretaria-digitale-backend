@@ -88,6 +88,18 @@ The response is a chronologically ordered list where each item contains a
 Creating an event via `POST /events/` now returns HTTP status code `201` along
 with the created event.
 
+## Deployment
+
+The project is deployed to **Render** using the workflow at
+`.github/workflows/deploy-backend.yml`. The workflow installs `wkhtmltopdf` so
+that PDF generation via `pdfkit` works correctly. When deploying in your own
+environment make sure to install `wkhtmltopdf` before running `pip install`:
+
+```bash
+sudo apt-get update && sudo apt-get install -y wkhtmltopdf
+pip install -r requirements.txt
+```
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
