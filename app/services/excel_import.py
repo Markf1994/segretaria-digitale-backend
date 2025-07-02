@@ -3,12 +3,14 @@ import pdfkit
 import tempfile
 import os
 from typing import List, Dict, Any, Tuple
+from sqlalchemy.orm import Session
+from app.models.user import User
 
 
-def parse_excel(path: str) -> List[Dict[str, Any]]:
+def parse_excel(path: str, db: Session) -> List[Dict[str, Any]]:
     """Parse an Excel file into TurnoIn-compatible payloads.
 
-    Colonne obbligatorie / Required columns: ``Data``, ``User ID``,
+    Colonne obbligatorie / Required columns: ``Data``, ``Agente``,
     ``Inizio1`` e ``Fine1``. Colonne facoltative / Optional: ``Inizio2``,
     ``Fine2``, ``Inizio3``, ``Fine3``, ``Tipo`` e ``Note``.
 
@@ -17,8 +19,11 @@ def parse_excel(path: str) -> List[Dict[str, Any]]:
     df = pd.read_excel(path)  # requires openpyxl
     rows: list[dict[str, Any]] = []
     for _, row in df.iterrows():
+        user = db.query(User).filter(User.nome == row["Agente"]).first()
+        if not user:
+            raise ValueError(f"Unknown user: {row['Agente']}")
         payload: dict[str, Any] = {
-            "user_id": str(row["User ID"]),
+            "user_id": str(user.id),
             "giorno": row["Data"].date() if hasattr(row["Data"], "date") else row["Data"],
             "slot1": {"inizio": row["Inizio1"], "fine": row["Fine1"]},
             "tipo": row.get("Tipo", "NORMALE"),
