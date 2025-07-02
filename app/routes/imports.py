@@ -32,7 +32,8 @@ async def import_xlsx(
         crud_turno.upsert_turno(db, TurnoIn(**payload))
 
     # 4 – generate PDF summary
-    pdf_path = df_to_pdf(rows)
+    pdf_path, html_path = df_to_pdf(rows)
     background_tasks.add_task(os.remove, pdf_path)
+    background_tasks.add_task(os.remove, html_path)
     background_tasks.add_task(os.remove, tmp_path)
     return FileResponse(pdf_path, filename="turni_settimana.pdf")
