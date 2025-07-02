@@ -12,12 +12,11 @@ This repository contains a FastAPI backend used by Segretaria Digitale.
    source .venv/bin/activate
    pip install -r requirements.txt
    ```
-3. Install `wkhtmltopdf` at the system level (e.g. `apt-get install wkhtmltopdf`
-   when deploying to Docker or Render).
+3. Install [wkhtmltopdf](https://wkhtmltopdf.org/downloads.html) at the system
+   level (e.g. `apt-get update && apt-get install -y wkhtmltopdf`). This is
+   required for PDF generation in `app/services/excel_import.py` and must be
+   included in deployment build steps.
 4. Copy `.env.example` to `.env` and adjust the values as needed.
-
-4. Install [wkhtmltopdf](https://wkhtmltopdf.org/downloads.html) to enable
-   PDF generation in `app/services/excel_import.py`.
 
 If asynchronous database access becomes necessary later on, add `asyncpg` to
 `requirements.txt` and configure SQLAlchemy with its async engine.
@@ -73,6 +72,18 @@ pytest
 
 The test suite uses a temporary SQLite database, so no additional
 configuration is required.
+
+## Deployment
+
+When deploying on platforms like Render or Railway, ensure `wkhtmltopdf` is
+installed before Python dependencies. A typical build command is:
+
+```bash
+apt-get update && apt-get install -y wkhtmltopdf && pip install -r requirements.txt
+```
+
+If deploying with Docker, the provided `Dockerfile` installs `wkhtmltopdf` prior
+to installing packages.
 
 ## Dashboard endpoint
 
