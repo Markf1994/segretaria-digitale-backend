@@ -5,13 +5,16 @@ This repository contains a FastAPI backend used by Segretaria Digitale.
 ## Setup
 
 1. Ensure you have **Python 3.10+** installed.
-2. Create a virtual environment and install dependencies (including `httpx`):
+2. Create a virtual environment and install dependencies (including `httpx`,
+   `pandas`, `openpyxl` and `pdfkit`):
    ```bash
    python3 -m venv .venv
    source .venv/bin/activate
    pip install -r requirements.txt
    ```
-3. Copy `.env.example` to `.env` and adjust the values as needed.
+3. Install `wkhtmltopdf` at the system level (e.g. `apt-get install wkhtmltopdf`
+   when deploying to Docker or Render).
+4. Copy `.env.example` to `.env` and adjust the values as needed.
 
 4. Install [wkhtmltopdf](https://wkhtmltopdf.org/downloads.html) to enable
    PDF generation in `app/services/excel_import.py`.
@@ -90,6 +93,19 @@ The response is a chronologically ordered list where each item contains a
 
 Creating an event via `POST /events/` now returns HTTP status code `201` along
 with the created event.
+
+## Excel import endpoint
+
+The `/import/xlsx` route accepts an Excel file containing shift data. It parses
+each row, synchronizes the shifts with the database and Google Calendar, then
+returns a PDF summary. The endpoint expects the file in a `multipart/form-data`
+request under the `file` field.
+
+Example:
+
+```bash
+curl -X POST -F "file=@shift.xlsx" http://localhost:8000/import/xlsx -o turni.pdf
+```
 
 ## License
 
