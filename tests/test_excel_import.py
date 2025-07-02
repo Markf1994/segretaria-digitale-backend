@@ -55,6 +55,42 @@ def test_parse_excel(tmp_path):
     ]
 
 
+def test_parse_excel_with_db(tmp_path):
+    """Ensure parsing works when resolving user names via a DB session."""
+    from app.database import SessionLocal
+    from app.models.user import User
+
+    db = SessionLocal()
+    user = User(id="u1", email="a@example.com", nome="Agent X", hashed_password="x")
+    db.add(user)
+    db.commit()
+
+    df = pd.DataFrame([
+        {
+            "Agente": "Agent X",
+            "Data": "2023-01-03",
+            "Inizio1": "07:00:00",
+            "Fine1": "11:00:00",
+        }
+    ])
+    xls = tmp_path / "agent.xlsx"
+    df.to_excel(xls, index=False)
+
+    rows = parse_excel(str(xls), db=db)
+
+    assert rows == [
+        {
+            "user_id": "u1",
+            "giorno": "2023-01-03",
+            "slot1": {"inizio": "07:00:00", "fine": "11:00:00"},
+            "tipo": "NORMALE",
+            "note": "",
+        }
+    ]
+
+    db.close()
+
+
 def test_df_to_pdf_creates_files_and_cleanup(tmp_path):
     rows = [
         {
