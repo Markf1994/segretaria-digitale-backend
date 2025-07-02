@@ -11,7 +11,7 @@ from app.routes import (
     dashboard,
 )
 from app.routes.orari import router as orari_router
-from app.routes import import_xlsx
+from app.routes import imports
 
 # Enable automatic redirect so both `/path` and `/path/` work
 # Tests continue to use the canonical routes defined in the routers
@@ -39,7 +39,7 @@ app.include_router(determinazioni.router)
 app.include_router(pdfs.router)
 app.include_router(dashboard.router)
 app.include_router(orari_router)
-app.include_router(import_xlsx.router)
+app.include_router(imports.router)
 
 from app.crud.pdffile import get_upload_root
 from fastapi.staticfiles import StaticFiles
