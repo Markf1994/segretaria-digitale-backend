@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import os
 from app.database import Base, engine
 from app.routes import (
     users,
@@ -23,9 +24,15 @@ def on_startup() -> None:
     """Create database tables on startup."""
     Base.metadata.create_all(bind=engine)
 
+origins = os.getenv("CORS_ORIGINS", "*")
+if origins == "*":
+    allow_origins = ["*"]
+else:
+    allow_origins = [o.strip() for o in origins.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allow_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
