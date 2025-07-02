@@ -3,6 +3,7 @@ from unittest.mock import patch, MagicMock
 from pathlib import Path
 import pandas as pd
 from fastapi.testclient import TestClient
+from app.services.excel_import import parse_excel
 
 # Patch Google API clients before importing the app
 with patch("google.oauth2.service_account.Credentials.from_service_account_file", return_value=MagicMock()):
@@ -55,8 +56,9 @@ def test_import_xlsx_creates_turni_and_returns_pdf(setup_db, tmp_path):
 def test_temp_files_removed_after_request(setup_db, tmp_path):
     captured = {}
 
-    def fake_parse_excel(path):
+    def fake_parse_excel(path, db=None):
         captured['xlsx'] = path
+        captured['db'] = db
         return []
 
     def fake_from_file(html_path, pdf_path):
@@ -78,3 +80,21 @@ def test_temp_files_removed_after_request(setup_db, tmp_path):
     assert not os.path.exists(captured['xlsx'])
     assert not os.path.exists(captured['html'])
     assert not os.path.exists(captured['pdf'])
+    assert captured['db'] is not None
+
+
+def test_parse_excel_with_and_without_db(tmp_path):
+    df = pd.DataFrame([
+        {
+            "User ID": "1",
+            "Data": "2023-01-01",
+            "Inizio1": "08:00:00",
+            "Fine1": "12:00:00",
+        }
+    ])
+    xlsx = tmp_path / "s.xlsx"
+    df.to_excel(xlsx, index=False)
+
+    rows_no_db = parse_excel(str(xlsx))
+    rows_with_db = parse_excel(str(xlsx), db=MagicMock())
+    assert rows_no_db == rows_with_db

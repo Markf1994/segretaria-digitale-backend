@@ -25,7 +25,7 @@ async def import_xlsx(
         tmp_path = tmp.name
 
     # 2 – parse Excel -> TurnoIn payloads
-    rows = parse_excel(tmp_path)
+    rows = parse_excel(tmp_path, db=db)
 
     # 3 – store/update each shift (DB + Google Calendar)
     for payload in rows:
