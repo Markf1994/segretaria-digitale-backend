@@ -17,4 +17,4 @@ def list_users_route(
 @router.post("/", response_model=UserResponse)
 def create_user_route(user_data: UserCreate, db: Session = Depends(get_db)):
     """Register a new user and return it."""
-    return user.create_user(db, user_data.email, user_data.password)
+    return user.create_user(db, user_data.email, user_data.password, user_data.nome)

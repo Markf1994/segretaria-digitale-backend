@@ -12,7 +12,10 @@ client = TestClient(app)
 
 
 def auth_user(email: str):
-    resp = client.post("/users/", json={"email": email, "password": "secret"})
+    resp = client.post(
+        "/users/",
+        json={"email": email, "password": "secret", "nome": "User"},
+    )
     user_id = resp.json()["id"]
     token = client.post(
         "/login",
