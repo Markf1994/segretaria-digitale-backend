@@ -3,6 +3,7 @@ from unittest.mock import patch, MagicMock
 from pathlib import Path
 import pandas as pd
 from fastapi.testclient import TestClient
+from fastapi import HTTPException
 
 # Patch Google API clients before importing the app
 with patch("google.oauth2.service_account.Credentials.from_service_account_file", return_value=MagicMock()):
@@ -79,3 +80,23 @@ def test_temp_files_removed_after_request(setup_db, tmp_path):
     assert not os.path.exists(captured['xlsx'])
     assert not os.path.exists(captured['html'])
     assert not os.path.exists(captured['pdf'])
+
+
+def test_parse_error_returns_400_and_removes_xlsx(tmp_path):
+    captured = {}
+
+    def fake_parse_excel(path, db):
+        captured['xlsx'] = path
+        raise HTTPException(status_code=400, detail="bad data")
+
+    with patch("app.routes.imports.parse_excel", side_effect=fake_parse_excel):
+        dummy = tmp_path / "shift.xlsx"
+        dummy.write_bytes(b"data")
+        with open(dummy, "rb") as fh:
+            res = client.post(
+                "/import/xlsx",
+                files={"file": ("shift.xlsx", fh, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
+            )
+
+    assert res.status_code == 400
+    assert not os.path.exists(captured['xlsx'])
