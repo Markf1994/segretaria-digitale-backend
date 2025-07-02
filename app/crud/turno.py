@@ -92,3 +92,13 @@ def get_turni(db: Session, user: User) -> list[Turno]:
         .order_by(Turno.giorno.asc())
         .all()
     )
+
+
+# ------------------------------------------------------------------------------
+def list_all(db: Session) -> list[Turno]:
+    """Return all ``Turno`` records in the database ordered by date."""
+    return (
+        db.query(Turno)
+        .order_by(Turno.giorno.asc())
+        .all()
+    )
