@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, Depends, BackgroundTasks
+from fastapi import APIRouter, UploadFile, Depends, BackgroundTasks, HTTPException
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 import tempfile
@@ -25,7 +25,11 @@ async def import_xlsx(
         tmp_path = tmp.name
 
     # 2 – parse Excel -> TurnoIn payloads
-    rows = parse_excel(tmp_path)
+    try:
+        rows = parse_excel(tmp_path)
+    except ValueError as exc:
+        os.remove(tmp_path)
+        raise HTTPException(status_code=400, detail=str(exc))
 
     # 3 – store/update each shift (DB + Google Calendar)
     for payload in rows:

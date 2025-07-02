@@ -15,6 +15,13 @@ def parse_excel(path: str) -> List[Dict[str, Any]]:
     :return: a list of dictionaries ready for the TurnoIn API.
     """
     df = pd.read_excel(path)  # requires openpyxl
+
+    required = {"Data", "User ID", "Inizio1", "Fine1"}
+    missing = required - set(df.columns)
+    if missing:
+        missing_str = ", ".join(sorted(missing))
+        raise ValueError(f"Missing required columns: {missing_str}")
+
     rows: list[dict[str, Any]] = []
     for _, row in df.iterrows():
         payload: dict[str, Any] = {

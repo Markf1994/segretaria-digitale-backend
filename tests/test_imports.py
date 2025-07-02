@@ -78,3 +78,24 @@ def test_temp_files_removed_after_request(setup_db, tmp_path):
     assert not os.path.exists(captured['xlsx'])
     assert not os.path.exists(captured['html'])
     assert not os.path.exists(captured['pdf'])
+
+
+def test_import_xlsx_missing_columns_returns_400(setup_db, tmp_path):
+    df = pd.DataFrame([
+        {
+            "User ID": 1,
+            "Data": "2023-01-01",
+            "Inizio1": "08:00:00",
+        }
+    ])  # missing Fine1
+    xlsx_path = tmp_path / "shift.xlsx"
+    df.to_excel(xlsx_path, index=False)
+
+    with open(xlsx_path, "rb") as fh:
+        res = client.post(
+            "/import/xlsx",
+            files={"file": ("shift.xlsx", fh, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
+        )
+
+    assert res.status_code == 400
+    assert "Fine1" in res.json()["detail"]
