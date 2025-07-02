@@ -5,6 +5,15 @@ from app.schemas.user import UserCreate, UserResponse
 from app.crud import user
 router = APIRouter(prefix="/users", tags=["Users"])
 
+# ───── nuovo endpoint GET /users/ ─────
+@router.get("/", response_model=list[UserResponse])
+def list_users_route(
+    db: Session = Depends(get_db),
+):
+    """Restituisce la lista di tutti gli utenti."""
+    return user.list_users(db)
+# ───────────────────────────────────────
+
 @router.post("/", response_model=UserResponse)
 def create_user_route(user_data: UserCreate, db: Session = Depends(get_db)):
     """Register a new user and return it."""

@@ -29,3 +29,9 @@ def get_user_by_email(db: Session, email: str):
 def verify_password(plain_password, hashed_password):
     """Return ``True`` if the plaintext password matches the hashed one."""
     return pwd_context.verify(plain_password, hashed_password)
+
+
+def list_users(db: Session):
+    """Restituisce tutti gli utenti ordinati per e-mail."""
+    from app.models.user import User  # evita import circolare
+    return db.query(User).order_by(User.email.asc()).all()
