@@ -2,6 +2,7 @@ import os
 from unittest.mock import patch, MagicMock
 from pathlib import Path
 import pandas as pd
+import tempfile
 from fastapi.testclient import TestClient
 
 # Patch Google API clients before importing the app
@@ -50,3 +51,42 @@ def test_import_xlsx_creates_turni_and_returns_pdf(setup_db, tmp_path):
     body = list_res.json()
     assert len(body) == 1
     assert body[0]["user_id"] == user_id
+
+
+def test_temp_files_are_removed_after_request(setup_db, tmp_path):
+    """Ensure temporary Excel, HTML and PDF files are cleaned up."""
+    server_tmp = tmp_path / "server"
+    server_tmp.mkdir()
+
+    headers, user_id = auth_user("clean@example.com")
+    df = pd.DataFrame([
+        {
+            "User ID": user_id,
+            "Data": "2023-01-01",
+            "Inizio1": "08:00:00",
+            "Fine1": "12:00:00",
+        }
+    ])
+    xlsx_path = tmp_path / "shift.xlsx"
+    df.to_excel(xlsx_path, index=False)
+
+    def fake_ntf(*args, **kwargs):
+        kwargs.setdefault("delete", False)
+        kwargs.setdefault("dir", server_tmp)
+        return tempfile.NamedTemporaryFile(*args, **kwargs)
+
+    def fake_from_file(html_path, pdf_path):
+        Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
+        return True
+
+    with patch("app.routes.imports.tempfile.NamedTemporaryFile", side_effect=fake_ntf),
+        patch("app.services.excel_import.tempfile.NamedTemporaryFile", side_effect=fake_ntf),
+        patch("app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file):
+        with open(xlsx_path, "rb") as fh:
+            res = client.post(
+                "/import/xlsx",
+                files={"file": ("shift.xlsx", fh, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
+            )
+
+    assert res.status_code == 200
+    assert list(server_tmp.iterdir()) == []
