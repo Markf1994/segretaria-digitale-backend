@@ -13,6 +13,9 @@ This repository contains a FastAPI backend used by Segretaria Digitale.
    ```
 3. Copy `.env.example` to `.env` and adjust the values as needed.
 
+4. Install [wkhtmltopdf](https://wkhtmltopdf.org/downloads.html) to enable
+   PDF generation in `app/services/excel_import.py`.
+
 If asynchronous database access becomes necessary later on, add `asyncpg` to
 `requirements.txt` and configure SQLAlchemy with its async engine.
 
