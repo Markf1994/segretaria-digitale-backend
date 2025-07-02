@@ -10,30 +10,31 @@ from app.services.excel_import import parse_excel, df_to_pdf
 def test_parse_excel(tmp_path):
     df = pd.DataFrame([
         {
-            "User ID": 1,
+            "Agente": "Alpha",
             "Data": "2023-01-01",
+            "Tipo": "NORMALE",
             "Inizio1": "08:00:00",
             "Fine1": "12:00:00",
-            "Tipo": "NORMALE",
-            "Note": "n1",
         },
         {
-            "User ID": "2",
+            "Agente": "Beta",
             "Data": "2023-01-02",
+            "Tipo": "EXTRA",
             "Inizio1": "09:00:00",
             "Fine1": "13:00:00",
             "Inizio2": "14:00:00",
             "Fine2": "18:00:00",
-            "Inizio3": "19:00:00",
-            "Fine3": "21:00:00",
-            "Tipo": "EXTRA",
-            "Note": "n2",
+            "Straordinario inizio": "19:00:00",
+            "Straordinario fine": "21:00:00",
         },
     ])
     xls = tmp_path / "sample.xlsx"
     df.to_excel(xls, index=False)
 
-    rows = parse_excel(str(xls))
+    mapping = {"Alpha": "1", "Beta": "2"}
+
+    with patch("app.services.excel_import.get_user_id", side_effect=lambda db, a: mapping[a]):
+        rows = parse_excel(str(xls), None)
 
     assert rows == [
         {
@@ -41,7 +42,6 @@ def test_parse_excel(tmp_path):
             "giorno": "2023-01-01",
             "slot1": {"inizio": "08:00:00", "fine": "12:00:00"},
             "tipo": "NORMALE",
-            "note": "n1",
         },
         {
             "user_id": "2",
@@ -50,7 +50,6 @@ def test_parse_excel(tmp_path):
             "slot2": {"inizio": "14:00:00", "fine": "18:00:00"},
             "slot3": {"inizio": "19:00:00", "fine": "21:00:00"},
             "tipo": "EXTRA",
-            "note": "n2",
         },
     ]
 

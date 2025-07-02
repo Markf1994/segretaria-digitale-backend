@@ -7,33 +7,75 @@ from sqlalchemy.orm import Session
 from app.models.user import User
 
 
+def get_user_id(db: Session, agente: str) -> str:
+    """Return the ID of the user matching ``agente``.
+
+    Parameters
+    ----------
+    db: Session
+        Database session used for the lookup.
+    agente: str
+        Agent name as it appears in the Excel sheet.
+
+    Raises
+    ------
+    ValueError
+        If no user with the given name exists.
+
+    Returns
+    -------
+    str
+        The user's identifier as a string.
+    """
+    user = db.query(User).filter(User.nome == agente).first()
+    if not user:
+        raise ValueError(f"Unknown user: {agente}")
+    return str(user.id)
+
+
 def parse_excel(path: str, db: Session) -> List[Dict[str, Any]]:
     """Parse an Excel file into TurnoIn-compatible payloads.
 
-    Colonne obbligatorie / Required columns: ``Data``, ``Agente``,
-    ``Inizio1`` e ``Fine1``. Colonne facoltative / Optional: ``Inizio2``,
-    ``Fine2``, ``Inizio3``, ``Fine3``, ``Tipo`` e ``Note``.
+    Required columns are ``Agente``, ``Data``, ``Tipo``, ``Inizio1`` and
+    ``Fine1``. Columns ``Inizio2``/``Fine2`` and ``Straordinario inizio``/
+    ``Straordinario fine`` are optional.
 
-    :return: a list of dictionaries ready for the TurnoIn API.
+    Parameters
+    ----------
+    path: str
+        Path to the Excel file to parse.
+    db: Session
+        Database session for resolving user names.
+
+    Returns
+    -------
+    list[dict[str, Any]]
+        A list of dictionaries ready for the ``TurnoIn`` schema.
     """
+
     df = pd.read_excel(path)  # requires openpyxl
     rows: list[dict[str, Any]] = []
+
     for _, row in df.iterrows():
-        user = db.query(User).filter(User.nome == row["Agente"]).first()
-        if not user:
-            raise ValueError(f"Unknown user: {row['Agente']}")
-        payload: dict[str, Any] = {
-            "user_id": str(user.id),
+        user_id = get_user_id(db, row["Agente"])
+        payload: Dict[str, Any] = {
+            "user_id": user_id,
             "giorno": row["Data"].date() if hasattr(row["Data"], "date") else row["Data"],
             "slot1": {"inizio": row["Inizio1"], "fine": row["Fine1"]},
             "tipo": row.get("Tipo", "NORMALE"),
-            "note": row.get("Note", ""),
         }
+
         if not pd.isna(row.get("Inizio2")) and not pd.isna(row.get("Fine2")):
             payload["slot2"] = {"inizio": row["Inizio2"], "fine": row["Fine2"]}
-        if not pd.isna(row.get("Inizio3")) and not pd.isna(row.get("Fine3")):
-            payload["slot3"] = {"inizio": row["Inizio3"], "fine": row["Fine3"]}
+
+        if not pd.isna(row.get("Straordinario inizio")) and not pd.isna(row.get("Straordinario fine")):
+            payload["slot3"] = {
+                "inizio": row["Straordinario inizio"],
+                "fine": row["Straordinario fine"],
+            }
+
         rows.append(payload)
+
     return rows
 
 
