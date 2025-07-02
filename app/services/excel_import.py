@@ -1,7 +1,6 @@
 import pandas as pd
 import pdfkit
 import tempfile
-import os
 from typing import Any, Dict, List, Tuple
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
