@@ -12,18 +12,19 @@ with patch("google.oauth2.service_account.Credentials.from_service_account_file"
 
 client = TestClient(app)
 
-def auth_user(email: str):
-    resp = client.post("/users/", json={"email": email, "password": "secret"})
-    user_id = resp.json()["id"]
+def auth_user(email: str, nome: str = "Mario Rossi"):
+    resp = client.post("/users/", json={"email": email, "password": "secret", "nome": nome})
+    body = resp.json()
+    user_id = body["id"]
     token = client.post("/login", json={"email": email, "password": "secret"}).json()["access_token"]
-    return {"Authorization": f"Bearer {token}"}, user_id
+    return {"Authorization": f"Bearer {token}"}, user_id, nome
 
 
 def test_import_xlsx_creates_turni_and_returns_pdf(setup_db, tmp_path):
-    headers, user_id = auth_user("sheet@example.com")
+    headers, user_id, nome = auth_user("sheet@example.com")
     df = pd.DataFrame([
         {
-            "User ID": user_id,
+            "Agente": nome,
             "Data": "2023-01-01",
             "Inizio1": "08:00:00",
             "Fine1": "12:00:00",
@@ -55,7 +56,7 @@ def test_import_xlsx_creates_turni_and_returns_pdf(setup_db, tmp_path):
 def test_temp_files_removed_after_request(setup_db, tmp_path):
     captured = {}
 
-    def fake_parse_excel(path):
+    def fake_parse_excel(path, db):
         captured['xlsx'] = path
         return []
 
