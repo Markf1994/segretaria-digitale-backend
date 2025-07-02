@@ -55,7 +55,7 @@ def test_import_xlsx_creates_turni_and_returns_pdf(setup_db, tmp_path):
 def test_temp_files_removed_after_request(setup_db, tmp_path):
     captured = {}
 
-    def fake_parse_excel(path):
+    def fake_parse_excel(path, _db):
         captured['xlsx'] = path
         return []
 

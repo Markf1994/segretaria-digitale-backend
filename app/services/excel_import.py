@@ -5,7 +5,7 @@ import os
 from typing import List, Dict, Any, Tuple
 
 
-def parse_excel(path: str) -> List[Dict[str, Any]]:
+def parse_excel(path: str, db=None) -> List[Dict[str, Any]]:
     """Parse an Excel file into TurnoIn-compatible payloads.
 
     Colonne obbligatorie / Required columns: ``Data``, ``User ID``,
