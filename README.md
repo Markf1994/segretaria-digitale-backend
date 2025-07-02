@@ -83,6 +83,11 @@ GET /dashboard/upcoming?days=5
 The response is a chronologically ordered list where each item contains a
 `kind` field (`event`, `todo` or `google`) and a `data_ora` timestamp.
 
+## Events endpoint
+
+Creating an event via `POST /events/` now returns HTTP status code `201` along
+with the created event.
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).

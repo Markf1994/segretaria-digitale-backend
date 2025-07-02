@@ -23,7 +23,7 @@ def test_create_event(setup_db):
         "is_public": True,
     }
     response = client.post("/events/", json=data, headers=headers)
-    assert response.status_code == 200
+    assert response.status_code == 201
     body = response.json()
     assert body["titolo"] == "Meeting"
     assert body["user_id"] == user_id
