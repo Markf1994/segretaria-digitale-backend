@@ -4,6 +4,7 @@ import tempfile
 import os
 from typing import Any, Dict, List, Tuple
 from sqlalchemy.orm import Session
+from fastapi import HTTPException
 
 from app.models.user import User
 
@@ -34,6 +35,12 @@ def parse_excel(path: str, db: Session) -> List[Dict[str, Any]]:
     """
 
     df = pd.read_excel(path)  # requires openpyxl
+
+    required = {"Data", "User ID", "Inizio1", "Fine1"}
+    missing = required - set(df.columns)
+    if missing:
+        raise HTTPException(status_code=400, detail=f"Missing columns: {missing}")
+
     rows: list[dict[str, Any]] = []
 
     for _, row in df.iterrows():
