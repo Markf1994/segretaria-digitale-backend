@@ -3,6 +3,8 @@ from unittest.mock import patch, MagicMock
 from pathlib import Path
 import pandas as pd
 from fastapi.testclient import TestClient
+from app.database import SessionLocal
+from app.models.user import User
 
 # Patch Google API clients before importing the app
 with patch("google.oauth2.service_account.Credentials.from_service_account_file", return_value=MagicMock()):
@@ -12,19 +14,28 @@ with patch("google.oauth2.service_account.Credentials.from_service_account_file"
 
 client = TestClient(app)
 
-def auth_user(email: str):
+def auth_user(email: str, nome: str):
     resp = client.post("/users/", json={"email": email, "password": "secret"})
     user_id = resp.json()["id"]
+
+    # update the nome field directly on the DB
+    db = SessionLocal()
+    user = db.query(User).filter_by(id=user_id).first()
+    user.nome = nome
+    db.commit()
+    db.close()
+
     token = client.post("/login", json={"email": email, "password": "secret"}).json()["access_token"]
     return {"Authorization": f"Bearer {token}"}, user_id
 
 
 def test_import_xlsx_creates_turni_and_returns_pdf(setup_db, tmp_path):
-    headers, user_id = auth_user("sheet@example.com")
+    headers, user_id = auth_user("sheet@example.com", "Agente Test")
     df = pd.DataFrame([
         {
-            "User ID": user_id,
+            "Agente": "Agente Test",
             "Data": "2023-01-01",
+            "Tipo": "NORMALE",
             "Inizio1": "08:00:00",
             "Fine1": "12:00:00",
         }
@@ -55,7 +66,7 @@ def test_import_xlsx_creates_turni_and_returns_pdf(setup_db, tmp_path):
 def test_temp_files_removed_after_request(setup_db, tmp_path):
     captured = {}
 
-    def fake_parse_excel(path):
+    def fake_parse_excel(db, path):
         captured['xlsx'] = path
         return []
 
