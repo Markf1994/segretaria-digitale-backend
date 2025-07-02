@@ -24,8 +24,8 @@ def list_turni(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """List turni for the authenticated user."""
-    return crud_turno.get_turni(db, current_user)
+    """Return all turni without filtering by user."""
+    return crud_turno.list_all(db)
 
 
 @router.delete("/{turno_id}")
