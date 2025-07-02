@@ -12,7 +12,7 @@ client = TestClient(app)
 def test_login_success(setup_db):
     client.post(
         "/users/",
-        json={"email": "auth@example.com", "password": "secret"},
+        json={"email": "auth@example.com", "password": "secret", "nome": "Auth"},
     )
     response = client.post(
         "/login", json={"email": "auth@example.com", "password": "secret"}
@@ -26,7 +26,7 @@ def test_login_success(setup_db):
 def test_login_invalid_credentials(setup_db):
     client.post(
         "/users/",
-        json={"email": "wrong@example.com", "password": "secret"},
+        json={"email": "wrong@example.com", "password": "secret", "nome": "Wrong"},
     )
     response = client.post(
         "/login", json={"email": "wrong@example.com", "password": "bad"}
