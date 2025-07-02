@@ -16,7 +16,9 @@ This repository contains a FastAPI backend used by Segretaria Digitale.
    level (e.g. `apt-get update && apt-get install -y wkhtmltopdf`). This is
    required for PDF generation in `app/services/excel_import.py` and must be
    included in deployment build steps.
-4. Copy `.env.example` to `.env` and adjust the values as needed.
+4. Copy `.env.example` to `.env` and adjust the values as needed. If you want to
+   restrict cross-origin requests, set `CORS_ORIGINS` to a comma-separated list
+   of allowed origins; leaving it unset defaults to `"*"` for development.
 
 If asynchronous database access becomes necessary later on, add `asyncpg` to
 `requirements.txt` and configure SQLAlchemy with its async engine.
@@ -32,6 +34,8 @@ If asynchronous database access becomes necessary later on, add `asyncpg` to
 - `GOOGLE_CALENDAR_ID` – ID of the calendar to read events from.
 - `G_EVENT_CAL_ID` – ID of the Google Calendar used for event syncs.
 - `G_SHIFT_CAL_ID` – ID of the Google Calendar used for shift syncs.
+- `CORS_ORIGINS` – (optional) comma separated list of allowed origins for
+  cross-origin requests. Defaults to `"*"`.
 
 ## Database migrations
 
