@@ -2,8 +2,11 @@ import os
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
+
 import pandas as pd
 
+from fastapi import HTTPException
 from app.services.excel_import import parse_excel, df_to_pdf
 
 
@@ -87,6 +90,32 @@ def test_parse_excel_with_db(tmp_path):
             "note": "",
         }
     ]
+
+    db.close()
+
+
+def test_parse_excel_missing_column(tmp_path):
+    """An HTTPException is raised when required columns are missing."""
+    from app.database import SessionLocal
+
+    db = SessionLocal()
+
+    df = pd.DataFrame([
+        {
+            "Agente": "Agent X",
+            "Data": "2023-01-04",
+            "Inizio1": "07:00:00",
+            # "Fine1" column intentionally omitted
+        }
+    ])
+    xls = tmp_path / "missing.xlsx"
+    df.to_excel(xls, index=False)
+
+    with pytest.raises(HTTPException) as exc:
+        parse_excel(str(xls), db=db)
+
+    assert exc.value.status_code == 400
+    assert "Missing columns" in exc.value.detail
 
     db.close()
 
