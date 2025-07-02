@@ -29,6 +29,7 @@ def test_import_xlsx_creates_turni_and_returns_pdf(setup_db, tmp_path):
             "Data": "2023-01-01",
             "Inizio1": "08:00:00",
             "Fine1": "12:00:00",
+            "Tipo": "NORMALE",
         }
     ])
     xlsx_path = tmp_path / "shift.xlsx"

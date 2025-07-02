@@ -10,24 +10,22 @@ from app.services.excel_import import parse_excel, df_to_pdf
 def test_parse_excel(tmp_path):
     df = pd.DataFrame([
         {
-            "User ID": 1,
+            "Agente": 1,
             "Data": "2023-01-01",
             "Inizio1": "08:00:00",
             "Fine1": "12:00:00",
             "Tipo": "NORMALE",
-            "Note": "n1",
         },
         {
-            "User ID": "2",
+            "Agente": "2",
             "Data": "2023-01-02",
             "Inizio1": "09:00:00",
             "Fine1": "13:00:00",
             "Inizio2": "14:00:00",
             "Fine2": "18:00:00",
-            "Inizio3": "19:00:00",
-            "Fine3": "21:00:00",
+            "Straordinario inizio": "19:00:00",
+            "Straordinario fine": "21:00:00",
             "Tipo": "EXTRA",
-            "Note": "n2",
         },
     ])
     xls = tmp_path / "sample.xlsx"
@@ -41,7 +39,7 @@ def test_parse_excel(tmp_path):
             "giorno": "2023-01-01",
             "slot1": {"inizio": "08:00:00", "fine": "12:00:00"},
             "tipo": "NORMALE",
-            "note": "n1",
+            "note": "",
         },
         {
             "user_id": "2",
@@ -50,7 +48,7 @@ def test_parse_excel(tmp_path):
             "slot2": {"inizio": "14:00:00", "fine": "18:00:00"},
             "slot3": {"inizio": "19:00:00", "fine": "21:00:00"},
             "tipo": "EXTRA",
-            "note": "n2",
+            "note": "",
         },
     ]
 
@@ -71,6 +69,7 @@ def test_parse_excel_with_db(tmp_path):
             "Data": "2023-01-03",
             "Inizio1": "07:00:00",
             "Fine1": "11:00:00",
+            "Tipo": "NORMALE",
         }
     ])
     xls = tmp_path / "agent.xlsx"
