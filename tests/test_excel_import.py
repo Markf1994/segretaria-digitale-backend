@@ -8,51 +8,62 @@ from app.services.excel_import import parse_excel, df_to_pdf
 
 
 def test_parse_excel(tmp_path):
+    """Parse a sheet with agent names using a DB session."""
+    from app.database import SessionLocal
+    from app.models.user import User
+
+    db = SessionLocal()
+    db.add_all([
+        User(id="u1", email="a@example.com", nome="Agent 1", hashed_password="x"),
+        User(id="u2", email="b@example.com", nome="Agent 2", hashed_password="x"),
+    ])
+    db.commit()
+
     df = pd.DataFrame([
         {
-            "User ID": 1,
+            "Agente": "Agent 1",
             "Data": "2023-01-01",
             "Inizio1": "08:00:00",
             "Fine1": "12:00:00",
             "Tipo": "NORMALE",
-            "Note": "n1",
         },
         {
-            "User ID": "2",
+            "Agente": "Agent 2",
             "Data": "2023-01-02",
             "Inizio1": "09:00:00",
             "Fine1": "13:00:00",
             "Inizio2": "14:00:00",
             "Fine2": "18:00:00",
-            "Inizio3": "19:00:00",
-            "Fine3": "21:00:00",
+            "Straordinario inizio": "19:00:00",
+            "Straordinario fine": "21:00:00",
             "Tipo": "EXTRA",
-            "Note": "n2",
         },
     ])
     xls = tmp_path / "sample.xlsx"
     df.to_excel(xls, index=False)
 
-    rows = parse_excel(str(xls))
+    rows = parse_excel(str(xls), db=db)
 
     assert rows == [
         {
-            "user_id": "1",
+            "user_id": "u1",
             "giorno": "2023-01-01",
             "slot1": {"inizio": "08:00:00", "fine": "12:00:00"},
             "tipo": "NORMALE",
-            "note": "n1",
+            "note": "",
         },
         {
-            "user_id": "2",
+            "user_id": "u2",
             "giorno": "2023-01-02",
             "slot1": {"inizio": "09:00:00", "fine": "13:00:00"},
             "slot2": {"inizio": "14:00:00", "fine": "18:00:00"},
             "slot3": {"inizio": "19:00:00", "fine": "21:00:00"},
             "tipo": "EXTRA",
-            "note": "n2",
+            "note": "",
         },
     ]
+
+    db.close()
 
 
 def test_parse_excel_with_db(tmp_path):

@@ -36,7 +36,7 @@ def parse_excel(path: str, db: Session) -> List[Dict[str, Any]]:
 
     df = pd.read_excel(path)  # requires openpyxl
 
-    required = {"Data", "User ID", "Inizio1", "Fine1"}
+    required = {"Agente", "Data", "Inizio1", "Fine1"}
     missing = required - set(df.columns)
     if missing:
         raise HTTPException(status_code=400, detail=f"Missing columns: {missing}")
