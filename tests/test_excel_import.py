@@ -42,16 +42,20 @@ def test_parse_excel(tmp_path):
         {
             "user_id": "1",
             "giorno": "2023-01-01",
-            "slot1": {"inizio": "08:00:00", "fine": "12:00:00"},
+            "inizio_1": "08:00:00",
+            "fine_1": "12:00:00",
             "tipo": "NORMALE",
             "note": "n1",
         },
         {
             "user_id": "2",
             "giorno": "2023-01-02",
-            "slot1": {"inizio": "09:00:00", "fine": "13:00:00"},
-            "slot2": {"inizio": "14:00:00", "fine": "18:00:00"},
-            "slot3": {"inizio": "19:00:00", "fine": "21:00:00"},
+            "inizio_1": "09:00:00",
+            "fine_1": "13:00:00",
+            "inizio_2": "14:00:00",
+            "fine_2": "18:00:00",
+            "inizio_3": "19:00:00",
+            "fine_3": "21:00:00",
             "tipo": "EXTRA",
             "note": "n2",
         },
@@ -78,8 +82,10 @@ def test_parse_excel_straordinario(tmp_path):
         {
             "user_id": "3",
             "giorno": "2023-02-01",
-            "slot1": {"inizio": "08:00:00", "fine": "12:00:00"},
-            "slot3": {"inizio": "20:00:00", "fine": "22:00:00"},
+            "inizio_1": "08:00:00",
+            "fine_1": "12:00:00",
+            "inizio_3": "20:00:00",
+            "fine_3": "22:00:00",
             "tipo": "NORMALE",
             "note": "",
         }
@@ -113,7 +119,8 @@ def test_parse_excel_with_db(tmp_path):
         {
             "user_id": "u1",
             "giorno": "2023-01-03",
-            "slot1": {"inizio": "07:00:00", "fine": "11:00:00"},
+            "inizio_1": "07:00:00",
+            "fine_1": "11:00:00",
             "tipo": "NORMALE",
             "note": "",
         }
@@ -245,7 +252,8 @@ def test_df_to_pdf_creates_files_and_cleanup(tmp_path):
         {
             "user_id": "1",
             "giorno": "2023-01-01",
-            "slot1": {"inizio": "08:00:00", "fine": "12:00:00"},
+            "inizio_1": "08:00:00",
+            "fine_1": "12:00:00",
             "tipo": "NORMALE",
             "note": "",
         }
@@ -274,7 +282,8 @@ def test_df_to_pdf_missing_wkhtmltopdf(tmp_path):
         {
             "user_id": "1",
             "giorno": "2023-01-01",
-            "slot1": {"inizio": "08:00:00", "fine": "12:00:00"},
+            "inizio_1": "08:00:00",
+            "fine_1": "12:00:00",
             "tipo": "NORMALE",
             "note": "",
         }

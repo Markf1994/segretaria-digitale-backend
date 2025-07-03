@@ -1,21 +1,17 @@
 from datetime import date, time
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from typing import Optional
-
-class Slot(BaseModel):
-    inizio: time
-    fine: time
 
 class TurnoBase(BaseModel):
     giorno: date
-    slot1: Slot = Field(..., alias="inizio_1_fine_1")
-    slot2: Optional[Slot] = Field(None, alias="inizio_2_fine_2")
-    slot3: Optional[Slot] = Field(None, alias="inizio_3_fine_3")
+    inizio_1: time
+    fine_1: time
+    inizio_2: Optional[time] = None
+    fine_2: Optional[time] = None
+    inizio_3: Optional[time] = None
+    fine_3: Optional[time] = None
     tipo: str
     note: Optional[str] = None
-
-    class Config:
-        allow_population_by_field_name = True
 
 class TurnoIn(TurnoBase):
     user_id: str
@@ -26,4 +22,3 @@ class TurnoOut(TurnoBase):
 
     class Config:
         orm_mode = True
-        allow_population_by_field_name = True

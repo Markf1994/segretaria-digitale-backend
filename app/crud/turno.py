@@ -35,18 +35,13 @@ def upsert_turno(db: Session, payload: TurnoIn) -> Turno:
     if rec is None:
         rec = Turno(user_id=payload.user_id, giorno=payload.giorno)
 
-    # 2. riempie i tre slot
-    rec.inizio_1, rec.fine_1 = payload.slot1.inizio, payload.slot1.fine
-
-    if payload.slot2:
-        rec.inizio_2, rec.fine_2 = payload.slot2.inizio, payload.slot2.fine
-    else:
-        rec.inizio_2 = rec.fine_2 = None
-
-    if payload.slot3:
-        rec.inizio_3, rec.fine_3 = payload.slot3.inizio, payload.slot3.fine
-    else:
-        rec.inizio_3 = rec.fine_3 = None
+    # 2. riempie i tre intervalli orari
+    rec.inizio_1 = payload.inizio_1
+    rec.fine_1 = payload.fine_1
+    rec.inizio_2 = payload.inizio_2
+    rec.fine_2 = payload.fine_2
+    rec.inizio_3 = payload.inizio_3
+    rec.fine_3 = payload.fine_3
 
     rec.tipo = payload.tipo            # NORMALE | STRAORD | FERIE
     rec.note = payload.note
