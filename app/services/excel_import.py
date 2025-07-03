@@ -106,5 +106,13 @@ def df_to_pdf(rows: List[Dict[str, Any]]) -> Tuple[str, str]:
         df.to_html(tmp_html.name, index=False)
         html_path = tmp_html.name
     pdf_path = html_path.replace(".html", ".pdf")
-    pdfkit.from_file(html_path, pdf_path)  # requires wkhtmltopdf installed
+    try:
+        pdfkit.from_file(html_path, pdf_path)  # requires wkhtmltopdf installed
+    except OSError as err:
+        if "wkhtmltopdf" in str(err):
+            raise HTTPException(
+                status_code=500,
+                detail="wkhtmltopdf not installed",
+            )
+        raise
     return pdf_path, html_path
