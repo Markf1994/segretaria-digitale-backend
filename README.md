@@ -66,6 +66,19 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 
 The API will be available at `http://localhost:8000/` by default.
 
+## Authentication
+
+Obtain a JWT access token using `POST /login`. The endpoint only accepts a
+`POST` request; `GET` requests are not supported.
+
+Example:
+
+```bash
+curl -X POST http://localhost:8000/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com", "password": "yourpassword"}'
+```
+
 
 ## Running tests
 
