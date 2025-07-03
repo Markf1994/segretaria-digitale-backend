@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import os
-from app.database import Base, engine
 from app.routes import (
     users,
     auth,
@@ -18,11 +17,8 @@ from app.routes import imports
 # Tests continue to use the canonical routes defined in the routers
 app = FastAPI()
 
-
-@app.on_event("startup")
-def on_startup() -> None:
-    """Create database tables on startup."""
-    Base.metadata.create_all(bind=engine)
+# Database tables are managed with Alembic migrations.
+# Tests create tables manually using `Base.metadata.create_all()`.
 
 origins = os.getenv("CORS_ORIGINS", "*")
 if origins == "*":
