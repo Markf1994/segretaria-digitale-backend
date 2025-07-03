@@ -134,6 +134,16 @@ The response is a chronologically ordered list where each item contains a
 Creating an event via `POST /events/` now returns HTTP status code `201` along
 with the created event.
 
+## Users endpoint
+
+Look up a user by email:
+
+```bash
+GET /users/by-email?email=<address>
+```
+
+Returns the matching user or `404` if none exists.
+
 ## Excel import endpoint
 
 The `/import/xlsx` route accepts an Excel file containing shift data. It parses

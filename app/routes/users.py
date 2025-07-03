@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.dependencies import get_db
 from app.schemas.user import UserCreate, UserResponse
@@ -18,3 +18,13 @@ def list_users_route(
 def create_user_route(user_data: UserCreate, db: Session = Depends(get_db)):
     """Register a new user and return it."""
     return user.create_user(db, user_data.email, user_data.password, user_data.nome)
+
+# ───── nuovo endpoint GET /users/by-email ─────
+@router.get("/by-email", response_model=UserResponse)
+def get_user_by_email_route(email: str, db: Session = Depends(get_db)):
+    """Return a user by email or raise 404 if not found."""
+    result = user.get_user_by_email(db, email)
+    if not result:
+        raise HTTPException(status_code=404, detail="User not found")
+    return result
+# ───────────────────────────────────────────────
