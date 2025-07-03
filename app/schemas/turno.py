@@ -2,15 +2,14 @@ from datetime import date, time
 from pydantic import BaseModel
 from typing import Optional
 
-class Slot(BaseModel):
-    inizio: time
-    fine: time
-
 class TurnoBase(BaseModel):
     giorno: date
-    slot1: Slot
-    slot2: Optional[Slot] = None
-    slot3: Optional[Slot] = None
+    inizio_1: time
+    fine_1: time
+    inizio_2: Optional[time] = None
+    fine_2: Optional[time] = None
+    inizio_3: Optional[time] = None
+    fine_3: Optional[time] = None
     tipo: str
     note: Optional[str] = None
 

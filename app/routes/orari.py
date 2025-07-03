@@ -65,14 +65,17 @@ def week_pdf(
         row = {
             "user_id": t.user_id,
             "giorno": t.giorno.isoformat(),
-            "slot1": {"inizio": t.inizio_1.isoformat(), "fine": t.fine_1.isoformat()},
+            "inizio_1": t.inizio_1.isoformat(),
+            "fine_1": t.fine_1.isoformat(),
             "tipo": t.tipo,
             "note": t.note or "",
         }
         if t.inizio_2 and t.fine_2:
-            row["slot2"] = {"inizio": t.inizio_2.isoformat(), "fine": t.fine_2.isoformat()}
+            row["inizio_2"] = t.inizio_2.isoformat()
+            row["fine_2"] = t.fine_2.isoformat()
         if t.inizio_3 and t.fine_3:
-            row["slot3"] = {"inizio": t.inizio_3.isoformat(), "fine": t.fine_3.isoformat()}
+            row["inizio_3"] = t.inizio_3.isoformat()
+            row["fine_3"] = t.fine_3.isoformat()
         rows.append(row)
 
     pdf_path, html_path = df_to_pdf(rows)

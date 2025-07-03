@@ -60,9 +60,12 @@ def test_user_turni_listed_after_creation(setup_db):
         shift = {
             "user_id": user_id,
             "giorno": "2023-01-01",
-            "slot1": {"inizio": "08:00:00", "fine": "12:00:00"},
-            "slot2": None,
-            "slot3": None,
+            "inizio_1": "08:00:00",
+            "fine_1": "12:00:00",
+            "inizio_2": None,
+            "fine_2": None,
+            "inizio_3": None,
+            "fine_3": None,
             "tipo": "NORMALE",
             "note": "",
         }

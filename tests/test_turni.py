@@ -23,9 +23,12 @@ def test_create_turno(setup_db):
     data = {
         "user_id": user_id,
         "giorno": "2023-01-01",
-        "slot1": {"inizio": "08:00:00", "fine": "12:00:00"},
-        "slot2": {"inizio": "13:00:00", "fine": "17:00:00"},
-        "slot3": None,
+        "inizio_1": "08:00:00",
+        "fine_1": "12:00:00",
+        "inizio_2": "13:00:00",
+        "fine_2": "17:00:00",
+        "inizio_3": None,
+        "fine_3": None,
         "tipo": "NORMALE",
         "note": "test",
     }
@@ -34,9 +37,12 @@ def test_create_turno(setup_db):
     body = res.json()
     assert body["user_id"] == user_id
     assert body["giorno"] == "2023-01-01"
-    assert body["slot1"] == {"inizio": "08:00:00", "fine": "12:00:00"}
-    assert body["slot2"] == {"inizio": "13:00:00", "fine": "17:00:00"}
-    assert body["slot3"] is None
+    assert body["inizio_1"] == "08:00:00"
+    assert body["fine_1"] == "12:00:00"
+    assert body["inizio_2"] == "13:00:00"
+    assert body["fine_2"] == "17:00:00"
+    assert body["inizio_3"] is None
+    assert body["fine_3"] is None
 
 
 def test_update_turno(setup_db):
@@ -44,21 +50,26 @@ def test_update_turno(setup_db):
     base = {
         "user_id": user_id,
         "giorno": "2023-01-02",
-        "slot1": {"inizio": "08:00:00", "fine": "12:00:00"},
-        "slot2": None,
-        "slot3": None,
+        "inizio_1": "08:00:00",
+        "fine_1": "12:00:00",
+        "inizio_2": None,
+        "fine_2": None,
+        "inizio_3": None,
+        "fine_3": None,
         "tipo": "NORMALE",
         "note": "",
     }
     first = client.post("/orari/", json=base, headers=headers)
     turno_id = first.json()["id"]
-    base["slot1"] = {"inizio": "09:00:00", "fine": "13:00:00"}
+    base["inizio_1"] = "09:00:00"
+    base["fine_1"] = "13:00:00"
     base["tipo"] = "STRAORD"
     update = client.post("/orari/", json=base, headers=headers)
     assert update.status_code == 200
     updated = update.json()
     assert updated["id"] == turno_id
-    assert updated["slot1"] == {"inizio": "09:00:00", "fine": "13:00:00"}
+    assert updated["inizio_1"] == "09:00:00"
+    assert updated["fine_1"] == "13:00:00"
     assert updated["tipo"] == "STRAORD"
 
 
@@ -67,9 +78,12 @@ def test_delete_turno(setup_db):
     data = {
         "user_id": user_id,
         "giorno": "2023-01-03",
-        "slot1": {"inizio": "08:00:00", "fine": "12:00:00"},
-        "slot2": None,
-        "slot3": None,
+        "inizio_1": "08:00:00",
+        "fine_1": "12:00:00",
+        "inizio_2": None,
+        "fine_2": None,
+        "inizio_3": None,
+        "fine_3": None,
         "tipo": "NORMALE",
         "note": "",
     }
@@ -103,9 +117,12 @@ def test_shift_event_summary_email(setup_db):
             json={
                 "user_id": user_id,
                 "giorno": "2023-05-05",
-                "slot1": {"inizio": "08:00:00", "fine": "12:00:00"},
-                "slot2": None,
-                "slot3": None,
+                "inizio_1": "08:00:00",
+                "fine_1": "12:00:00",
+                "inizio_2": None,
+                "fine_2": None,
+                "inizio_3": None,
+                "fine_3": None,
                 "tipo": "NORMALE",
                 "note": "",
             },
