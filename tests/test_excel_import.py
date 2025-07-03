@@ -195,3 +195,26 @@ def test_df_to_pdf_creates_files_and_cleanup(tmp_path):
 
     assert not os.path.exists(pdf_path)
     assert not os.path.exists(html_path)
+
+
+def test_df_to_pdf_missing_wkhtmltopdf(tmp_path):
+    """An informative HTTPException is raised when wkhtmltopdf is missing."""
+    rows = [
+        {
+            "user_id": "1",
+            "giorno": "2023-01-01",
+            "slot1": {"inizio": "08:00:00", "fine": "12:00:00"},
+            "tipo": "NORMALE",
+            "note": "",
+        }
+    ]
+
+    def fake_from_file(html_path, pdf_path):
+        raise OSError("No wkhtmltopdf executable found")
+
+    with patch("app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file):
+        with pytest.raises(HTTPException) as exc:
+            df_to_pdf(rows)
+
+    assert exc.value.status_code == 500
+    assert "wkhtmltopdf" in exc.value.detail
