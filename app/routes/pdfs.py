@@ -28,8 +28,18 @@ async def upload_pdf(
 
 @router.get("/{filename}")
 def get_pdf(filename: str):
+    """Return a previously uploaded PDF by filename."""
+    from pathlib import Path
     from app.crud.pdffile import get_upload_root
-    path = os.path.join(get_upload_root(), filename)
-    if not os.path.exists(path):
-        raise HTTPException(404)
-    return FileResponse(path, media_type="application/pdf", filename=filename)
+
+    # Prevent path traversal attacks by stripping directory components
+    safe_name = Path(filename).name
+    if safe_name != filename:
+        # Invalid filename with path components
+        raise HTTPException(status_code=404)
+
+    root = Path(get_upload_root())
+    path = root / safe_name
+    if not path.exists():
+        raise HTTPException(status_code=404)
+    return FileResponse(str(path), media_type="application/pdf", filename=safe_name)
