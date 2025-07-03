@@ -1,5 +1,7 @@
 from pydantic import BaseModel
 from app.schemas.turno import TurnoOut
+
+
 class UserCreate(BaseModel):
     email: str
     password: str
@@ -9,10 +11,14 @@ class UserCreate(BaseModel):
 class UserCredentials(BaseModel):
     email: str
     password: str
+
+
 class UserResponse(BaseModel):
     id: str
     email: str
     nome: str
     turni: list[TurnoOut] = []
-    class Config:
-        orm_mode = True
+
+    model_config = {
+        "from_attributes": True,
+    }
