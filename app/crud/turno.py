@@ -26,7 +26,12 @@ def upsert_turno(db: Session, payload: TurnoIn) -> Turno:
     Crea un nuovo turno o aggiorna quello esistente per lo stesso user+giorno.
     Dopo il commit sincronizza l’evento nel calendario “Turni di Servizio”.
     """
-    # 1. recupera (o crea) il record
+    # 1. verifica esistenza utente
+    user = db.query(User).filter_by(id=payload.user_id).first()
+    if not user:
+        raise HTTPException(status_code=400, detail="Unknown user")
+
+    # 2. recupera (o crea) il record
     rec: Turno | None = (
         db.query(Turno)
         .filter_by(user_id=payload.user_id, giorno=payload.giorno)
@@ -35,7 +40,7 @@ def upsert_turno(db: Session, payload: TurnoIn) -> Turno:
     if rec is None:
         rec = Turno(user_id=payload.user_id, giorno=payload.giorno)
 
-    # 2. riempie i tre intervalli orari
+    # 3. riempie i tre intervalli orari
     rec.inizio_1 = payload.inizio_1
     rec.fine_1 = payload.fine_1
     rec.inizio_2 = payload.inizio_2
@@ -46,12 +51,12 @@ def upsert_turno(db: Session, payload: TurnoIn) -> Turno:
     rec.tipo = payload.tipo            # NORMALE | STRAORD | FERIE
     rec.note = payload.note
 
-    # 3. salva su database
+    # 4. salva su database
     db.add(rec)
     db.commit()
     db.refresh(rec)                    # ottieni id definitivo
 
-    # 4. sincronizza l’evento Google Calendar
+    # 5. sincronizza l’evento Google Calendar
     try:
         gcal.sync_shift_event(rec)
     except Exception as exc:
