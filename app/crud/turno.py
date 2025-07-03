@@ -10,6 +10,7 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
+from datetime import date
 import logging
 
 logger = logging.getLogger(__name__)
@@ -99,6 +100,17 @@ def list_all(db: Session) -> list[Turno]:
     """Return all ``Turno`` records in the database ordered by date."""
     return (
         db.query(Turno)
+        .order_by(Turno.giorno.asc())
+        .all()
+    )
+
+
+# ------------------------------------------------------------------------------
+def list_between(db: Session, start: date, end: date) -> list[Turno]:
+    """Return ``Turno`` records between ``start`` and ``end`` dates."""
+    return (
+        db.query(Turno)
+        .filter(Turno.giorno >= start, Turno.giorno <= end)
         .order_by(Turno.giorno.asc())
         .all()
     )
