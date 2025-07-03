@@ -130,3 +130,24 @@ def test_shift_event_summary_email(setup_db):
         )
 
     assert captured["body"]["summary"] == "Calendar User"
+
+
+def test_create_turno_unknown_user_returns_400(setup_db):
+    headers, _ = auth_user("u@example.com")
+
+    data = {
+        "user_id": "unknown-id",
+        "giorno": "2023-06-01",
+        "inizio_1": "08:00:00",
+        "fine_1": "12:00:00",
+        "inizio_2": None,
+        "fine_2": None,
+        "inizio_3": None,
+        "fine_3": None,
+        "tipo": "NORMALE",
+        "note": "",
+    }
+
+    res = client.post("/orari/", json=data, headers=headers)
+    assert res.status_code == 400
+    assert res.json()["detail"] == "Unknown user"
