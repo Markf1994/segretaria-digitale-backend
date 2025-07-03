@@ -169,6 +169,51 @@ def test_parse_excel_agente_without_db(tmp_path):
     assert "Database session required" in exc.value.detail
 
 
+def test_parse_excel_empty_user_id(tmp_path):
+    """Empty cells in the User ID column should result in a 400 error."""
+
+    df = pd.DataFrame([
+        {
+            "User ID": "",
+            "Data": "2023-03-01",
+            "Inizio1": "08:00:00",
+            "Fine1": "12:00:00",
+        }
+    ])
+    xls = tmp_path / "empty_user.xlsx"
+    df.to_excel(xls, index=False)
+
+    with pytest.raises(HTTPException) as exc:
+        parse_excel(str(xls), None)
+
+    assert exc.value.status_code == 400
+    assert "Missing user identifier" in exc.value.detail
+
+
+def test_parse_excel_empty_agente(tmp_path):
+    """Empty cells in the Agente column should result in a 400 error."""
+    from app.database import SessionLocal
+
+    db = SessionLocal()
+    df = pd.DataFrame([
+        {
+            "Agente": " ",
+            "Data": "2023-03-02",
+            "Inizio1": "08:00:00",
+            "Fine1": "12:00:00",
+        }
+    ])
+    xls = tmp_path / "empty_agent.xlsx"
+    df.to_excel(xls, index=False)
+
+    with pytest.raises(HTTPException) as exc:
+        parse_excel(str(xls), db)
+
+    assert exc.value.status_code == 400
+    assert "Missing user identifier" in exc.value.detail
+
+    db.close()
+
 def test_df_to_pdf_creates_files_and_cleanup(tmp_path):
     rows = [
         {
