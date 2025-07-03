@@ -10,7 +10,7 @@ This repository contains a FastAPI backend used by Segretaria Digitale.
    ```bash
    python3 -m venv .venv
    source .venv/bin/activate
-   pip install -r requirements.txt
+   pip install -r requirements.txt -r requirements-dev.txt
    ```
 3. Install [wkhtmltopdf](https://wkhtmltopdf.org/downloads.html) at the system
    level (e.g. `apt-get update && apt-get install -y wkhtmltopdf`). This is
@@ -70,7 +70,7 @@ The API will be available at `http://localhost:8000/` by default.
 ## Running tests
 
 Tests are located in the `tests/` directory. After installing the
-dependencies simply run:
+dependencies from both `requirements.txt` and `requirements-dev.txt`, simply run:
 
 ```bash
 pytest
