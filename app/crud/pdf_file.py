@@ -3,6 +3,7 @@ import uuid
 import shutil
 from sqlalchemy.orm import Session
 from fastapi import UploadFile
+import aiofiles
 from app.models.pdf_file import PDFFile
 from app.schemas.pdf_file import PDFFileCreate
 
@@ -14,15 +15,19 @@ def get_upload_root() -> str:
     return root
 
 
-def create(db: Session, *, obj_in: PDFFileCreate, file: UploadFile) -> PDFFile:
+async def create(db: Session, *, obj_in: PDFFileCreate, file: UploadFile) -> PDFFile:
     ext = os.path.splitext(file.filename)[1]
     fname = f"{uuid.uuid4()}{ext}"
     path = os.path.join(get_upload_root(), fname)
-    with open(path, "wb") as fp:
-        shutil.copyfileobj(file.file, fp)
 
-    # Explicitly close the uploaded file to release resources
-    file.file.close()
+    async with aiofiles.open(path, "wb") as fp:
+        while True:
+            chunk = await file.read(1024 * 1024)
+            if not chunk:
+                break
+            await fp.write(chunk)
+
+    await file.close()
 
     db_obj = PDFFile(title=obj_in.title, filename=fname)
     db.add(db_obj)
