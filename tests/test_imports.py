@@ -100,3 +100,30 @@ def test_parse_error_returns_400_and_removes_xlsx(tmp_path):
 
     assert res.status_code == 400
     assert not os.path.exists(captured['xlsx'])
+
+
+def test_import_excel_alias_returns_pdf(tmp_path):
+    df = pd.DataFrame([
+        {
+            "Agente": "Mario Rossi",
+            "Data": "2023-01-01",
+            "Inizio1": "08:00:00",
+            "Fine1": "12:00:00",
+        }
+    ])
+    xlsx_path = tmp_path / "shift.xlsx"
+    df.to_excel(xlsx_path, index=False)
+
+    def fake_from_file(html_path, pdf_path):
+        Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
+        return True
+
+    with patch("app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file):
+        with open(xlsx_path, "rb") as fh:
+            res = client.post(
+                "/import/excel",
+                files={"file": ("shift.xlsx", fh, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
+            )
+
+    assert res.status_code == 200
+    assert res.headers["content-type"] == "application/pdf"

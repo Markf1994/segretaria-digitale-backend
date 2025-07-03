@@ -116,7 +116,8 @@ with the created event.
 The `/import/xlsx` route accepts an Excel file containing shift data. It parses
 each row, synchronizes the shifts with the database and Google Calendar, then
 returns a PDF summary. The endpoint expects the file in a `multipart/form-data`
-request under the `file` field.
+request under the `file` field. The same functionality is available via
+`/import/excel`.
 
 Example:
 
