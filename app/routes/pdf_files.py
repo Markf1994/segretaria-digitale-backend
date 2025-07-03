@@ -23,6 +23,17 @@ async def upload_pdf(
 ):
     if file.content_type != "application/pdf":
         raise HTTPException(400, "Il file deve essere un PDF")
+    max_size = os.getenv("MAX_PDF_SIZE")
+    if max_size:
+        try:
+            limit = int(max_size)
+        except ValueError:
+            limit = 0
+        if limit > 0:
+            chunk = await file.read(limit + 1)
+            if len(chunk) > limit:
+                raise HTTPException(status_code=413, detail="File too large")
+            await file.seek(0)
     return crud_pdf_file.create(db, obj_in=PDFFileCreate(title=title), file=file)
 
 
