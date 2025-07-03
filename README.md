@@ -148,6 +148,13 @@ Example:
 curl -X POST -F "file=@shift.xlsx" http://localhost:8000/import/xlsx -o turni.pdf
 ```
 
+## Shift PDF endpoint
+
+The `GET /orari/pdf?week=YYYY-Www` route returns a PDF summary of the shifts
+scheduled in the specified ISO week. The `week` parameter identifies the week
+using the `YYYY-Www` format (for example, `2023-W42`). Authentication is
+required.
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
