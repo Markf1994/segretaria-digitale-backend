@@ -1,10 +1,16 @@
-from fastapi import APIRouter, Depends
+from datetime import date, timedelta
+import os
+
+from fastapi import APIRouter, Depends, BackgroundTasks, HTTPException
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app.dependencies import get_db, get_current_user
 from app.models.user import User
+from app.models.turno import Turno
 from app.schemas.turno import TurnoIn, TurnoOut
 from app.crud import turno as crud_turno
+from app.services.excel_import import df_to_pdf
 
 router = APIRouter(prefix="/orari", tags=["Turni"])
 
@@ -26,6 +32,49 @@ def list_turni(
 ):
     """Return all turni without filtering by user."""
     return crud_turno.list_all(db)
+
+
+@router.get("/pdf")
+def weekly_pdf(
+    week: str,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Return a PDF summary of shifts for the given ISO week."""
+    try:
+        year_str, week_str = week.split("-W")
+        start = date.fromisocalendar(int(year_str), int(week_str), 1)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid week format")
+    end = start + timedelta(days=6)
+
+    turni = (
+        db.query(Turno)
+        .filter(Turno.giorno >= start, Turno.giorno <= end)
+        .order_by(Turno.giorno.asc())
+        .all()
+    )
+
+    rows: list[dict] = []
+    for t in turni:
+        row = {
+            "user_id": t.user_id,
+            "giorno": t.giorno,
+            "slot1": {"inizio": t.inizio_1, "fine": t.fine_1},
+            "tipo": t.tipo,
+            "note": t.note or "",
+        }
+        if t.inizio_2 and t.fine_2:
+            row["slot2"] = {"inizio": t.inizio_2, "fine": t.fine_2}
+        if t.inizio_3 and t.fine_3:
+            row["slot3"] = {"inizio": t.inizio_3, "fine": t.fine_3}
+        rows.append(row)
+
+    pdf_path, html_path = df_to_pdf(rows)
+    background_tasks.add_task(os.remove, pdf_path)
+    background_tasks.add_task(os.remove, html_path)
+    return FileResponse(pdf_path, filename="turni_settimana.pdf")
 
 
 @router.delete("/{turno_id}")
