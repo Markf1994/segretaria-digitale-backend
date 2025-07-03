@@ -169,6 +169,32 @@ def test_parse_excel_agente_without_db(tmp_path):
     assert "Database session required" in exc.value.detail
 
 
+def test_parse_excel_unknown_user_id(tmp_path):
+    """An HTTPException is raised for an unknown User ID when a DB session is provided."""
+    from app.database import SessionLocal
+
+    db = SessionLocal()
+
+    df = pd.DataFrame([
+        {
+            "User ID": "missing",
+            "Data": "2023-03-01",
+            "Inizio1": "08:00:00",
+            "Fine1": "12:00:00",
+        }
+    ])
+    xls = tmp_path / "unknown_id.xlsx"
+    df.to_excel(xls, index=False)
+
+    with pytest.raises(HTTPException) as exc:
+        parse_excel(str(xls), db)
+
+    assert exc.value.status_code == 400
+    assert "Unknown user ID" in exc.value.detail
+
+    db.close()
+
+
 def test_df_to_pdf_creates_files_and_cleanup(tmp_path):
     rows = [
         {
