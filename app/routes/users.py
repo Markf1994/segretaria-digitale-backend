@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.dependencies import get_db
-from app.schemas.user import UserCreate, UserResponse
+from app.dependencies import get_db, get_current_user
+from app.schemas.user import UserCreate, UserResponse, UserOut
 from app.crud import user
+from app.models.user import User
 router = APIRouter(prefix="/users", tags=["Users"])
 
 # ───── nuovo endpoint GET /users/ ─────
@@ -27,4 +28,11 @@ def get_user_by_email_route(email: str, db: Session = Depends(get_db)):
     if not result:
         raise HTTPException(status_code=404, detail="User not found")
     return result
+# ───────────────────────────────────────────────
+
+
+@router.get("/me", response_model=UserOut)
+def read_current_user(current_user: User = Depends(get_current_user)):
+    """Restituisce i dati dell'utente autenticato (dal token JWT)."""
+    return current_user
 # ───────────────────────────────────────────────
