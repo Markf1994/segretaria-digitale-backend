@@ -97,3 +97,12 @@ def test_get_user_by_email_not_found():
     response = client.get("/users/by-email", params={"email": "missing@example.com"})
     assert response.status_code == 404
 
+
+def test_get_current_user(setup_db):
+    headers, user_id = auth_user("me@example.com")
+    response = client.get("/users/me", headers=headers)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["id"] == user_id
+    assert data["email"] == "me@example.com"
+
