@@ -127,3 +127,26 @@ def test_import_excel_alias_returns_pdf(tmp_path):
 
     assert res.status_code == 200
     assert res.headers["content-type"] == "application/pdf"
+
+
+def test_import_xlsx_unknown_agent_returns_400(tmp_path):
+    """Uploading a sheet with an unknown Agente should return a 400 response."""
+    df = pd.DataFrame([
+        {
+            "Agente": "Unknown Agent",
+            "Data": "2023-01-01",
+            "Inizio1": "08:00:00",
+            "Fine1": "12:00:00",
+        }
+    ])
+    xlsx_path = tmp_path / "unknown.xlsx"
+    df.to_excel(xlsx_path, index=False)
+
+    with open(xlsx_path, "rb") as fh:
+        res = client.post(
+            "/import/xlsx",
+            files={"file": ("unknown.xlsx", fh, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
+        )
+
+    assert res.status_code == 400
+    assert "Unknown user" in res.json()["detail"]

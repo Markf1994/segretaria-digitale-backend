@@ -56,7 +56,10 @@ def parse_excel(path: str, db: Session | None = None) -> List[Dict[str, Any]]:
         else:
             if not db:
                 raise HTTPException(status_code=400, detail="Database session required to resolve 'Agente'")
-            user_id = get_user_id(db, row["Agente"])
+            try:
+                user_id = get_user_id(db, row["Agente"])
+            except ValueError as err:
+                raise HTTPException(status_code=400, detail=str(err))
 
         payload: dict[str, Any] = {
             "user_id": user_id,
