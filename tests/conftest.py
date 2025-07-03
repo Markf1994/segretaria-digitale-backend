@@ -1,7 +1,9 @@
 import os
-import pytest
 import shutil
 import importlib
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 # Ensure DATABASE_URL is set for tests
 os.environ.setdefault("DATABASE_URL", "sqlite:///./test.db")
@@ -32,3 +34,14 @@ def setup_upload_dir(tmp_path):
 
     yield
     shutil.rmtree(str(upload_dir), ignore_errors=True)
+
+
+@pytest.fixture(autouse=True)
+def patch_google_clients():
+    """Mock Google API clients so tests run without network access."""
+    with patch(
+        "google.oauth2.service_account.Credentials.from_service_account_file",
+        return_value=MagicMock(),
+    ):
+        with patch("googleapiclient.discovery.build", return_value=MagicMock()):
+            yield
