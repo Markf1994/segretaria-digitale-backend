@@ -69,15 +69,18 @@ The API will be available at `http://localhost:8000/` by default.
 
 ## Running tests
 
-Tests are located in the `tests/` directory. After installing the
-dependencies simply run:
+Tests are located in the `tests/` directory. Ensure all Python
+dependencies are installed and that `wkhtmltopdf` is available on the
+system before running them. Environment variables such as
+`DATABASE_URL` must also be set prior to invoking `pytest`.
 
 ```bash
+export DATABASE_URL=sqlite:///./test.db
 pytest
 ```
 
-The test suite uses a temporary SQLite database, so no additional
-configuration is required.
+The test suite uses a temporary SQLite database by default, so no
+additional configuration is required.
 
 ## Deployment
 
