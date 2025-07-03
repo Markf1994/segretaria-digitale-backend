@@ -43,3 +43,8 @@ def test_upload_invalid_content_type(setup_db, tmp_path):
 def test_get_pdf_not_found(setup_db):
     res = client.get("/pdf/missing.pdf")
     assert res.status_code == 404
+
+
+def test_get_pdf_invalid_filename(setup_db):
+    res = client.get("/pdf/../secret.pdf")
+    assert res.status_code in (400, 404)
