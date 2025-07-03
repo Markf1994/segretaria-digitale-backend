@@ -22,7 +22,10 @@ def upcoming_events(
     limit = now + timedelta(days=days)
 
     ev_items = [
-        {**EventResponse.from_orm(ev).dict(), "kind": "event"}
+        {
+            **EventResponse.model_validate(ev, from_attributes=True).dict(),
+            "kind": "event",
+        }
         for ev in event.get_events(db, current_user)
         if now <= ev.data_ora <= limit
     ]
@@ -30,7 +33,7 @@ def upcoming_events(
     todo_items = []
     for td in todo.get_todos(db, current_user):
         if now <= td.scadenza <= limit:
-            data = ToDoResponse.from_orm(td).dict()
+            data = ToDoResponse.model_validate(td, from_attributes=True).dict()
             data.pop("user_id", None)
             data["data_ora"] = data.pop("scadenza")
             data["kind"] = "todo"
@@ -38,9 +41,7 @@ def upcoming_events(
 
     gcal_raw = list_upcoming_events(days)
     gcal_items = [
-        {**g, "kind": "google"}
-        for g in gcal_raw
-        if now <= g.get("data_ora") <= limit
+        {**g, "kind": "google"} for g in gcal_raw if now <= g.get("data_ora") <= limit
     ]
 
     combined = ev_items + todo_items + gcal_items
@@ -50,4 +51,3 @@ def upcoming_events(
         if isinstance(item.get("data_ora"), datetime):
             item["data_ora"] = item["data_ora"].isoformat()
     return combined
-

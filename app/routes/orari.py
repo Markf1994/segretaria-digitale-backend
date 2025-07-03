@@ -61,7 +61,10 @@ def week_pdf(
 
     turni = crud_turno.list_between(db, start, end)
 
-    rows = [jsonable_encoder(TurnoOut.from_orm(t)) for t in turni]
+    rows = [
+        jsonable_encoder(TurnoOut.model_validate(t, from_attributes=True))
+        for t in turni
+    ]
 
     pdf_path, html_path = df_to_pdf(rows)
     background_tasks.add_task(os.remove, pdf_path)

@@ -1,6 +1,8 @@
 from datetime import date, time
 from pydantic import BaseModel
 from typing import Optional
+from uuid import UUID
+
 
 class TurnoBase(BaseModel):
     giorno: date
@@ -13,12 +15,15 @@ class TurnoBase(BaseModel):
     tipo: str
     note: Optional[str] = None
 
+
 class TurnoIn(TurnoBase):
     user_id: str
 
-class TurnoOut(TurnoBase):
-    id: str
-    user_id: str
 
-    class Config:
-        orm_mode = True
+class TurnoOut(TurnoBase):
+    id: UUID
+    user_id: UUID
+
+    model_config = {
+        "from_attributes": True,
+    }
