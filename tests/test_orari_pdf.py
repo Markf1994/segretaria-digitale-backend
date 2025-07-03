@@ -74,3 +74,13 @@ def test_week_pdf_filters_turni(setup_db, tmp_path):
     assert len(captured["rows"]) == 2
     days = {r["giorno"] for r in captured["rows"]}
     assert days == {"2023-01-02", "2023-01-08"}
+
+
+def test_week_pdf_invalid_format(setup_db):
+    """Requesting an invalid week string should return a 400 error."""
+    headers, _ = auth_user("badweek@example.com")
+
+    res = client.get("/orari/pdf?week=bad", headers=headers)
+
+    assert res.status_code == 400
+    assert "Invalid week format" in res.json()["detail"]
