@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from fastapi import UploadFile, HTTPException
 import aiofiles
 from app.models.pdf_file import PDFFile
+from app.models.user import User
 from app.schemas.pdf_file import PDFFileCreate
 
 logger = logging.getLogger(__name__)
@@ -17,10 +18,14 @@ def get_upload_root() -> str:
     return root
 
 
-async def create(db: Session, *, obj_in: PDFFileCreate, file: UploadFile) -> PDFFile:
+async def create(
+    db: Session, *, obj_in: PDFFileCreate, file: UploadFile, user: User | None = None
+) -> PDFFile:
     ext = os.path.splitext(file.filename)[1]
     fname = f"{uuid.uuid4()}{ext}"
     path = os.path.join(get_upload_root(), fname)
+
+    user_str = user.email if user else "anonymous"
 
     try:
         async with aiofiles.open(path, "wb") as fp:
@@ -34,12 +39,12 @@ async def create(db: Session, *, obj_in: PDFFileCreate, file: UploadFile) -> PDF
             os.remove(path)
         except FileNotFoundError:
             pass
-        logger.error("Failed to write PDF %s: %s", path, exc)
+        logger.error("Failed to write PDF %s for %s: %s", path, user_str, exc)
         await file.close()
         raise HTTPException(status_code=500, detail="Failed to store PDF")
     else:
         await file.close()
-        logger.info("Stored PDF at %s", path)
+        logger.info("Stored PDF at %s for %s", path, user_str)
 
     db_obj = PDFFile(title=obj_in.title, filename=fname)
     db.add(db_obj)
