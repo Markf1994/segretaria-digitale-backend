@@ -24,7 +24,7 @@ def auth_user(email: str, nome: str = "Test"):
 
 
 def test_create_turno(setup_db):
-    _, user_id = auth_user("shift@example.com")
+    headers, user_id = auth_user("shift@example.com")
     data = {
         "user_id": user_id,
         "giorno": "2023-01-01",
@@ -34,7 +34,7 @@ def test_create_turno(setup_db):
         "tipo": "NORMALE",
         "note": "test",
     }
-    res = client.post("/orari/", json=data)
+    res = client.post("/orari/", json=data, headers=headers)
     assert res.status_code == 200
     body = res.json()
     assert body["user_id"] == user_id
@@ -45,7 +45,7 @@ def test_create_turno(setup_db):
 
 
 def test_update_turno(setup_db):
-    _, user_id = auth_user("update@example.com")
+    headers, user_id = auth_user("update@example.com")
     base = {
         "user_id": user_id,
         "giorno": "2023-01-02",
@@ -55,11 +55,11 @@ def test_update_turno(setup_db):
         "tipo": "NORMALE",
         "note": "",
     }
-    first = client.post("/orari/", json=base)
+    first = client.post("/orari/", json=base, headers=headers)
     turno_id = first.json()["id"]
     base["slot1"] = {"inizio": "09:00:00", "fine": "13:00:00"}
     base["tipo"] = "STRAORD"
-    update = client.post("/orari/", json=base)
+    update = client.post("/orari/", json=base, headers=headers)
     assert update.status_code == 200
     updated = update.json()
     assert updated["id"] == turno_id
@@ -68,7 +68,7 @@ def test_update_turno(setup_db):
 
 
 def test_delete_turno(setup_db):
-    _, user_id = auth_user("delete@example.com")
+    headers, user_id = auth_user("delete@example.com")
     data = {
         "user_id": user_id,
         "giorno": "2023-01-03",
@@ -78,12 +78,12 @@ def test_delete_turno(setup_db):
         "tipo": "NORMALE",
         "note": "",
     }
-    res = client.post("/orari/", json=data)
+    res = client.post("/orari/", json=data, headers=headers)
     turno_id = res.json()["id"]
-    del_res = client.delete(f"/orari/{turno_id}")
+    del_res = client.delete(f"/orari/{turno_id}", headers=headers)
     assert del_res.status_code == 200
     assert del_res.json()["ok"] is True
-    list_res = client.get("/orari/")
+    list_res = client.get("/orari/", headers=headers)
     assert list_res.status_code == 200
     assert list_res.json() == []
 
