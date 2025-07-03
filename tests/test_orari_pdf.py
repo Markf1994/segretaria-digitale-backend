@@ -79,3 +79,38 @@ def test_week_pdf_invalid_format(setup_db):
 
     assert res.status_code == 400
     assert "Invalid week format" in res.json()["detail"]
+
+
+def test_week_pdf_temp_files_removed(setup_db, tmp_path):
+    """Temporary PDF and HTML files should be cleaned up after the request."""
+    headers, user_id = auth_user("clean@example.com")
+
+    shift = {
+        "user_id": user_id,
+        "giorno": "2023-01-02",
+        "slot1": {"inizio": "08:00:00", "fine": "12:00:00"},
+        "slot2": None,
+        "slot3": None,
+        "tipo": "NORMALE",
+        "note": "",
+    }
+
+    client.post("/orari/", json=shift, headers=headers)
+
+    captured = {}
+
+    def fake_df_to_pdf(rows):
+        pdf_path = tmp_path / "week.pdf"
+        html_path = tmp_path / "week.html"
+        pdf_path.write_bytes(b"%PDF-1.4 fake")
+        html_path.write_text("<html></html>")
+        captured["pdf"] = str(pdf_path)
+        captured["html"] = str(html_path)
+        return str(pdf_path), str(html_path)
+
+    with patch("app.routes.orari.df_to_pdf", side_effect=fake_df_to_pdf):
+        res = client.get("/orari/pdf?week=2023-W01", headers=headers)
+
+    assert res.status_code == 200
+    assert not os.path.exists(captured["pdf"])
+    assert not os.path.exists(captured["html"])
