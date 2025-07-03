@@ -79,6 +79,12 @@ pytest
 The test suite uses a temporary SQLite database, so no additional
 configuration is required.
 
+## Continuous Integration
+
+All pushes and pull requests trigger a GitHub Actions workflow. It sets up
+Python 3.11, installs the dependencies from `requirements.txt` and runs
+`pytest`. The job fails if any tests fail.
+
 ## Deployment
 
 When deploying on platforms like Render or Railway, ensure `wkhtmltopdf` is
