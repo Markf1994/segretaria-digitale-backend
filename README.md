@@ -70,14 +70,18 @@ The API will be available at `http://localhost:8000/` by default.
 ## Running tests
 
 Tests are located in the `tests/` directory. After installing the
-dependencies from both `requirements.txt` and `requirements-dev.txt`, simply run:
+dependencies from both `requirements.txt` and `requirements-dev.txt`, make
+sure system packages such as `wkhtmltopdf` are available and export the
+environment variables required by the application (e.g. `DATABASE_URL`)
+before running the tests:
 
 ```bash
+export DATABASE_URL=postgresql://user:pass@localhost:5432/dbname
 pytest
 ```
 
-The test suite uses a temporary SQLite database, so no additional
-configuration is required.
+The test suite uses a temporary SQLite database by default, but the
+environment variables still need to be defined.
 
 ## Continuous Integration
 
