@@ -58,6 +58,13 @@ def parse_excel(path: str, db: Session | None = None) -> List[Dict[str, Any]]:
 
         if user_col == "User ID":
             user_id = str(value)
+            if db:
+                user = db.query(User).filter(User.id == user_id).first()
+                if not user:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Unknown user ID: {user_id}",
+                    )
         else:
             if not db:
                 raise HTTPException(status_code=400, detail="Database session required to resolve 'Agente'")
