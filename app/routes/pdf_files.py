@@ -23,7 +23,7 @@ async def upload_pdf(
 ):
     if file.content_type != "application/pdf":
         raise HTTPException(400, "Il file deve essere un PDF")
-    return crud_pdf_file.create(db, obj_in=PDFFileCreate(title=title), file=file)
+    return await crud_pdf_file.create(db, obj_in=PDFFileCreate(title=title), file=file)
 
 
 @router.get("/{filename}")
