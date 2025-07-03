@@ -1,6 +1,7 @@
 from fastapi.testclient import TestClient
 import os
 from pathlib import Path
+from unittest.mock import patch
 
 from app.main import app
 
@@ -84,3 +85,21 @@ def test_delete_pdf_not_found(setup_db):
 def test_delete_pdf_invalid_filename(setup_db):
     res = client.delete("/pdf/../hack.pdf")
     assert res.status_code in (400, 404)
+
+
+def test_upload_write_error_returns_500(setup_db, tmp_path):
+    pdf_path = tmp_path / "err.pdf"
+    pdf_path.write_bytes(b"%PDF-1.4 test")
+
+    with patch("app.crud.pdf_file.aiofiles.open", side_effect=OSError("disk full")):
+        with open(pdf_path, "rb") as fh:
+            res = client.post(
+                "/pdf/",
+                data={"title": "Bad"},
+                files={"file": ("err.pdf", fh, "application/pdf")},
+            )
+
+    assert res.status_code == 500
+    assert client.get("/pdf/").json() == []
+    upload_root = os.environ["PDF_UPLOAD_ROOT"]
+    assert list(Path(upload_root).iterdir()) == []
