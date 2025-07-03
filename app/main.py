@@ -7,9 +7,9 @@ from app.routes import (
     events,
     todo,
     determinazioni,
-    pdfs,
     dashboard,
     health,
+    pdf_files,
 )
 from app.routes.orari import router as orari_router
 from app.routes import imports
@@ -40,12 +40,12 @@ app.include_router(auth.router)
 app.include_router(events.router)
 app.include_router(todo.router)
 app.include_router(determinazioni.router)
-app.include_router(pdfs.router)
+app.include_router(pdf_files.router)
 app.include_router(dashboard.router)
 app.include_router(health.router)
 app.include_router(orari_router)
 app.include_router(imports.router)
 
-from app.crud.pdffile import get_upload_root
+from app.crud.pdf_file import get_upload_root
 from fastapi.staticfiles import StaticFiles
 app.mount("/uploads", StaticFiles(directory=get_upload_root()), name="uploads")
