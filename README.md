@@ -165,6 +165,16 @@ scheduled in the specified ISO week. The `week` parameter identifies the week
 using the `YYYY-Www` format (for example, `2023-W42`). Authentication is
 required.
 
+## Health endpoint
+
+Check that required configuration and the database connection are working:
+
+```bash
+GET /health
+```
+
+A successful call returns status `200` with `{ "status": "ok" }`.
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).

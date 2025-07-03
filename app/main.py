@@ -9,6 +9,7 @@ from app.routes import (
     determinazioni,
     pdfs,
     dashboard,
+    health,
 )
 from app.routes.orari import router as orari_router
 from app.routes import imports
@@ -41,6 +42,7 @@ app.include_router(todo.router)
 app.include_router(determinazioni.router)
 app.include_router(pdfs.router)
 app.include_router(dashboard.router)
+app.include_router(health.router)
 app.include_router(orari_router)
 app.include_router(imports.router)
 
