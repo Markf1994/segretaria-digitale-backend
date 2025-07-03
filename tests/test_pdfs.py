@@ -18,6 +18,9 @@ def test_upload_pdf_and_list(setup_db, tmp_path):
     body = res.json()
     assert body["title"] == "Doc"
     assert "filename" in body
+    # ensure id is a valid UUID string
+    from uuid import UUID
+    UUID(body["id"])
 
     list_res = client.get("/pdf/")
     assert list_res.status_code == 200
