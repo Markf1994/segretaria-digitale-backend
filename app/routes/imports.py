@@ -41,3 +41,13 @@ async def import_xlsx(
     background_tasks.add_task(os.remove, html_path)
     background_tasks.add_task(os.remove, tmp_path)
     return FileResponse(pdf_path, filename="turni_settimana.pdf")
+
+
+@router.post("/excel", include_in_schema=False)
+async def import_excel(
+    file: UploadFile,
+    db: Session = Depends(get_db),
+    background_tasks: BackgroundTasks,
+):
+    """Alias for :func:`import_xlsx`"""
+    return await import_xlsx(file=file, db=db, background_tasks=background_tasks)
