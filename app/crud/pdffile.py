@@ -24,7 +24,7 @@ def create(db: Session, *, obj_in: PDFFileCreate, file: UploadFile) -> PDFFile:
     # Explicitly close the uploaded file to release resources
     file.file.close()
 
-    db_obj = PDFFile(title=obj_in.title, filename=fname)
+    db_obj = PDFFile(id=str(uuid.uuid4()), title=obj_in.title, filename=fname)
     db.add(db_obj)
     db.commit()
     db.refresh(db_obj)
