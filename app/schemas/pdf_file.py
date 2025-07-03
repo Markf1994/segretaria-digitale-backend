@@ -8,7 +8,7 @@ class PDFFileCreate(PDFFileBase):
     pass
 
 class PDFFileResponse(PDFFileBase):
-    id: int
+    id: str
     filename: str
     uploaded_at: datetime
 
