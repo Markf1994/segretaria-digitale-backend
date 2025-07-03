@@ -24,13 +24,13 @@ def setup_upload_dir(tmp_path):
     upload_dir = tmp_path / "pdfs"
     os.environ["PDF_UPLOAD_ROOT"] = str(upload_dir)
 
-    # Reload pdffile module so it picks up the new environment variable
-    import app.crud.pdffile as pdffile
-    pdffile = importlib.reload(pdffile)
+    # Reload pdf_file module so it picks up the new environment variable
+    import app.crud.pdf_file as pdf_file
+    pdf_file = importlib.reload(pdf_file)
 
     # Update the reference used by the PDF routes
-    import app.routes.pdfs as pdf_routes
-    pdf_routes.crud_pdffile = pdffile
+    import app.routes.pdf_files as pdf_routes
+    pdf_routes.crud_pdf_file = pdf_file
 
     yield
     shutil.rmtree(str(upload_dir), ignore_errors=True)
