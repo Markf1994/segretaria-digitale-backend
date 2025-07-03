@@ -1,0 +1,29 @@
+# Version control
+.git
+
+# Python artifacts
+__pycache__/
+*.pyc
+
+# Virtual environments
+.venv/
+venv/
+
+# Testing and development caches
+.pytest_cache/
+.mypy_cache/
+
+# Distribution / build artifacts
+*.egg-info/
+dist/
+build/
+
+# Logs and environment files
+*.log
+.env
+
+# Tests
+tests/
+
+# Misc
+Stemma 2k25 definitivo.png
