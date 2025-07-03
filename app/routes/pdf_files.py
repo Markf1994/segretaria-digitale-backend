@@ -2,10 +2,14 @@ from typing import List
 from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
 from sqlalchemy.orm import Session
 from fastapi.responses import FileResponse
-from app.dependencies import get_db
+from app.dependencies import get_db, get_optional_user
+from app.models.user import User
+import logging
 from app.schemas.pdf_file import PDFFileCreate, PDFFileResponse
 from app.crud import pdf_file as crud_pdf_file
 import os
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/pdf", tags=["PDF"])
 
@@ -27,7 +31,10 @@ async def upload_pdf(
 
 
 @router.get("/{filename}")
-def get_pdf(filename: str):
+def get_pdf(
+    filename: str,
+    current_user: User | None = Depends(get_optional_user),
+):
     """Return a previously uploaded PDF by filename."""
     from pathlib import Path
     from app.crud.pdf_file import get_upload_root
@@ -42,11 +49,20 @@ def get_pdf(filename: str):
     path = root / safe_name
     if not path.exists():
         raise HTTPException(status_code=404)
+    logger.info(
+        "User %s downloading PDF %s",
+        getattr(current_user, "id", None),
+        safe_name,
+    )
     return FileResponse(str(path), media_type="application/pdf", filename=safe_name)
 
 
 @router.delete("/{filename}")
-def delete_pdf(filename: str, db: Session = Depends(get_db)):
+def delete_pdf(
+    filename: str,
+    db: Session = Depends(get_db),
+    current_user: User | None = Depends(get_optional_user),
+):
     """Delete a previously uploaded PDF by filename."""
     from pathlib import Path
 
@@ -57,4 +73,9 @@ def delete_pdf(filename: str, db: Session = Depends(get_db)):
     db_obj = crud_pdf_file.delete(db, filename=safe_name)
     if not db_obj:
         raise HTTPException(status_code=404)
+    logger.info(
+        "User %s deleted PDF %s",
+        getattr(current_user, "id", None),
+        safe_name,
+    )
     return {"ok": True}
