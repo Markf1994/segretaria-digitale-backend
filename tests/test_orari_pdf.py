@@ -1,13 +1,8 @@
-import os
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from fastapi.testclient import TestClient
 
-# Patch Google API clients before importing the app
-with patch("google.oauth2.service_account.Credentials.from_service_account_file", return_value=MagicMock()):
-    with patch("googleapiclient.discovery.build", return_value=MagicMock()):
-        os.environ["DATABASE_URL"] = "sqlite:///./test.db"
-        from app.main import app
+from app.main import app
 
 client = TestClient(app)
 

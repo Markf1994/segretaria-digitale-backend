@@ -1,13 +1,9 @@
-import os
 from datetime import datetime, timedelta
 from fastapi.testclient import TestClient
-
-os.environ["DATABASE_URL"] = "sqlite:///./test.db"
 
 from app.main import app
 
 client = TestClient(app)
-
 
 def auth_user(email: str):
     resp = client.post(
