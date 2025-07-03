@@ -36,6 +36,8 @@ If asynchronous database access becomes necessary later on, add `asyncpg` to
 - `G_SHIFT_CAL_ID` – ID of the Google Calendar used for shift syncs.
 - `CORS_ORIGINS` – (optional) comma separated list of allowed origins for
   cross-origin requests. Defaults to `"*"`.
+- `LOG_LEVEL` – (optional) Python log level for application logging. Defaults
+  to `"INFO"`.
 
 ## Database migrations
 
