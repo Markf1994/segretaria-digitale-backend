@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
-
+import os
+from pathlib import Path
 
 from app.main import app
 
@@ -50,4 +51,36 @@ def test_get_pdf_not_found(setup_db):
 
 def test_get_pdf_invalid_filename(setup_db):
     res = client.get("/pdf/../secret.pdf")
+    assert res.status_code in (400, 404)
+
+
+def test_delete_pdf_removes_file_and_record(setup_db, tmp_path):
+    pdf_path = tmp_path / "del.pdf"
+    pdf_path.write_bytes(b"%PDF-1.4 test")
+    with open(pdf_path, "rb") as fh:
+        res = client.post(
+            "/pdf/",
+            data={"title": "Doc"},
+            files={"file": ("del.pdf", fh, "application/pdf")},
+        )
+    fname = res.json()["filename"]
+
+    upload_root = os.environ["PDF_UPLOAD_ROOT"]
+    stored = Path(upload_root) / fname
+    assert stored.exists()
+
+    del_res = client.delete(f"/pdf/{fname}")
+    assert del_res.status_code == 200
+    assert del_res.json()["ok"] is True
+    assert client.get("/pdf/").json() == []
+    assert not stored.exists()
+
+
+def test_delete_pdf_not_found(setup_db):
+    res = client.delete("/pdf/missing.pdf")
+    assert res.status_code == 404
+
+
+def test_delete_pdf_invalid_filename(setup_db):
+    res = client.delete("/pdf/../hack.pdf")
     assert res.status_code in (400, 404)

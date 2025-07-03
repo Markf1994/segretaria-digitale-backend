@@ -33,3 +33,20 @@ def create(db: Session, *, obj_in: PDFFileCreate, file: UploadFile) -> PDFFile:
 
 def get_multi(db: Session):
     return db.query(PDFFile).order_by(PDFFile.uploaded_at.desc()).all()
+
+
+def delete(db: Session, *, filename: str) -> PDFFile | None:
+    """Remove a ``PDFFile`` entry and delete the file from disk."""
+    db_obj = db.query(PDFFile).filter(PDFFile.filename == filename).first()
+    if not db_obj:
+        return None
+
+    path = os.path.join(get_upload_root(), db_obj.filename)
+    try:
+        os.remove(path)
+    except FileNotFoundError:
+        pass
+
+    db.delete(db_obj)
+    db.commit()
+    return db_obj

@@ -43,3 +43,18 @@ def get_pdf(filename: str):
     if not path.exists():
         raise HTTPException(status_code=404)
     return FileResponse(str(path), media_type="application/pdf", filename=safe_name)
+
+
+@router.delete("/{filename}")
+def delete_pdf(filename: str, db: Session = Depends(get_db)):
+    """Delete a previously uploaded PDF by filename."""
+    from pathlib import Path
+
+    safe_name = Path(filename).name
+    if safe_name != filename:
+        raise HTTPException(status_code=404)
+
+    db_obj = crud_pdf_file.delete(db, filename=safe_name)
+    if not db_obj:
+        raise HTTPException(status_code=404)
+    return {"ok": True}
