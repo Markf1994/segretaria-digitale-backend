@@ -2,7 +2,8 @@ from typing import List
 from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
 from sqlalchemy.orm import Session
 from fastapi.responses import FileResponse
-from app.dependencies import get_db
+from app.dependencies import get_db, get_optional_user
+from app.models.user import User
 from app.schemas.pdf_file import PDFFileCreate, PDFFileResponse
 from app.crud import pdf_file as crud_pdf_file
 import os
@@ -20,10 +21,13 @@ async def upload_pdf(
     title: str = Form(...),
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
+    user: User | None = Depends(get_optional_user),
 ):
     if file.content_type != "application/pdf":
         raise HTTPException(400, "Il file deve essere un PDF")
-    return await crud_pdf_file.create(db, obj_in=PDFFileCreate(title=title), file=file)
+    return await crud_pdf_file.create(
+        db, obj_in=PDFFileCreate(title=title), file=file, user=user
+    )
 
 
 @router.get("/{filename}")
