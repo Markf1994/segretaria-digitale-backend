@@ -51,3 +51,22 @@ def test_get_pdf_not_found(setup_db):
 def test_get_pdf_invalid_filename(setup_db):
     res = client.get("/pdf/../secret.pdf")
     assert res.status_code in (400, 404)
+
+
+def test_upload_write_failure(monkeypatch, setup_db, tmp_path):
+    pdf_path = tmp_path / "sample.pdf"
+    pdf_path.write_bytes(b"%PDF-1.4 test")
+
+    def fail_open(*args, **kwargs):
+        raise OSError("disk full")
+
+    monkeypatch.setattr("app.crud.pdf_file.open", fail_open)
+
+    with open(pdf_path, "rb") as fh:
+        res = client.post(
+            "/pdf/",
+            data={"title": "Doc"},
+            files={"file": ("sample.pdf", fh, "application/pdf")},
+        )
+
+    assert res.status_code == 500

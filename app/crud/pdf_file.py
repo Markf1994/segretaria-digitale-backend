@@ -1,10 +1,13 @@
 import os
 import uuid
 import shutil
+import logging
 from sqlalchemy.orm import Session
-from fastapi import UploadFile
+from fastapi import UploadFile, HTTPException
 from app.models.pdf_file import PDFFile
 from app.schemas.pdf_file import PDFFileCreate
+
+logger = logging.getLogger(__name__)
 
 
 def get_upload_root() -> str:
@@ -18,11 +21,15 @@ def create(db: Session, *, obj_in: PDFFileCreate, file: UploadFile) -> PDFFile:
     ext = os.path.splitext(file.filename)[1]
     fname = f"{uuid.uuid4()}{ext}"
     path = os.path.join(get_upload_root(), fname)
-    with open(path, "wb") as fp:
-        shutil.copyfileobj(file.file, fp)
-
-    # Explicitly close the uploaded file to release resources
-    file.file.close()
+    try:
+        with open(path, "wb") as fp:
+            shutil.copyfileobj(file.file, fp)
+    except OSError as exc:
+        logger.error("Failed to write PDF file: %s", exc)
+        raise HTTPException(status_code=500, detail="Could not save uploaded file") from exc
+    finally:
+        # Explicitly close the uploaded file to release resources
+        file.file.close()
 
     db_obj = PDFFile(title=obj_in.title, filename=fname)
     db.add(db_obj)
