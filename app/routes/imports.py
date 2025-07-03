@@ -15,8 +15,8 @@ router = APIRouter(prefix="/import", tags=["Import"])
 @router.post("/xlsx")
 async def import_xlsx(
     file: UploadFile,
-    db: Session = Depends(get_db),
     background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
 ):
     """Import Excel shifts, sync them and return a PDF summary."""
     # 1 – save temp file
@@ -46,8 +46,8 @@ async def import_xlsx(
 @router.post("/excel", include_in_schema=False)
 async def import_excel(
     file: UploadFile,
-    db: Session = Depends(get_db),
     background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
 ):
     """Alias for :func:`import_xlsx`"""
-    return await import_xlsx(file=file, db=db, background_tasks=background_tasks)
+    return await import_xlsx(file=file, background_tasks=background_tasks, db=db)
