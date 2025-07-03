@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, BackgroundTasks, HTTPException
 from fastapi.responses import FileResponse
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from datetime import date, timedelta
 import os
@@ -60,20 +61,10 @@ def week_pdf(
 
     turni = crud_turno.list_between(db, start, end)
 
-    rows = []
-    for t in turni:
-        row = {
-            "user_id": t.user_id,
-            "giorno": t.giorno.isoformat(),
-            "slot1": {"inizio": t.inizio_1.isoformat(), "fine": t.fine_1.isoformat()},
-            "tipo": t.tipo,
-            "note": t.note or "",
-        }
-        if t.inizio_2 and t.fine_2:
-            row["slot2"] = {"inizio": t.inizio_2.isoformat(), "fine": t.fine_2.isoformat()}
-        if t.inizio_3 and t.fine_3:
-            row["slot3"] = {"inizio": t.inizio_3.isoformat(), "fine": t.fine_3.isoformat()}
-        rows.append(row)
+    rows = [
+        jsonable_encoder(TurnoOut.from_orm(t), by_alias=False)
+        for t in turni
+    ]
 
     pdf_path, html_path = df_to_pdf(rows)
     background_tasks.add_task(os.remove, pdf_path)
