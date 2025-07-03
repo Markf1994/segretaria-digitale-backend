@@ -51,13 +51,18 @@ def parse_excel(path: str, db: Session | None = None) -> List[Dict[str, Any]]:
     rows: list[dict[str, Any]] = []
 
     for _, row in df.iterrows():
-        if "User ID" in df.columns:
-            user_id = str(row["User ID"])
+        user_col = "User ID" if "User ID" in df.columns else "Agente"
+        value = row.get(user_col)
+        if pd.isna(value) or str(value).strip() == "":
+            raise HTTPException(status_code=400, detail="Missing user identifier")
+
+        if user_col == "User ID":
+            user_id = str(value)
         else:
             if not db:
                 raise HTTPException(status_code=400, detail="Database session required to resolve 'Agente'")
             try:
-                user_id = get_user_id(db, row["Agente"])
+                user_id = get_user_id(db, value)
             except ValueError as err:
                 raise HTTPException(status_code=400, detail=str(err))
 
