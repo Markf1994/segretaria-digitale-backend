@@ -22,22 +22,3 @@ class Turno(Base):
 
     user = relationship("User", back_populates="turni")
 
-    # Properties used by Pydantic alias mapping ------------------------------
-    @property
-    def inizio_1_fine_1(self) -> dict[str, Time]:
-        """Return slot1 as a dictionary for Pydantic alias mapping."""
-        return {"inizio": self.inizio_1, "fine": self.fine_1}
-
-    @property
-    def inizio_2_fine_2(self) -> dict[str, Time] | None:
-        """Return slot2 or ``None`` if not fully specified."""
-        if self.inizio_2 and self.fine_2:
-            return {"inizio": self.inizio_2, "fine": self.fine_2}
-        return None
-
-    @property
-    def inizio_3_fine_3(self) -> dict[str, Time] | None:
-        """Return slot3 or ``None`` if not fully specified."""
-        if self.inizio_3 and self.fine_3:
-            return {"inizio": self.inizio_3, "fine": self.fine_3}
-        return None

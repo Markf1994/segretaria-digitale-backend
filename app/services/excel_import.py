@@ -28,7 +28,7 @@ def parse_excel(path: str, db: Session | None = None) -> List[Dict[str, Any]]:
     When ``Agente`` is present a database session is required in order to
     resolve the user name to the corresponding ``User.id``. ``Inizio2``/``Fine2``
     and ``Inizio3``/``Fine3`` (or ``Straordinario inizio``/``Straordinario fine``)
-    are mapped to ``slot2`` and ``slot3`` respectively.
+    are mapped to the ``inizio_2``/``fine_2`` and ``inizio_3``/``fine_3`` fields.
 
     :return: a list of dictionaries ready for the ``TurnoIn`` API.
     """
@@ -76,32 +76,30 @@ def parse_excel(path: str, db: Session | None = None) -> List[Dict[str, Any]]:
         payload: dict[str, Any] = {
             "user_id": user_id,
             "giorno": row["Data"].date() if hasattr(row["Data"], "date") else row["Data"],
-            "slot1": {"inizio": row["Inizio1"], "fine": row["Fine1"]},
+            "inizio_1": row["Inizio1"],
+            "fine_1": row["Fine1"],
             "tipo": row.get("Tipo", "NORMALE"),
             "note": row.get("Note", ""),
         }
 
         if "Inizio2" in df.columns and not pd.isna(row.get("Inizio2")) and not pd.isna(row.get("Fine2")):
-            payload["slot2"] = {"inizio": row["Inizio2"], "fine": row["Fine2"]}
+            payload["inizio_2"] = row["Inizio2"]
+            payload["fine_2"] = row["Fine2"]
 
         if (
             "Straordinario inizio" in df.columns
             and not pd.isna(row.get("Straordinario inizio"))
             and not pd.isna(row.get("Straordinario fine"))
         ):
-            payload["slot3"] = {
-                "inizio": row["Straordinario inizio"],
-                "fine": row["Straordinario fine"],
-            }
+            payload["inizio_3"] = row["Straordinario inizio"]
+            payload["fine_3"] = row["Straordinario fine"]
         elif (
             "Inizio3" in df.columns
             and not pd.isna(row.get("Inizio3"))
             and not pd.isna(row.get("Fine3"))
         ):
-            payload["slot3"] = {
-                "inizio": row["Inizio3"],
-                "fine": row["Fine3"],
-            }
+            payload["inizio_3"] = row["Inizio3"]
+            payload["fine_3"] = row["Fine3"]
 
         rows.append(payload)
 
