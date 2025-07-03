@@ -1,11 +1,15 @@
 from typing import List
+import logging
 from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
 from sqlalchemy.orm import Session
 from fastapi.responses import FileResponse
-from app.dependencies import get_db
+from app.dependencies import get_db, get_optional_user
+from app.models.user import User
 from app.schemas.pdf_file import PDFFileCreate, PDFFileResponse
 from app.crud import pdf_file as crud_pdf_file
 import os
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/pdf", tags=["PDF"])
 
@@ -27,21 +31,29 @@ async def upload_pdf(
 
 
 @router.get("/{filename}")
-def get_pdf(filename: str):
+def get_pdf(
+    filename: str,
+    current_user: User | None = Depends(get_optional_user),
+):
     """Return a previously uploaded PDF by filename."""
     from pathlib import Path
     from app.crud.pdf_file import get_upload_root
 
     # Prevent path traversal attacks by stripping directory components
     safe_name = Path(filename).name
+    user_ctx = current_user.email if current_user else "anonymous"
     if safe_name != filename:
         # Invalid filename with path components
+        logger.warning("Invalid filename '%s' requested by %s", filename, user_ctx)
         raise HTTPException(status_code=404)
 
     root = Path(get_upload_root())
     path = root / safe_name
     if not path.exists():
+        logger.warning("PDF '%s' not found for user %s", filename, user_ctx)
         raise HTTPException(status_code=404)
+
+    logger.info("Retrieval requested for PDF '%s' by %s", filename, user_ctx)
     return FileResponse(str(path), media_type="application/pdf", filename=safe_name)
 
 
