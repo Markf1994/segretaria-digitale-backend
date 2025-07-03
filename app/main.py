@@ -1,6 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import logging
 import os
+
+# Basic logging configuration
+logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
 from app.routes import (
     users,
     auth,
