@@ -100,3 +100,29 @@ def test_parse_error_returns_400_and_removes_xlsx(tmp_path):
 
     assert res.status_code == 400
     assert not os.path.exists(captured['xlsx'])
+
+
+def test_import_xlsx_unknown_agente_returns_400(tmp_path):
+    df = pd.DataFrame([
+        {
+            "Agente": "Ghost Agent",
+            "Data": "2023-01-10",
+            "Inizio1": "08:00:00",
+            "Fine1": "12:00:00",
+        }
+    ])
+    xlsx_path = tmp_path / "unknown.xlsx"
+    df.to_excel(xlsx_path, index=False)
+
+    def fake_from_file(html_path, pdf_path):
+        Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
+        return True
+
+    with patch("app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file):
+        with open(xlsx_path, "rb") as fh:
+            res = client.post(
+                "/import/xlsx",
+                files={"file": ("unknown.xlsx", fh, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
+            )
+
+    assert res.status_code == 400
