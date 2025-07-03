@@ -75,3 +75,22 @@ def test_user_turni_listed_after_creation(setup_db):
         found = next(u for u in users if u["id"] == user_id)
         assert len(found["turni"]) == 1
 
+
+def test_get_user_by_email_success():
+    resp = client.post(
+        "/users/",
+        json={"email": "lookup@example.com", "password": "secret", "nome": "Lookup"},
+    )
+    user_id = resp.json()["id"]
+
+    response = client.get("/users/by-email", params={"email": "lookup@example.com"})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["id"] == user_id
+    assert data["email"] == "lookup@example.com"
+
+
+def test_get_user_by_email_not_found():
+    response = client.get("/users/by-email", params={"email": "missing@example.com"})
+    assert response.status_code == 404
+
