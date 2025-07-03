@@ -3,8 +3,8 @@ import uuid
 import shutil
 from sqlalchemy.orm import Session
 from fastapi import UploadFile
-from app.models.pdffile import PDFFile
-from app.schemas.pdffile import PDFFileCreate
+from app.models.pdf_file import PDFFile
+from app.schemas.pdf_file import PDFFileCreate
 
 
 def get_upload_root() -> str:
