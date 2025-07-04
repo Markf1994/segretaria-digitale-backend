@@ -154,6 +154,14 @@ returns a PDF summary. The endpoint expects the file in a `multipart/form-data`
 request under the `file` field. The same functionality is available via
 `/import/excel`.
 
+The Excel sheet **must** include the `Data`, `Inizio1` and `Fine1` columns and
+either a `User ID` or an `Agente` column. Optional columns are
+`Inizio2`/`Fine2`, `Inizio3`/`Fine3` (or `Straordinario inizio`/`Straordinario fine`), `Tipo` and `Note`.
+
+Requests can fail with status `400` when required columns are missing, when a
+user referenced by `User ID` or `Agente` does not exist, or when the identifier
+cells are left empty.
+
 Example:
 
 ```bash
