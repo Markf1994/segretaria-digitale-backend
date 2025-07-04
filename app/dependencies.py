@@ -1,7 +1,7 @@
 from typing import Generator
 
 from sqlalchemy.orm import Session
-from fastapi import Depends, Header, HTTPException
+from fastapi import Depends, Header, HTTPException, status
 from jose import jwt, JWTError
 from app.config import settings
 
@@ -19,9 +19,14 @@ def get_db() -> Generator[Session, None, None]:
 
 def get_current_user(
     db: Session = Depends(get_db),
-    authorization: str = Header(..., alias="Authorization"),
+    authorization: str | None = Header(None, alias="Authorization"),
 ) -> User:
     """Return the authenticated ``User`` based on the JWT token."""
+    if authorization is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authorization header missing",
+        )
     if not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Invalid authorization header")
 

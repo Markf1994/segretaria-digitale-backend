@@ -106,3 +106,9 @@ def test_get_current_user(setup_db):
     assert data["id"] == user_id
     assert data["email"] == "me@example.com"
 
+
+def test_get_current_user_missing_header():
+    response = client.get("/users/me")
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Authorization header missing"
+
