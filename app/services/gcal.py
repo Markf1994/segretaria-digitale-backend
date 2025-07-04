@@ -9,9 +9,10 @@ Richiede:
   G_SHIFT_CAL_ID=…@group.calendar.google.com
 """
 
-import os
 from datetime import date, time, datetime
 from functools import lru_cache
+from app.config import settings
+import os
 
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -22,14 +23,14 @@ import googleapiclient.errors as gerr
 def get_client():
     """Return a Google Calendar client built from service account credentials."""
     creds = service_account.Credentials.from_service_account_file(
-        os.getenv("GOOGLE_CREDENTIALS_JSON"),
+        settings.GOOGLE_CREDENTIALS_JSON,
         scopes=["https://www.googleapis.com/auth/calendar"],
     )
     return build("calendar", "v3", credentials=creds)
 
 # ------------------------------------------------------------------- calendar ID
-EVENT_CAL_ID = os.getenv("G_EVENT_CAL_ID")   # già in uso per gli altri eventi
-SHIFT_CAL_ID = os.getenv("G_SHIFT_CAL_ID")   # nuovo calendario “Turni di Servizio”
+EVENT_CAL_ID = settings.G_EVENT_CAL_ID   # già in uso per gli altri eventi
+SHIFT_CAL_ID = settings.G_SHIFT_CAL_ID   # nuovo calendario “Turni di Servizio”
 
 # ------------------------------------------------------------------- utilità
 def iso_dt(d: date, t: time) -> str:

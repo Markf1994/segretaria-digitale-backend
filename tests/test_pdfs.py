@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
-import os
 from pathlib import Path
 from unittest.mock import patch
+from app import config
 
 from app.main import app
 
@@ -66,7 +66,7 @@ def test_delete_pdf_removes_file_and_record(setup_db, tmp_path):
         )
     fname = res.json()["filename"]
 
-    upload_root = os.environ["PDF_UPLOAD_ROOT"]
+    upload_root = config.settings.PDF_UPLOAD_ROOT
     stored = Path(upload_root) / fname
     assert stored.exists()
 
@@ -101,5 +101,5 @@ def test_upload_write_error_returns_500(setup_db, tmp_path):
 
     assert res.status_code == 500
     assert client.get("/pdf/").json() == []
-    upload_root = os.environ["PDF_UPLOAD_ROOT"]
+    upload_root = config.settings.PDF_UPLOAD_ROOT
     assert list(Path(upload_root).iterdir()) == []

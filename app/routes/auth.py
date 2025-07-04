@@ -4,15 +4,15 @@ from app.dependencies import get_db
 from app.schemas.user import UserCreate, UserCredentials
 from app.crud import user
 from jose import jwt
-import os
+from app.config import settings
 import datetime
 
-SECRET_KEY = os.getenv("SECRET_KEY")
+SECRET_KEY = settings.SECRET_KEY
 if not SECRET_KEY:
     raise RuntimeError("SECRET_KEY environment variable not set")
 
-ALGORITHM = os.getenv("ALGORITHM", "HS256")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+ALGORITHM = settings.ALGORITHM
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 router = APIRouter(tags=["Auth"])
 
 @router.post("/login")

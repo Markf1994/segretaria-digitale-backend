@@ -6,13 +6,14 @@ from fastapi import UploadFile, HTTPException
 import aiofiles
 from app.models.pdf_file import PDFFile
 from app.schemas.pdf_file import PDFFileCreate
+from app.config import settings
 
 logger = logging.getLogger(__name__)
 
 
 def get_upload_root() -> str:
     """Return the path where PDF files should be stored."""
-    root = os.getenv("PDF_UPLOAD_ROOT", "uploads/pdfs")
+    root = settings.PDF_UPLOAD_ROOT
     os.makedirs(root, exist_ok=True)
     return root
 

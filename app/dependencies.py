@@ -3,7 +3,7 @@ from typing import Generator
 from sqlalchemy.orm import Session
 from fastapi import Depends, Header, HTTPException
 from jose import jwt, JWTError
-import os
+from app.config import settings
 
 from .database import SessionLocal
 from .models.user import User
@@ -26,10 +26,10 @@ def get_current_user(
         raise HTTPException(status_code=401, detail="Invalid authorization header")
 
     token = authorization.split(" ", 1)[1]
-    secret = os.getenv("SECRET_KEY")
+    secret = settings.SECRET_KEY
     if not secret:
         raise HTTPException(status_code=500, detail="Secret key not configured")
-    algorithm = os.getenv("ALGORITHM", "HS256")
+    algorithm = settings.ALGORITHM
 
     try:
         payload = jwt.decode(token, secret, algorithms=[algorithm])
