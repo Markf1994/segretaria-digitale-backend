@@ -53,12 +53,17 @@ def get_pdf(
         logger.warning("PDF '%s' not found for user %s", filename, user_ctx)
         raise HTTPException(status_code=404)
 
-    logger.info("Retrieval requested for PDF '%s' by %s", filename, user_ctx)
-    return FileResponse(str(path), media_type="application/pdf", filename=safe_name)
+    response = FileResponse(str(path), media_type="application/pdf", filename=safe_name)
+    logger.info("PDF '%s' retrieved by %s", filename, user_ctx)
+    return response
 
 
 @router.delete("/{filename}")
-def delete_pdf(filename: str, db: Session = Depends(get_db)):
+def delete_pdf(
+    filename: str,
+    db: Session = Depends(get_db),
+    current_user: User | None = Depends(get_optional_user),
+):
     """Delete a previously uploaded PDF by filename."""
     from pathlib import Path
 
@@ -69,4 +74,7 @@ def delete_pdf(filename: str, db: Session = Depends(get_db)):
     db_obj = crud_pdf_file.delete(db, filename=safe_name)
     if not db_obj:
         raise HTTPException(status_code=404)
+
+    user_ctx = current_user.email if current_user else "anonymous"
+    logger.info("PDF '%s' deleted by %s", safe_name, user_ctx)
     return {"ok": True}
