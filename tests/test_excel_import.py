@@ -173,7 +173,7 @@ def test_parse_excel_agente_without_db(tmp_path):
         parse_excel(str(xls), None)
 
     assert exc.value.status_code == 400
-    assert "Database session required" in exc.value.detail
+    assert exc.value.detail == "Row 2: Database session required to resolve 'Agente'"
 
 
 def test_parse_excel_empty_user_id(tmp_path):
@@ -194,7 +194,7 @@ def test_parse_excel_empty_user_id(tmp_path):
         parse_excel(str(xls), None)
 
     assert exc.value.status_code == 400
-    assert "Missing user identifier" in exc.value.detail
+    assert exc.value.detail == "Row 2: Missing user identifier"
 
 
 def test_parse_excel_empty_agente(tmp_path):
@@ -217,7 +217,7 @@ def test_parse_excel_empty_agente(tmp_path):
         parse_excel(str(xls), db)
 
     assert exc.value.status_code == 400
-    assert "Missing user identifier" in exc.value.detail
+    assert exc.value.detail == "Row 2: Missing user identifier"
 
     db.close()
 
@@ -243,7 +243,7 @@ def test_parse_excel_unknown_user_id(tmp_path):
         parse_excel(str(xls), db)
 
     assert exc.value.status_code == 400
-    assert "Unknown user ID" in exc.value.detail
+    assert exc.value.detail == "Row 2: Unknown user ID: missing"
 
     db.close()
 
