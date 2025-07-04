@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-import os
 import json
 from datetime import datetime, timedelta
 from typing import Any
 
 from fastapi import HTTPException
+from app.config import settings
+import os
 
 
 def list_upcoming_events(days: int) -> list[dict[str, Any]]:
@@ -15,8 +16,8 @@ def list_upcoming_events(days: int) -> list[dict[str, Any]]:
     environment variables. When they are missing, an empty list is returned.
     ``data_ora`` fields in the returned dictionaries are ``datetime`` objects.
     """
-    creds_json = os.getenv("GOOGLE_CREDENTIALS_JSON")
-    calendar_id = os.getenv("GOOGLE_CALENDAR_ID")
+    creds_json = settings.GOOGLE_CREDENTIALS_JSON
+    calendar_id = settings.GOOGLE_CALENDAR_ID
     if not creds_json or not calendar_id:
         return []
 

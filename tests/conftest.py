@@ -9,6 +9,7 @@ import pytest
 os.environ.setdefault("DATABASE_URL", "sqlite:///./test.db")
 
 from app.database import Base, engine
+from app import config
 
 @pytest.fixture(autouse=True)
 def setup_db():
@@ -22,9 +23,10 @@ def setup_db():
 @pytest.fixture(autouse=True)
 def setup_upload_dir(tmp_path):
     upload_dir = tmp_path / "pdfs"
-    os.environ["PDF_UPLOAD_ROOT"] = str(upload_dir)
+    original = config.settings.PDF_UPLOAD_ROOT
+    config.settings.PDF_UPLOAD_ROOT = str(upload_dir)
 
-    # Reload pdf_file module so it picks up the new environment variable
+    # Reload pdf_file module so it picks up the new setting
     import app.crud.pdf_file as pdf_file
     pdf_file = importlib.reload(pdf_file)
 
@@ -34,6 +36,7 @@ def setup_upload_dir(tmp_path):
 
     yield
     shutil.rmtree(str(upload_dir), ignore_errors=True)
+    config.settings.PDF_UPLOAD_ROOT = original
 
 
 @pytest.fixture(autouse=True)

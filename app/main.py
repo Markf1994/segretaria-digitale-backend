@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import logging
-import os
+from app.config import settings
 from app.routes import (
     users,
     auth,
@@ -17,7 +17,7 @@ from app.routes import imports
 
 # Enable automatic redirect so both `/path` and `/path/` work
 # Tests continue to use the canonical routes defined in the routers
-log_level = os.getenv("LOG_LEVEL", "INFO").upper()
+log_level = settings.LOG_LEVEL.upper()
 logging.basicConfig(level=getattr(logging, log_level, logging.INFO))
 
 app = FastAPI()
@@ -25,7 +25,7 @@ app = FastAPI()
 # Database tables are managed with Alembic migrations.
 # Tests create tables manually using `Base.metadata.create_all()`.
 
-origins = os.getenv("CORS_ORIGINS", "*")
+origins = settings.CORS_ORIGINS
 if origins == "*":
     allow_origins = ["*"]
 else:

@@ -1,10 +1,12 @@
 import importlib
-import os
 import pytest
+from app import config
 
-def test_sqlite_connect_args(monkeypatch):
-    monkeypatch.setenv("DATABASE_URL", "sqlite:///./test.db")
+def test_sqlite_connect_args():
+    original = config.settings.DATABASE_URL
+    config.settings.DATABASE_URL = "sqlite:///./test.db"
     db = importlib.reload(importlib.import_module("app.database"))
+    config.settings.DATABASE_URL = original
     assert db.CONNECT_ARGS == {"check_same_thread": False}
 
 
