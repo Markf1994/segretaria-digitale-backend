@@ -160,6 +160,10 @@ Example:
 curl -X POST -F "file=@shift.xlsx" http://localhost:8000/import/xlsx -o turni.pdf
 ```
 
+When an import fails, the API returns a JSON response with a `detail` field
+describing the issue. Front‑end code should display this message to the user
+instead of logging a truncated line such as `ImportExcel error: L`.
+
 ## Shift PDF endpoint
 
 The `GET /orari/pdf?week=YYYY-Www` route returns a PDF summary of the shifts
