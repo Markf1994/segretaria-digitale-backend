@@ -116,6 +116,14 @@ apt-get update && apt-get install -y wkhtmltopdf && pip install -r requirements.
 If deploying with Docker, the provided `Dockerfile` installs `wkhtmltopdf` prior
 to installing packages.
 
+### Troubleshooting CORS
+
+Set the `CORS_ORIGINS` environment variable to a comma-separated list of allowed
+origins, for example `https://example.com,https://app.example.com`. Two common
+pitfalls are omitting the domain entirely and leaving trailing slashes after the
+origin URL. When `CORS_ORIGINS` is not set, the API defaults to `"*"`, which is
+appropriate only for local development.
+
 ## Dashboard endpoint
 
 The `/dashboard/upcoming` route aggregates local events, personal todos and
