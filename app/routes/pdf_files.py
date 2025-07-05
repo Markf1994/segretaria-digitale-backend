@@ -7,7 +7,6 @@ from app.dependencies import get_db, get_optional_user
 from app.models.user import User
 from app.schemas.pdf_file import PDFFileCreate, PDFFileResponse
 from app.crud import pdf_file as crud_pdf_file
-import os
 
 logger = logging.getLogger(__name__)
 

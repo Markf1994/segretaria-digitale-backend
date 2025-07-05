@@ -12,7 +12,6 @@ Richiede:
 from datetime import date, time, datetime
 from functools import lru_cache
 from app.config import settings
-import os
 
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
