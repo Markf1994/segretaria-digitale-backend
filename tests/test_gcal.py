@@ -1,4 +1,4 @@
-import types
+import json
 from datetime import date, time, timedelta
 
 from app.services import gcal
@@ -36,3 +36,32 @@ def test_iso_dt_uses_patched_timezone(monkeypatch):
 
     res = gcal.iso_dt(date(2023, 1, 1), time(0, 0))
     assert res.endswith("+09:30")
+
+
+def test_get_client_from_json_string(monkeypatch):
+    """``get_client`` should parse JSON credentials strings."""
+    dummy_info = {
+        "type": "service_account",
+        "client_email": "bot@example.com",
+        "private_key": "---KEY---",
+        "token_uri": "https://oauth2.example/token",
+    }
+
+    captured = {}
+
+    def fake_from_info(info, scopes=None):
+        captured["info"] = info
+        return "CREDS"
+
+    monkeypatch.setattr(
+        gcal.service_account.Credentials,
+        "from_service_account_info",
+        fake_from_info,
+    )
+    monkeypatch.setattr(gcal, "build", lambda *a, **k: "CLIENT")
+    monkeypatch.setattr(gcal.settings, "GOOGLE_CREDENTIALS_JSON", json.dumps(dummy_info))
+
+    gcal.get_client.cache_clear()
+    result = gcal.get_client()
+    assert result == "CLIENT"
+    assert captured["info"] == dummy_info

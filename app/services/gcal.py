@@ -13,6 +13,8 @@ from datetime import date, time, datetime
 from functools import lru_cache
 from app.config import settings
 
+import json
+import os
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 import googleapiclient.errors as gerr
@@ -21,10 +23,22 @@ import googleapiclient.errors as gerr
 @lru_cache()
 def get_client():
     """Return a Google Calendar client built from service account credentials."""
-    creds = service_account.Credentials.from_service_account_file(
-        settings.GOOGLE_CREDENTIALS_JSON,
-        scopes=["https://www.googleapis.com/auth/calendar"],
-    )
+    creds_json = settings.GOOGLE_CREDENTIALS_JSON
+    if creds_json is None:
+        raise RuntimeError("GOOGLE_CREDENTIALS_JSON is not configured")
+
+    if os.path.isfile(creds_json):
+        creds = service_account.Credentials.from_service_account_file(
+            creds_json,
+            scopes=["https://www.googleapis.com/auth/calendar"],
+        )
+    else:
+        info = json.loads(creds_json)
+        creds = service_account.Credentials.from_service_account_info(
+            info,
+            scopes=["https://www.googleapis.com/auth/calendar"],
+        )
+
     return build("calendar", "v3", credentials=creds)
 
 # ------------------------------------------------------------------- calendar ID
