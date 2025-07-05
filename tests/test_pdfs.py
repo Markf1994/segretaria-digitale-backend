@@ -45,6 +45,18 @@ def test_upload_invalid_content_type(setup_db, tmp_path):
     assert res.status_code == 400
 
 
+def test_upload_invalid_extension(setup_db, tmp_path):
+    malicious = tmp_path / "malicious.txt"
+    malicious.write_bytes(b"%PDF-1.4 test")
+    with open(malicious, "rb") as fh:
+        res = client.post(
+            "/pdf/",
+            data={"title": "Bad"},
+            files={"file": ("malicious.txt", fh, "application/pdf")},
+        )
+    assert res.status_code == 400
+
+
 def test_get_pdf_not_found(setup_db):
     res = client.get("/pdf/missing.pdf")
     assert res.status_code == 404
