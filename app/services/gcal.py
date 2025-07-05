@@ -13,24 +13,40 @@ from datetime import date, time, datetime
 from functools import lru_cache
 from app.config import settings
 import os
+import json
 
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 import googleapiclient.errors as gerr
 
+
 # ------------------------------------------------------------------- credenziali
 @lru_cache()
 def get_client():
     """Return a Google Calendar client built from service account credentials."""
-    creds = service_account.Credentials.from_service_account_file(
-        settings.GOOGLE_CREDENTIALS_JSON,
-        scopes=["https://www.googleapis.com/auth/calendar"],
-    )
+    creds_json = settings.GOOGLE_CREDENTIALS_JSON
+    if not creds_json:
+        raise RuntimeError("GOOGLE_CREDENTIALS_JSON is not configured")
+
+    if os.path.isfile(creds_json):
+        creds = service_account.Credentials.from_service_account_file(
+            creds_json,
+            scopes=["https://www.googleapis.com/auth/calendar"],
+        )
+    else:
+        info = json.loads(creds_json)
+        creds = service_account.Credentials.from_service_account_info(
+            info,
+            scopes=["https://www.googleapis.com/auth/calendar"],
+        )
+
     return build("calendar", "v3", credentials=creds)
 
+
 # ------------------------------------------------------------------- calendar ID
-EVENT_CAL_ID = settings.G_EVENT_CAL_ID   # già in uso per gli altri eventi
-SHIFT_CAL_ID = settings.G_SHIFT_CAL_ID   # nuovo calendario “Turni di Servizio”
+EVENT_CAL_ID = settings.G_EVENT_CAL_ID  # già in uso per gli altri eventi
+SHIFT_CAL_ID = settings.G_SHIFT_CAL_ID  # nuovo calendario “Turni di Servizio”
+
 
 # ------------------------------------------------------------------- utilità
 def iso_dt(d: date, t: time) -> str:
@@ -45,11 +61,14 @@ def iso_dt(d: date, t: time) -> str:
         tz = f"{sign}{h:02d}:{m:02d}"
     return f"{d.isoformat()}T{t.strftime('%H:%M')}:00{tz}"
 
+
 def first_non_null(*vals):
     return next(v for v in vals if v)
 
+
 def last_non_null(*vals):
     return next(v for v in reversed(vals) if v)
+
 
 # ------------------------------------------------------------------- sync turni
 def sync_shift_event(turno):
@@ -61,14 +80,14 @@ def sync_shift_event(turno):
 
     # orari: primo inizio disponibile, ultimo fine disponibile
     start = first_non_null(turno.inizio_1, turno.inizio_2, turno.inizio_3)
-    end   = last_non_null(turno.fine_3, turno.fine_2, turno.fine_1)
+    end = last_non_null(turno.fine_3, turno.fine_2, turno.fine_1)
 
     body = {
         "id": evt_id,
         "summary": turno.user.nome or turno.user.email.split("@")[0],
         "description": turno.note or "",
         "start": {"dateTime": iso_dt(turno.giorno, start)},
-        "end":   {"dateTime": iso_dt(turno.giorno, end)},
+        "end": {"dateTime": iso_dt(turno.giorno, end)},
         "colorId": "11" if turno.tipo == "STRAORD" else "10",  # rosso / blu
     }
 
@@ -80,7 +99,7 @@ def sync_shift_event(turno):
             body=body,
         ).execute()
     except gerr.HttpError as e:
-        if e.resp.status == 404:              # evento non esiste → crealo
+        if e.resp.status == 404:  # evento non esiste → crealo
             gcal.events().insert(
                 calendarId=SHIFT_CAL_ID,
                 body=body,
@@ -88,6 +107,7 @@ def sync_shift_event(turno):
             ).execute()
         else:
             raise
+
 
 def delete_shift_event(turno_id):
     """

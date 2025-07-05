@@ -11,6 +11,7 @@ os.environ.setdefault("DATABASE_URL", "sqlite:///./test.db")
 from app.database import Base, engine
 from app import config
 
+
 @pytest.fixture(autouse=True)
 def setup_db():
     """Create a fresh database for each test."""
@@ -28,10 +29,12 @@ def setup_upload_dir(tmp_path):
 
     # Reload pdf_file module so it picks up the new setting
     import app.crud.pdf_file as pdf_file
+
     pdf_file = importlib.reload(pdf_file)
 
     # Update the reference used by the PDF routes
     import app.routes.pdf_files as pdf_routes
+
     pdf_routes.crud_pdf_file = pdf_file
 
     yield
@@ -45,6 +48,10 @@ def patch_google_clients():
     with patch(
         "google.oauth2.service_account.Credentials.from_service_account_file",
         return_value=MagicMock(),
+    ), patch(
+        "google.oauth2.service_account.Credentials.from_service_account_info",
+        return_value=MagicMock(),
+    ), patch(
+        "googleapiclient.discovery.build", return_value=MagicMock()
     ):
-        with patch("googleapiclient.discovery.build", return_value=MagicMock()):
-            yield
+        yield

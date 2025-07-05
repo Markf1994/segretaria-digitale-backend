@@ -25,6 +25,7 @@ def test_iso_dt_uses_patched_timezone(monkeypatch):
             class DummyOffset:
                 def utcoffset(self, *args, **kwargs):
                     return timedelta(hours=9, minutes=30)
+
             return DummyOffset()
 
     class DummyDateTime:
@@ -36,3 +37,38 @@ def test_iso_dt_uses_patched_timezone(monkeypatch):
 
     res = gcal.iso_dt(date(2023, 1, 1), time(0, 0))
     assert res.endswith("+09:30")
+
+
+def test_get_client_from_json(monkeypatch):
+    gcal.get_client.cache_clear()
+    called = {}
+
+    def fake_from_info(info, scopes=None):
+        called["info"] = info
+        return "creds"
+
+    def fake_build(api, version, credentials=None):
+        called["credentials"] = credentials
+        return "client"
+
+    monkeypatch.setattr(
+        gcal.service_account.Credentials,
+        "from_service_account_info",
+        fake_from_info,
+    )
+    monkeypatch.setattr(
+        gcal.service_account.Credentials,
+        "from_service_account_file",
+        lambda *a, **kw: (_ for _ in ()).throw(AssertionError("file used")),
+    )
+    monkeypatch.setattr(gcal, "build", fake_build)
+    monkeypatch.setattr(
+        gcal.settings,
+        "GOOGLE_CREDENTIALS_JSON",
+        '{"type":"service_account","dummy":true}',
+    )
+
+    client = gcal.get_client()
+    assert client == "client"
+    assert called["info"]["dummy"] is True
+    assert called["credentials"] == "creds"
