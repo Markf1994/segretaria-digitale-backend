@@ -27,6 +27,8 @@ async def upload_pdf(
 ):
     if file.content_type != "application/pdf":
         raise HTTPException(400, "Il file deve essere un PDF")
+    if not file.filename.lower().endswith(".pdf"):
+        raise HTTPException(400, "Il file deve avere estensione .pdf")
     return await crud_pdf_file.create(db, obj_in=PDFFileCreate(title=title), file=file)
 
 
