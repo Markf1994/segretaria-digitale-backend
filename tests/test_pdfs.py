@@ -7,6 +7,7 @@ from app.main import app
 
 client = TestClient(app)
 
+
 def test_upload_pdf_and_list(setup_db, tmp_path):
     pdf_path = tmp_path / "sample.pdf"
     pdf_path.write_bytes(b"%PDF-1.4 test")
@@ -22,6 +23,7 @@ def test_upload_pdf_and_list(setup_db, tmp_path):
     assert "filename" in body
     # ensure id is a valid UUID string
     from uuid import UUID
+
     UUID(body["id"])
 
     list_res = client.get("/pdf/")

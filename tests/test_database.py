@@ -2,6 +2,7 @@ import importlib
 import pytest
 from app import config
 
+
 def test_sqlite_connect_args():
     original = config.settings.DATABASE_URL
     config.settings.DATABASE_URL = "sqlite:///./test.db"
@@ -29,4 +30,3 @@ def test_turno_invalid_user_fk(setup_db):
     with pytest.raises(IntegrityError):
         db.commit()
     db.close()
-

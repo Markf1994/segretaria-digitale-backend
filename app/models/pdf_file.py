@@ -3,6 +3,7 @@ import uuid
 from sqlalchemy import Column, String, DateTime
 from app.database import Base
 
+
 class PDFFile(Base):
     __tablename__ = "pdf_files"
 

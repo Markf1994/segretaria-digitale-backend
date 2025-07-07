@@ -11,28 +11,30 @@ from app.services.excel_import import parse_excel, df_to_pdf
 
 
 def test_parse_excel(tmp_path):
-    df = pd.DataFrame([
-        {
-            "User ID": 1,
-            "Data": "2023-01-01",
-            "Inizio1": "08:00:00",
-            "Fine1": "12:00:00",
-            "Tipo": "NORMALE",
-            "Note": "n1",
-        },
-        {
-            "User ID": "2",
-            "Data": "2023-01-02",
-            "Inizio1": "09:00:00",
-            "Fine1": "13:00:00",
-            "Inizio2": "14:00:00",
-            "Fine2": "18:00:00",
-            "Inizio3": "19:00:00",
-            "Fine3": "21:00:00",
-            "Tipo": "EXTRA",
-            "Note": "n2",
-        },
-    ])
+    df = pd.DataFrame(
+        [
+            {
+                "User ID": 1,
+                "Data": "2023-01-01",
+                "Inizio1": "08:00:00",
+                "Fine1": "12:00:00",
+                "Tipo": "NORMALE",
+                "Note": "n1",
+            },
+            {
+                "User ID": "2",
+                "Data": "2023-01-02",
+                "Inizio1": "09:00:00",
+                "Fine1": "13:00:00",
+                "Inizio2": "14:00:00",
+                "Fine2": "18:00:00",
+                "Inizio3": "19:00:00",
+                "Fine3": "21:00:00",
+                "Tipo": "EXTRA",
+                "Note": "n2",
+            },
+        ]
+    )
     xls = tmp_path / "sample.xlsx"
     df.to_excel(xls, index=False)
 
@@ -63,16 +65,18 @@ def test_parse_excel(tmp_path):
 
 
 def test_parse_excel_straordinario(tmp_path):
-    df = pd.DataFrame([
-        {
-            "User ID": 3,
-            "Data": "2023-02-01",
-            "Inizio1": "08:00:00",
-            "Fine1": "12:00:00",
-            "Straordinario inizio": "20:00:00",
-            "Straordinario fine": "22:00:00",
-        }
-    ])
+    df = pd.DataFrame(
+        [
+            {
+                "User ID": 3,
+                "Data": "2023-02-01",
+                "Inizio1": "08:00:00",
+                "Fine1": "12:00:00",
+                "Straordinario inizio": "20:00:00",
+                "Straordinario fine": "22:00:00",
+            }
+        ]
+    )
     xls = tmp_path / "straordinario.xlsx"
     df.to_excel(xls, index=False)
 
@@ -102,14 +106,16 @@ def test_parse_excel_with_db(tmp_path):
     db.add(user)
     db.commit()
 
-    df = pd.DataFrame([
-        {
-            "Agente": "Agent X",
-            "Data": "2023-01-03",
-            "Inizio1": "07:00:00",
-            "Fine1": "11:00:00",
-        }
-    ])
+    df = pd.DataFrame(
+        [
+            {
+                "Agente": "Agent X",
+                "Data": "2023-01-03",
+                "Inizio1": "07:00:00",
+                "Fine1": "11:00:00",
+            }
+        ]
+    )
     xls = tmp_path / "agent.xlsx"
     df.to_excel(xls, index=False)
 
@@ -135,14 +141,16 @@ def test_parse_excel_missing_column(tmp_path):
 
     db = SessionLocal()
 
-    df = pd.DataFrame([
-        {
-            "Agente": "Agent X",
-            "Data": "2023-01-04",
-            "Inizio1": "07:00:00",
-            # "Fine1" column intentionally omitted
-        }
-    ])
+    df = pd.DataFrame(
+        [
+            {
+                "Agente": "Agent X",
+                "Data": "2023-01-04",
+                "Inizio1": "07:00:00",
+                # "Fine1" column intentionally omitted
+            }
+        ]
+    )
     xls = tmp_path / "missing.xlsx"
     df.to_excel(xls, index=False)
 
@@ -158,14 +166,16 @@ def test_parse_excel_missing_column(tmp_path):
 def test_parse_excel_agente_without_db(tmp_path):
     """Parsing fails when only the Agente column is present and no DB session is provided."""
 
-    df = pd.DataFrame([
-        {
-            "Agente": "Agent X",
-            "Data": "2023-01-05",
-            "Inizio1": "08:00:00",
-            "Fine1": "12:00:00",
-        }
-    ])
+    df = pd.DataFrame(
+        [
+            {
+                "Agente": "Agent X",
+                "Data": "2023-01-05",
+                "Inizio1": "08:00:00",
+                "Fine1": "12:00:00",
+            }
+        ]
+    )
     xls = tmp_path / "no_db.xlsx"
     df.to_excel(xls, index=False)
 
@@ -179,14 +189,16 @@ def test_parse_excel_agente_without_db(tmp_path):
 def test_parse_excel_empty_user_id(tmp_path):
     """Empty cells in the User ID column should result in a 400 error."""
 
-    df = pd.DataFrame([
-        {
-            "User ID": "",
-            "Data": "2023-03-01",
-            "Inizio1": "08:00:00",
-            "Fine1": "12:00:00",
-        }
-    ])
+    df = pd.DataFrame(
+        [
+            {
+                "User ID": "",
+                "Data": "2023-03-01",
+                "Inizio1": "08:00:00",
+                "Fine1": "12:00:00",
+            }
+        ]
+    )
     xls = tmp_path / "empty_user.xlsx"
     df.to_excel(xls, index=False)
 
@@ -202,14 +214,16 @@ def test_parse_excel_empty_agente(tmp_path):
     from app.database import SessionLocal
 
     db = SessionLocal()
-    df = pd.DataFrame([
-        {
-            "Agente": " ",
-            "Data": "2023-03-02",
-            "Inizio1": "08:00:00",
-            "Fine1": "12:00:00",
-        }
-    ])
+    df = pd.DataFrame(
+        [
+            {
+                "Agente": " ",
+                "Data": "2023-03-02",
+                "Inizio1": "08:00:00",
+                "Fine1": "12:00:00",
+            }
+        ]
+    )
     xls = tmp_path / "empty_agent.xlsx"
     df.to_excel(xls, index=False)
 
@@ -228,14 +242,16 @@ def test_parse_excel_unknown_user_id(tmp_path):
 
     db = SessionLocal()
 
-    df = pd.DataFrame([
-        {
-            "User ID": "missing",
-            "Data": "2023-04-01",
-            "Inizio1": "08:00:00",
-            "Fine1": "12:00:00",
-        }
-    ])
+    df = pd.DataFrame(
+        [
+            {
+                "User ID": "missing",
+                "Data": "2023-04-01",
+                "Inizio1": "08:00:00",
+                "Fine1": "12:00:00",
+            }
+        ]
+    )
     xls = tmp_path / "unknown_id.xlsx"
     df.to_excel(xls, index=False)
 
@@ -246,6 +262,7 @@ def test_parse_excel_unknown_user_id(tmp_path):
     assert exc.value.detail == "Row 2: Unknown user ID: missing"
 
     db.close()
+
 
 def test_df_to_pdf_creates_files_and_cleanup(tmp_path):
     rows = [
@@ -263,7 +280,9 @@ def test_df_to_pdf_creates_files_and_cleanup(tmp_path):
         Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
         return True
 
-    with patch("app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file):
+    with patch(
+        "app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file
+    ):
         pdf_path, html_path = df_to_pdf(rows)
 
     assert os.path.exists(pdf_path)
@@ -292,7 +311,9 @@ def test_df_to_pdf_missing_wkhtmltopdf(tmp_path):
     def fake_from_file(html_path, pdf_path):
         raise OSError("No wkhtmltopdf executable found")
 
-    with patch("app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file):
+    with patch(
+        "app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file
+    ):
         with pytest.raises(HTTPException) as exc:
             df_to_pdf(rows)
 

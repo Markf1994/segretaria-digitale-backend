@@ -10,9 +10,9 @@ def auth_user(email: str):
         "/users/", json={"email": email, "password": "secret", "nome": "Test"}
     )
     user_id = resp.json()["id"]
-    token = client.post(
-        "/login", json={"email": email, "password": "secret"}
-    ).json()["access_token"]
+    token = client.post("/login", json={"email": email, "password": "secret"}).json()[
+        "access_token"
+    ]
     return {"Authorization": f"Bearer {token}"}, user_id
 
 
@@ -106,4 +106,3 @@ def test_user_isolated_todos(setup_db):
     assert len(res2.json()) == 1
     assert all(t["user_id"] == id1 for t in res1.json())
     assert all(t["user_id"] == id2 for t in res2.json())
-

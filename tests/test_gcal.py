@@ -25,6 +25,7 @@ def test_iso_dt_uses_patched_timezone(monkeypatch):
             class DummyOffset:
                 def utcoffset(self, *args, **kwargs):
                     return timedelta(hours=9, minutes=30)
+
             return DummyOffset()
 
     class DummyDateTime:
@@ -59,7 +60,9 @@ def test_get_client_from_json_string(monkeypatch):
         fake_from_info,
     )
     monkeypatch.setattr(gcal, "build", lambda *a, **k: "CLIENT")
-    monkeypatch.setattr(gcal.settings, "GOOGLE_CREDENTIALS_JSON", json.dumps(dummy_info))
+    monkeypatch.setattr(
+        gcal.settings, "GOOGLE_CREDENTIALS_JSON", json.dumps(dummy_info)
+    )
 
     gcal.get_client.cache_clear()
     result = gcal.get_client()

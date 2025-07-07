@@ -8,9 +8,13 @@ client = TestClient(app)
 
 
 def auth_user(email: str, nome: str = "Test"):
-    resp = client.post("/users/", json={"email": email, "password": "secret", "nome": nome})
+    resp = client.post(
+        "/users/", json={"email": email, "password": "secret", "nome": nome}
+    )
     user_id = resp.json()["id"]
-    token = client.post("/login", json={"email": email, "password": "secret"}).json()["access_token"]
+    token = client.post("/login", json={"email": email, "password": "secret"}).json()[
+        "access_token"
+    ]
     return {"Authorization": f"Bearer {token}"}, user_id
 
 
@@ -59,7 +63,9 @@ def test_week_pdf_filters_turni(setup_db, tmp_path):
     client.post("/orari/", json=shift3, headers=headers)
 
     captured = {}
-    real_df_to_pdf = __import__("app.services.excel_import", fromlist=["df_to_pdf"]).df_to_pdf
+    real_df_to_pdf = __import__(
+        "app.services.excel_import", fromlist=["df_to_pdf"]
+    ).df_to_pdf
 
     def fake_from_file(html_path, pdf_path):
         Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
@@ -69,7 +75,9 @@ def test_week_pdf_filters_turni(setup_db, tmp_path):
         captured["rows"] = rows
         return real_df_to_pdf(rows)
 
-    with patch("app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file):
+    with patch(
+        "app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file
+    ):
         with patch("app.routes.orari.df_to_pdf", side_effect=capture_df_to_pdf):
             res = client.get("/orari/pdf?week=2023-W01", headers=headers)
 

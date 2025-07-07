@@ -39,8 +39,5 @@ def verify_password(plain_password, hashed_password):
 def list_users(db: Session):
     """Restituisce tutti gli utenti ordinati per nome con i turni caricati."""
     return (
-        db.query(User)
-        .options(joinedload(User.turni))
-        .order_by(User.nome.asc())
-        .all()
+        db.query(User).options(joinedload(User.turni)).order_by(User.nome.asc()).all()
     )

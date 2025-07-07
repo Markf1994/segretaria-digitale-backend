@@ -5,6 +5,7 @@ from app.main import app
 
 client = TestClient(app)
 
+
 def auth_user(email: str):
     resp = client.post(
         "/users/", json={"email": email, "password": "secret", "nome": "Test"}
@@ -49,7 +50,10 @@ def test_dashboard_upcoming(monkeypatch, setup_db):
     )
     client.post(
         "/todo/",
-        json={"descrizione": "Other", "scadenza": (now + timedelta(days=1)).isoformat()},
+        json={
+            "descrizione": "Other",
+            "scadenza": (now + timedelta(days=1)).isoformat(),
+        },
         headers=other_h,
     )
 
@@ -72,4 +76,3 @@ def test_dashboard_upcoming(monkeypatch, setup_db):
     assert [item["kind"] for item in data] == ["event", "todo", "google"]
     times = [item["data_ora"] for item in data]
     assert times == sorted(times)
-

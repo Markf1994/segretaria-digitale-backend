@@ -4,7 +4,9 @@ from app.dependencies import get_db, get_current_user, get_optional_user
 from app.models.user import User
 from app.schemas.event import EventCreate, EventResponse
 from app.crud import event
+
 router = APIRouter(prefix="/events", tags=["Events"])
+
 
 @router.post("/", response_model=EventResponse, status_code=201)
 def create_event_route(
@@ -14,6 +16,8 @@ def create_event_route(
 ):
     """Create a new event and return the stored model."""
     return event.create_event(db, data, current_user)
+
+
 @router.get("/", response_model=list[EventResponse])
 def list_events(
     db: Session = Depends(get_db),
@@ -21,6 +25,8 @@ def list_events(
 ):
     """Retrieve all events from the database."""
     return event.get_events(db, current_user)
+
+
 @router.put("/{event_id}", response_model=EventResponse)
 def update_event_route(
     event_id: str,
@@ -33,6 +39,8 @@ def update_event_route(
     if not db_event:
         raise HTTPException(status_code=404, detail="Event not found")
     return db_event
+
+
 @router.delete("/{event_id}")
 def delete_event_route(
     event_id: str,
