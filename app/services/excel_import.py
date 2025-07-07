@@ -11,7 +11,7 @@ from app.models.user import User
 def get_user_id(db: Session, agente: str) -> str:
     """Return the ``User.id`` for ``agente`` raising ``ValueError`` if missing."""
 
-    if not db:
+    if db is None:
         raise ValueError("A database session is required to resolve users")
 
     name = agente.strip()
@@ -62,7 +62,7 @@ def parse_excel(path: str, db: Session | None = None) -> List[Dict[str, Any]]:
 
         if user_col == "User ID":
             user_id = str(value)
-            if db:
+            if db is not None:
                 user = db.query(User).filter(User.id == user_id).first()
                 if not user:
                     raise HTTPException(
@@ -70,7 +70,7 @@ def parse_excel(path: str, db: Session | None = None) -> List[Dict[str, Any]]:
                         detail=f"Row {row_num}: Unknown user ID: {user_id}",
                     )
         else:
-            if not db:
+            if db is None:
                 raise HTTPException(
                     status_code=400,
                     detail=f"Row {row_num}: Database session required to resolve 'Agente'",
