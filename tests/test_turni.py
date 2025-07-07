@@ -175,3 +175,28 @@ def test_create_turno_day_off_allows_missing_times(setup_db):
     body = res.json()
     assert body["inizio_1"] is None
     assert body["fine_1"] is None
+
+
+def test_create_turno_recupero_skips_gcal_sync(setup_db):
+    """Creating a RECUPERO turno should not trigger calendar sync."""
+    headers, user_id = auth_user("recupero@example.com")
+    data = {
+        "user_id": user_id,
+        "giorno": "2023-12-26",
+        "inizio_1": None,
+        "fine_1": None,
+        "inizio_2": None,
+        "fine_2": None,
+        "inizio_3": None,
+        "fine_3": None,
+        "tipo": "RECUPERO",
+        "note": "",
+    }
+
+    with patch("app.services.gcal.sync_shift_event") as fake_sync:
+        res = client.post("/orari/", json=data, headers=headers)
+
+    assert res.status_code == 200
+    fake_sync.assert_not_called()
+    payload = res.json()
+    assert payload["tipo"] == "RECUPERO"
