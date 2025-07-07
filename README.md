@@ -186,6 +186,7 @@ request under the `file` field. The same functionality is available via
 The Excel sheet **must** include the `Data`, `Inizio1` and `Fine1` columns and
 either a `User ID` or an `Agente` column. Optional columns are
 `Inizio2`/`Fine2`, `Inizio3`/`Fine3` (or `Straordinario inizio`/`Straordinario fine`), `Tipo` and `Note`.
+Rows marked as day off (with `Tipo` set to `FERIE`, `RIPOSO`, `FESTIVO` or `RECUPERO`) may leave the `Inizio1` and `Fine1` cells empty. The columns must still be present in the sheet.
 
 Requests can fail with status `400` when required columns are missing, when a
 user referenced by `User ID` or `Agente` does not exist, or when the identifier
