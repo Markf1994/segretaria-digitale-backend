@@ -293,6 +293,36 @@ def test_parse_excel_day_off_missing_times(tmp_path):
     ]
 
 
+def test_parse_excel_day_off_missing_times_recupero(tmp_path):
+    """Day-off rows of type RECUPERO allow missing time values."""
+    df = pd.DataFrame(
+        [
+            {
+                "User ID": 2,
+                "Giorno": "2024-01-02",
+                "Inizio1": None,
+                "Fine1": None,
+                "Tipo": "RECUPERO",
+            }
+        ]
+    )
+    xls = tmp_path / "recupero.xlsx"
+    df.to_excel(xls, index=False)
+
+    rows = parse_excel(str(xls), None)
+
+    assert rows == [
+        {
+            "user_id": "2",
+            "giorno": "2024-01-02",
+            "inizio_1": None,
+            "fine_1": None,
+            "tipo": "RECUPERO",
+            "note": "",
+        }
+    ]
+
+
 def test_parse_excel_strips_whitespace(tmp_path):
     """Leading/trailing spaces in time columns are ignored."""
     df = pd.DataFrame(
