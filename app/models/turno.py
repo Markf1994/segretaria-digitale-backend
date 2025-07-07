@@ -11,8 +11,8 @@ class Turno(Base):
     user_id = Column(String, ForeignKey("users.id"), nullable=False)
     giorno = Column(Date, nullable=False)
 
-    inizio_1 = Column(Time, nullable=False)
-    fine_1 = Column(Time, nullable=False)
+    inizio_1 = Column(Time, nullable=True)
+    fine_1 = Column(Time, nullable=True)
     inizio_2 = Column(Time, nullable=True)
     fine_2 = Column(Time, nullable=True)
     inizio_3 = Column(Time, nullable=True)

@@ -19,6 +19,8 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 import googleapiclient.errors as gerr
 
+from app.schemas.turno import DAY_OFF_TYPES
+
 
 # ------------------------------------------------------------------- credenziali
 @lru_cache()
@@ -76,6 +78,11 @@ def sync_shift_event(turno):
     Crea o aggiorna l'evento relativo a un turno
     nel calendario 'Turni di Servizio'.
     """
+    if (turno.tipo or "").upper() in DAY_OFF_TYPES:
+        # remove any existing calendar event for day-off records
+        delete_shift_event(turno.id)
+        return
+
     evt_id = f"shift-{turno.id}"  # chiave stabile = prefisso + UUID DB
 
     # orari: primo inizio disponibile, ultimo fine disponibile
