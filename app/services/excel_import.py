@@ -45,7 +45,7 @@ def parse_excel(path: str, db: Session | None = None) -> List[Dict[str, Any]]:
 
     df = pd.read_excel(path)  # requires openpyxl
 
-    base_required = {"Data", "Inizio1", "Fine1"}
+    base_required = {"Giorno", "Inizio1", "Fine1"}
 
     if "User ID" in df.columns:
         required = base_required | {"User ID"}
@@ -104,7 +104,7 @@ def parse_excel(path: str, db: Session | None = None) -> List[Dict[str, Any]]:
         payload: dict[str, Any] = {
             "user_id": user_id,
             "giorno": (
-                row["Data"].date() if hasattr(row["Data"], "date") else row["Data"]
+                row["Giorno"].date() if hasattr(row["Giorno"], "date") else row["Giorno"]
             ),
             "inizio_1": inizio1,
             "fine_1": fine1,

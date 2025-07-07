@@ -15,7 +15,7 @@ def test_parse_excel(tmp_path):
         [
             {
                 "User ID": 1,
-                "Data": "2023-01-01",
+                "Giorno": "2023-01-01",
                 "Inizio1": "08:00:00",
                 "Fine1": "12:00:00",
                 "Tipo": "NORMALE",
@@ -23,7 +23,7 @@ def test_parse_excel(tmp_path):
             },
             {
                 "User ID": "2",
-                "Data": "2023-01-02",
+                "Giorno": "2023-01-02",
                 "Inizio1": "09:00:00",
                 "Fine1": "13:00:00",
                 "Inizio2": "14:00:00",
@@ -69,7 +69,7 @@ def test_parse_excel_straordinario(tmp_path):
         [
             {
                 "User ID": 3,
-                "Data": "2023-02-01",
+                "Giorno": "2023-02-01",
                 "Inizio1": "08:00:00",
                 "Fine1": "12:00:00",
                 "Straordinario inizio": "20:00:00",
@@ -110,7 +110,7 @@ def test_parse_excel_with_db(tmp_path):
         [
             {
                 "Agente": "Agent X",
-                "Data": "2023-01-03",
+                "Giorno": "2023-01-03",
                 "Inizio1": "07:00:00",
                 "Fine1": "11:00:00",
             }
@@ -145,7 +145,7 @@ def test_parse_excel_missing_column(tmp_path):
         [
             {
                 "Agente": "Agent X",
-                "Data": "2023-01-04",
+                "Giorno": "2023-01-04",
                 "Inizio1": "07:00:00",
                 # "Fine1" column intentionally omitted
             }
@@ -170,7 +170,7 @@ def test_parse_excel_agente_without_db(tmp_path):
         [
             {
                 "Agente": "Agent X",
-                "Data": "2023-01-05",
+                "Giorno": "2023-01-05",
                 "Inizio1": "08:00:00",
                 "Fine1": "12:00:00",
             }
@@ -193,7 +193,7 @@ def test_parse_excel_empty_user_id(tmp_path):
         [
             {
                 "User ID": "",
-                "Data": "2023-03-01",
+                "Giorno": "2023-03-01",
                 "Inizio1": "08:00:00",
                 "Fine1": "12:00:00",
             }
@@ -218,7 +218,7 @@ def test_parse_excel_empty_agente(tmp_path):
         [
             {
                 "Agente": " ",
-                "Data": "2023-03-02",
+                "Giorno": "2023-03-02",
                 "Inizio1": "08:00:00",
                 "Fine1": "12:00:00",
             }
@@ -246,7 +246,7 @@ def test_parse_excel_unknown_user_id(tmp_path):
         [
             {
                 "User ID": "missing",
-                "Data": "2023-04-01",
+                "Giorno": "2023-04-01",
                 "Inizio1": "08:00:00",
                 "Fine1": "12:00:00",
             }
@@ -269,7 +269,7 @@ def test_parse_excel_day_off_missing_times(tmp_path):
         [
             {
                 "User ID": 1,
-                "Data": "2024-01-01",
+                "Giorno": "2024-01-01",
                 "Inizio1": None,
                 "Fine1": None,
                 "Tipo": "FESTIVO",
@@ -299,7 +299,7 @@ def test_parse_excel_strips_whitespace(tmp_path):
         [
             {
                 "User ID": 4,
-                "Data": "2024-01-02",
+                "Giorno": "2024-01-02",
                 "Inizio1": " 08:00",
                 "Fine1": "12:00 ",
             }
