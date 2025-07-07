@@ -15,10 +15,11 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-from app.models.turno import Turno          # modello ORM
+from app.models.turno import Turno  # modello ORM
 from app.models.user import User
-from app.schemas.turno import TurnoIn       # Pydantic (input)
+from app.schemas.turno import TurnoIn  # Pydantic (input)
 from app.services import gcal
+
 
 # ------------------------------------------------------------------------------
 def upsert_turno(db: Session, payload: TurnoIn) -> Turno:
@@ -48,13 +49,13 @@ def upsert_turno(db: Session, payload: TurnoIn) -> Turno:
     rec.inizio_3 = payload.inizio_3
     rec.fine_3 = payload.fine_3
 
-    rec.tipo = payload.tipo            # NORMALE | STRAORD | FERIE
+    rec.tipo = payload.tipo  # NORMALE | STRAORD | FERIE
     rec.note = payload.note
 
     # 4. salva su database
     db.add(rec)
     db.commit()
-    db.refresh(rec)                    # ottieni id definitivo
+    db.refresh(rec)  # ottieni id definitivo
 
     # 5. sincronizza l’evento Google Calendar
     try:
@@ -98,11 +99,7 @@ def get_turni(db: Session, user: User) -> list[Turno]:
 # ------------------------------------------------------------------------------
 def list_all(db: Session) -> list[Turno]:
     """Return all ``Turno`` records in the database ordered by date."""
-    return (
-        db.query(Turno)
-        .order_by(Turno.giorno.asc())
-        .all()
-    )
+    return db.query(Turno).order_by(Turno.giorno.asc()).all()
 
 
 # ------------------------------------------------------------------------------

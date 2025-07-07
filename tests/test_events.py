@@ -10,8 +10,11 @@ def auth_user(email: str):
         "/users/", json={"email": email, "password": "secret", "nome": "Test"}
     )
     user_id = resp.json()["id"]
-    token = client.post("/login", json={"email": email, "password": "secret"}).json()["access_token"]
+    token = client.post("/login", json={"email": email, "password": "secret"}).json()[
+        "access_token"
+    ]
     return {"Authorization": f"Bearer {token}"}, user_id
+
 
 def test_create_event(setup_db):
     headers, user_id = auth_user("ev@example.com")
@@ -63,17 +66,32 @@ def test_list_events(setup_db):
     h2, _ = auth_user("b@example.com")
     client.post(
         "/events/",
-        json={"titolo": "A", "descrizione": "", "data_ora": "2023-01-01T09:00:00", "is_public": False},
+        json={
+            "titolo": "A",
+            "descrizione": "",
+            "data_ora": "2023-01-01T09:00:00",
+            "is_public": False,
+        },
         headers=h1,
     )
     client.post(
         "/events/",
-        json={"titolo": "B", "descrizione": "", "data_ora": "2023-01-02T09:00:00", "is_public": False},
+        json={
+            "titolo": "B",
+            "descrizione": "",
+            "data_ora": "2023-01-02T09:00:00",
+            "is_public": False,
+        },
         headers=h2,
     )
     client.post(
         "/events/",
-        json={"titolo": "Pub", "descrizione": "", "data_ora": "2023-01-03T09:00:00", "is_public": True},
+        json={
+            "titolo": "Pub",
+            "descrizione": "",
+            "data_ora": "2023-01-03T09:00:00",
+            "is_public": True,
+        },
         headers=h2,
     )
     res1 = client.get("/events/", headers=h1)
@@ -88,7 +106,12 @@ def test_delete_event(setup_db):
     headers, _ = auth_user("del@example.com")
     res = client.post(
         "/events/",
-        json={"titolo": "A", "descrizione": "", "data_ora": "2023-01-01T09:00:00", "is_public": False},
+        json={
+            "titolo": "A",
+            "descrizione": "",
+            "data_ora": "2023-01-01T09:00:00",
+            "is_public": False,
+        },
         headers=headers,
     )
     event_id = res.json()["id"]
@@ -96,4 +119,3 @@ def test_delete_event(setup_db):
     assert response.status_code == 200
     assert response.json()["ok"] is True
     assert client.get("/events/", headers=headers).json() == []
-

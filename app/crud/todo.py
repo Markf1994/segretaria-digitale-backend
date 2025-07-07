@@ -36,4 +36,3 @@ def delete_todo(db: Session, todo_id: str, user: User):
         db.delete(db_todo)
         db.commit()
     return db_todo
-

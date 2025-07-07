@@ -5,14 +5,18 @@ from app.main import app
 
 client = TestClient(app)
 
+
 def auth_user(email: str, nome: str = "Test"):
     resp = client.post(
         "/users/",
         json={"email": email, "password": "secret", "nome": nome},
     )
     user_id = resp.json()["id"]
-    token = client.post("/login", json={"email": email, "password": "secret"}).json()["access_token"]
+    token = client.post("/login", json={"email": email, "password": "secret"}).json()[
+        "access_token"
+    ]
     return {"Authorization": f"Bearer {token}"}, user_id
+
 
 def test_create_user():
     response = client.post(
@@ -25,6 +29,7 @@ def test_create_user():
     assert data["nome"] == "Test"
     assert "id" in data
     assert data["turni"] == []
+
 
 def test_duplicate_user():
     client.post(
@@ -54,7 +59,9 @@ def test_list_users():
 
 
 def test_user_turni_listed_after_creation(setup_db):
-    with patch("app.services.gcal.sync_shift_event"), patch("app.services.gcal.delete_shift_event"):
+    with patch("app.services.gcal.sync_shift_event"), patch(
+        "app.services.gcal.delete_shift_event"
+    ):
         headers, user_id = auth_user("shift@example.com")
 
         shift = {
@@ -111,4 +118,3 @@ def test_get_current_user_missing_header():
     response = client.get("/users/me")
     assert response.status_code == 401
     assert response.json()["detail"] == "Authorization header missing"
-

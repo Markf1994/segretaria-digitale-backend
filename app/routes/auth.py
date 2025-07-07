@@ -15,6 +15,7 @@ ALGORITHM = settings.ALGORITHM
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 router = APIRouter(tags=["Auth"])
 
+
 @router.post("/login")
 def login(form_data: UserCredentials, db: Session = Depends(get_db)):
     """Authenticate a user and issue a JWT access token.
@@ -24,9 +25,13 @@ def login(form_data: UserCredentials, db: Session = Depends(get_db)):
     400 HTTP error is raised.
     """
     db_user = user.get_user_by_email(db, form_data.email)
-    if not db_user or not user.verify_password(form_data.password, db_user.hashed_password):
+    if not db_user or not user.verify_password(
+        form_data.password, db_user.hashed_password
+    ):
         raise HTTPException(status_code=400, detail="Invalid credentials")
-    expire = datetime.datetime.utcnow() + datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire = datetime.datetime.utcnow() + datetime.timedelta(
+        minutes=ACCESS_TOKEN_EXPIRE_MINUTES
+    )
     payload = {"sub": db_user.email, "exp": int(expire.timestamp())}
     token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
     return {"access_token": token, "token_type": "bearer"}

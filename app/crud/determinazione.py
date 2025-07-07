@@ -18,7 +18,9 @@ def get_determinazioni(db: Session):
 
 def update_determinazione(db: Session, determinazione_id: str, data):
     """Update an existing ``Determinazione`` or return ``None`` if absent."""
-    db_det = db.query(Determinazione).filter(Determinazione.id == determinazione_id).first()
+    db_det = (
+        db.query(Determinazione).filter(Determinazione.id == determinazione_id).first()
+    )
     if not db_det:
         return None
     for key, value in data.dict().items():
@@ -30,7 +32,9 @@ def update_determinazione(db: Session, determinazione_id: str, data):
 
 def delete_determinazione(db: Session, determinazione_id: str):
     """Delete a ``Determinazione`` by id if present and return it."""
-    db_det = db.query(Determinazione).filter(Determinazione.id == determinazione_id).first()
+    db_det = (
+        db.query(Determinazione).filter(Determinazione.id == determinazione_id).first()
+    )
     if db_det:
         db.delete(db_det)
         db.commit()

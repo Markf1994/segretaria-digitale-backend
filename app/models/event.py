@@ -2,6 +2,8 @@ from sqlalchemy import Column, String, DateTime, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from app.database import Base
 import uuid
+
+
 class Event(Base):
     __tablename__ = "events"
     id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))

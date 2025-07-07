@@ -42,7 +42,9 @@ def parse_excel(path: str, db: Session | None = None) -> List[Dict[str, Any]]:
     elif "Agente" in df.columns:
         required = base_required | {"Agente"}
     else:
-        raise HTTPException(status_code=400, detail="Missing columns: {'User ID' or 'Agente'}")
+        raise HTTPException(
+            status_code=400, detail="Missing columns: {'User ID' or 'Agente'}"
+        )
 
     missing = required - set(df.columns)
     if missing:
@@ -82,14 +84,20 @@ def parse_excel(path: str, db: Session | None = None) -> List[Dict[str, Any]]:
 
         payload: dict[str, Any] = {
             "user_id": user_id,
-            "giorno": row["Data"].date() if hasattr(row["Data"], "date") else row["Data"],
+            "giorno": (
+                row["Data"].date() if hasattr(row["Data"], "date") else row["Data"]
+            ),
             "inizio_1": row["Inizio1"],
             "fine_1": row["Fine1"],
             "tipo": row.get("Tipo", "NORMALE"),
             "note": row.get("Note", ""),
         }
 
-        if "Inizio2" in df.columns and not pd.isna(row.get("Inizio2")) and not pd.isna(row.get("Fine2")):
+        if (
+            "Inizio2" in df.columns
+            and not pd.isna(row.get("Inizio2"))
+            and not pd.isna(row.get("Fine2"))
+        ):
             payload["inizio_2"] = row["Inizio2"]
             payload["fine_2"] = row["Fine2"]
 

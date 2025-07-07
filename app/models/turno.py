@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from app.database import Base
 import uuid
 
+
 class Turno(Base):
     __tablename__ = "turni"
 
@@ -21,4 +22,3 @@ class Turno(Base):
     note = Column(String, nullable=True)
 
     user = relationship("User", back_populates="turni")
-

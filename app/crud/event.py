@@ -22,7 +22,9 @@ def get_events(db: Session, user: User | None = None):
 
 def update_event(db: Session, event_id: str, data, user: User):
     """Update an ``Event`` owned by ``user`` or return ``None`` if missing."""
-    db_event = db.query(Event).filter(Event.id == event_id, Event.user_id == user.id).first()
+    db_event = (
+        db.query(Event).filter(Event.id == event_id, Event.user_id == user.id).first()
+    )
     if not db_event:
         return None
     for key, value in data.dict().items():
@@ -34,7 +36,9 @@ def update_event(db: Session, event_id: str, data, user: User):
 
 def delete_event(db: Session, event_id: str, user: User):
     """Delete the event owned by ``user`` with ``event_id`` if it exists."""
-    db_event = db.query(Event).filter(Event.id == event_id, Event.user_id == user.id).first()
+    db_event = (
+        db.query(Event).filter(Event.id == event_id, Event.user_id == user.id).first()
+    )
     if db_event:
         db.delete(db_event)
         db.commit()

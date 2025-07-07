@@ -52,4 +52,5 @@ app.include_router(imports.router)
 
 from app.crud.pdf_file import get_upload_root
 from fastapi.staticfiles import StaticFiles
+
 app.mount("/uploads", StaticFiles(directory=get_upload_root()), name="uploads")

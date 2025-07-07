@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import os
 
+
 @dataclass
 class Settings:
     DATABASE_URL: str
@@ -25,7 +26,9 @@ def load_settings() -> Settings:
     if not secret_key:
         missing.append("SECRET_KEY")
     if missing:
-        raise RuntimeError("Missing required environment variables: " + ", ".join(missing))
+        raise RuntimeError(
+            "Missing required environment variables: " + ", ".join(missing)
+        )
 
     return Settings(
         DATABASE_URL=database_url,
