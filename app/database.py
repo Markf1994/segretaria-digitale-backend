@@ -15,7 +15,11 @@ else:
     connect_args = {"sslmode": "require"}
 
 # Crea il motore SQLAlchemy con gli argomenti appropriati
-engine = create_engine(DATABASE_URL, connect_args=connect_args)
+engine = create_engine(
+    DATABASE_URL,
+    connect_args=connect_args,
+    pool_pre_ping=True,
+)
 
 if url.drivername.startswith("sqlite"):
 
