@@ -193,3 +193,33 @@ def test_import_xlsx_unknown_agent_returns_400(tmp_path):
 
     assert res.status_code == 400
     assert "Unknown user" in res.json()["detail"]
+
+
+def test_tmp_removed_on_late_failure(tmp_path):
+    captured = {}
+
+    def fake_parse_excel(path, db):
+        captured["xlsx"] = path
+        return [{"user_id": "1", "giorno": "2023-01-01", "inizio_1": "08:00:00", "fine_1": "12:00:00"}]
+
+    def boom(*args, **kwargs):
+        raise RuntimeError("oops")
+
+    with patch("app.routes.imports.parse_excel", side_effect=fake_parse_excel):
+        with patch("app.routes.imports.crud_turno.upsert_turno", side_effect=boom):
+            dummy = tmp_path / "shift.xlsx"
+            dummy.write_bytes(b"data")
+            with open(dummy, "rb") as fh:
+                res = client.post(
+                    "/import/xlsx",
+                    files={
+                        "file": (
+                            "shift.xlsx",
+                            fh,
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        )
+                    },
+                )
+
+    assert res.status_code == 500
+    assert not os.path.exists(captured["xlsx"])
