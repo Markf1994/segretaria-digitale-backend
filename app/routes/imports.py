@@ -20,6 +20,7 @@ async def import_xlsx(
     db: Session = Depends(get_db),
 ):
     """Import Excel shifts, sync them and return a PDF summary."""
+    tmp_path = None
     try:
         # 1 – save temp file
         with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp:
@@ -27,11 +28,7 @@ async def import_xlsx(
             tmp_path = tmp.name
 
         # 2 – parse Excel -> TurnoIn payloads
-        try:
-            rows = parse_excel(tmp_path, db)
-        except HTTPException:
-            os.remove(tmp_path)
-            raise
+        rows = parse_excel(tmp_path, db)
 
         # 3 – store/update each shift (DB + Google Calendar)
         for payload in rows:
@@ -41,13 +38,15 @@ async def import_xlsx(
         pdf_path, html_path = df_to_pdf(rows)
         background_tasks.add_task(os.remove, pdf_path)
         background_tasks.add_task(os.remove, html_path)
-        background_tasks.add_task(os.remove, tmp_path)
         return FileResponse(pdf_path, filename="turni_settimana.pdf")
     except HTTPException:
         raise
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(500, f"Errore import: {e}")
+    finally:
+        if tmp_path and os.path.exists(tmp_path):
+            os.remove(tmp_path)
 
 
 @router.post("/excel", include_in_schema=False)
