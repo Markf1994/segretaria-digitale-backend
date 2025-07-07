@@ -105,15 +105,16 @@ fetch("http://localhost:8000/google-login", {
 
 ## Running tests
 
-Tests are located in the `tests/` directory. After installing the
-dependencies from both `requirements.txt` and `requirements-dev.txt`, make
-sure system packages such as `wkhtmltopdf` are available and export the
-environment variables required by the application (e.g. `DATABASE_URL`)
-before running the tests:
+Tests are located in the `tests/` directory. The suite requires all
+packages listed in both `requirements.txt` and `requirements-dev.txt`.
+System packages such as `wkhtmltopdf` must also be installed and the
+necessary environment variables (for example `DATABASE_URL`) exported.
+You can run the helper script `scripts/test.sh` which sets up a local
+virtual environment, installs these dependencies and executes `pytest`:
 
 ```bash
 export DATABASE_URL=postgresql://user:pass@localhost:5432/dbname
-pytest
+./scripts/test.sh
 ```
 
 The test suite uses a temporary SQLite database by default, but the
