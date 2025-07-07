@@ -151,3 +151,27 @@ def test_create_turno_unknown_user_returns_400(setup_db):
     res = client.post("/orari/", json=data, headers=headers)
     assert res.status_code == 400
     assert res.json()["detail"] == "Unknown user"
+
+
+def test_create_turno_day_off_allows_missing_times(setup_db):
+    headers, user_id = auth_user("dayoff@example.com")
+    data = {
+        "user_id": user_id,
+        "giorno": "2023-12-25",
+        "inizio_1": None,
+        "fine_1": None,
+        "inizio_2": None,
+        "fine_2": None,
+        "inizio_3": None,
+        "fine_3": None,
+        "tipo": "FESTIVO",
+        "note": "",
+    }
+
+    with patch("app.services.gcal.sync_shift_event") as fake_sync:
+        res = client.post("/orari/", json=data, headers=headers)
+    assert res.status_code == 200
+    fake_sync.assert_not_called()
+    body = res.json()
+    assert body["inizio_1"] is None
+    assert body["fine_1"] is None

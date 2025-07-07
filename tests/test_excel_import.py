@@ -264,6 +264,35 @@ def test_parse_excel_unknown_user_id(tmp_path):
     db.close()
 
 
+def test_parse_excel_day_off_missing_times(tmp_path):
+    df = pd.DataFrame(
+        [
+            {
+                "User ID": 1,
+                "Data": "2024-01-01",
+                "Inizio1": None,
+                "Fine1": None,
+                "Tipo": "FESTIVO",
+            }
+        ]
+    )
+    xls = tmp_path / "dayoff.xlsx"
+    df.to_excel(xls, index=False)
+
+    rows = parse_excel(str(xls), None)
+
+    assert rows == [
+        {
+            "user_id": "1",
+            "giorno": "2024-01-01",
+            "inizio_1": None,
+            "fine_1": None,
+            "tipo": "FESTIVO",
+            "note": "",
+        }
+    ]
+
+
 def test_df_to_pdf_creates_files_and_cleanup(tmp_path):
     rows = [
         {
