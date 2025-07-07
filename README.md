@@ -34,6 +34,7 @@ If asynchronous database access becomes necessary later on, add `asyncpg` to
 - `GOOGLE_CALENDAR_ID` – ID of the calendar to read events from.
 - `G_EVENT_CAL_ID` – ID of the Google Calendar used for event syncs.
 - `G_SHIFT_CAL_ID` – ID of the Google Calendar used for shift syncs.
+- `GOOGLE_CLIENT_ID` – OAuth client ID for verifying Google sign-in tokens.
 - `CORS_ORIGINS` – (optional) comma separated list of allowed origins for
   cross-origin requests. Defaults to `"*"`.
 - `LOG_LEVEL` – (optional) Python log level for application logging. Defaults
@@ -79,6 +80,19 @@ Example:
 curl -X POST http://localhost:8000/login \
   -H "Content-Type: application/json" \
   -d '{"email": "user@example.com", "password": "yourpassword"}'
+```
+
+### Google login
+
+When using Google Identity Services, send the ID token returned by the client
+to `/google-login`:
+
+```javascript
+fetch("http://localhost:8000/google-login", {
+  method: "POST",
+  headers: {"Content-Type": "application/json"},
+  body: JSON.stringify({token: googleToken}),
+});
 ```
 
 
