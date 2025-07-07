@@ -1,5 +1,5 @@
 from fastapi import APIRouter, UploadFile, Depends, BackgroundTasks, HTTPException
-import traceback
+import logging
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 import tempfile
@@ -9,6 +9,8 @@ from app.dependencies import get_db
 from app.schemas.turno import TurnoIn
 from app.crud import turno as crud_turno
 from app.services.excel_import import parse_excel, df_to_pdf
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/import", tags=["Import"])
 
@@ -42,7 +44,7 @@ async def import_xlsx(
     except HTTPException:
         raise
     except Exception as e:
-        traceback.print_exc()
+        logger.exception("Errore import")
         raise HTTPException(500, f"Errore import: {e}")
     finally:
         if tmp_path and os.path.exists(tmp_path):
