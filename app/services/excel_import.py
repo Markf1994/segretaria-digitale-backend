@@ -23,7 +23,9 @@ def get_user_id(db: Session, agente: str) -> str:
 
 
 def _clean(cell: Any) -> Any:
-    """Strip whitespace from strings and convert empty values to ``None``."""
+    """Strip whitespace from strings and convert empty/NaN values to ``None``."""
+    if pd.isna(cell):
+        return None
     if isinstance(cell, str):
         cell = cell.strip()
         if cell == "":

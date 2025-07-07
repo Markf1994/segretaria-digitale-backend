@@ -322,6 +322,36 @@ def test_parse_excel_strips_whitespace(tmp_path):
     ]
 
 
+def test_parse_excel_day_off_nan_times(tmp_path):
+    """NaN time cells in day-off rows should be returned as None."""
+    df = pd.DataFrame(
+        [
+            {
+                "User ID": 5,
+                "Giorno": "2024-01-03",
+                "Inizio1": float("nan"),
+                "Fine1": float("nan"),
+                "Tipo": "FESTIVO",
+            }
+        ]
+    )
+    xls = tmp_path / "dayoff_nan.xlsx"
+    df.to_excel(xls, index=False)
+
+    rows = parse_excel(str(xls), None)
+
+    assert rows == [
+        {
+            "user_id": "5",
+            "giorno": "2024-01-03",
+            "inizio_1": None,
+            "fine_1": None,
+            "tipo": "FESTIVO",
+            "note": "",
+        }
+    ]
+
+
 def test_df_to_pdf_creates_files_and_cleanup(tmp_path):
     rows = [
         {
