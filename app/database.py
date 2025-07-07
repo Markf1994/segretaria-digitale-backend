@@ -3,6 +3,7 @@ from sqlalchemy.engine.url import make_url
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from app.config import settings
+import os
 
 # Recupera la URL del database dal modulo di configurazione
 DATABASE_URL = settings.DATABASE_URL
@@ -12,7 +13,13 @@ url = make_url(DATABASE_URL)
 if url.drivername.startswith("sqlite"):
     connect_args = {"check_same_thread": False}
 else:
-    connect_args = {"sslmode": "require"}
+    sslmode = os.getenv("DATABASE_SSLMODE")
+    if sslmode is not None:
+        connect_args = {"sslmode": sslmode}
+    elif "sslmode" in url.query:
+        connect_args = {}
+    else:
+        connect_args = {"sslmode": "require"}
 
 # Crea il motore SQLAlchemy con gli argomenti appropriati
 engine = create_engine(
