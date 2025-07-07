@@ -13,10 +13,11 @@ url = make_url(DATABASE_URL)
 if url.drivername.startswith("sqlite"):
     connect_args = {"check_same_thread": False}
 else:
-    sslmode = os.getenv("DATABASE_SSLMODE")
-    if sslmode is not None:
-        connect_args = {"sslmode": sslmode}
-    elif "sslmode" in url.query:
+    sslmode_env = os.getenv("DATABASE_SSLMODE")
+    sslmode_query = url.query.get("sslmode")
+    if sslmode_env is not None:
+        connect_args = {"sslmode": sslmode_env}
+    elif sslmode_query is not None:
         connect_args = {}
     else:
         connect_args = {"sslmode": "require"}

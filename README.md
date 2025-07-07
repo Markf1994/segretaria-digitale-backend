@@ -26,7 +26,9 @@ If asynchronous database access becomes necessary later on, add `asyncpg` to
 ## Required environment variables
 
 - `DATABASE_URL` – connection string for the PostgreSQL database.
-- `DATABASE_SSLMODE` – (optional) sslmode used for PostgreSQL connections. If not specified and no `sslmode` parameter is present in `DATABASE_URL`, it defaults to `require`.
+- `DATABASE_SSLMODE` – (optional) sslmode used for PostgreSQL connections. When
+  set it overrides any `sslmode` parameter in `DATABASE_URL`. If neither is
+  provided, the application defaults to `require`.
 - `SECRET_KEY` – secret key used to sign JWT tokens.
 - `ALGORITHM` – (optional) algorithm used for JWT; defaults to `HS256`.
 - `ACCESS_TOKEN_EXPIRE_MINUTES` – (optional) lifetime of access tokens in minutes; defaults to `30`.
@@ -41,9 +43,9 @@ If asynchronous database access becomes necessary later on, add `asyncpg` to
 - `LOG_LEVEL` – (optional) Python log level for application logging. Defaults
   to `"INFO"`.
 
-When `DATABASE_SSLMODE` is unset and no `sslmode` parameter is included in
-`DATABASE_URL`, the application enforces secure connections by setting
-`sslmode=require`.
+When `DATABASE_SSLMODE` is unset, the `sslmode` value from `DATABASE_URL` (if
+any) is honored. If neither specifies a value, the application enforces secure
+connections by setting `sslmode=require`.
 
 ## Database migrations
 
