@@ -293,6 +293,35 @@ def test_parse_excel_day_off_missing_times(tmp_path):
     ]
 
 
+def test_parse_excel_strips_whitespace(tmp_path):
+    """Leading/trailing spaces in time columns are ignored."""
+    df = pd.DataFrame(
+        [
+            {
+                "User ID": 4,
+                "Data": "2024-01-02",
+                "Inizio1": " 08:00",
+                "Fine1": "12:00 ",
+            }
+        ]
+    )
+    xls = tmp_path / "spaces.xlsx"
+    df.to_excel(xls, index=False)
+
+    rows = parse_excel(str(xls), None)
+
+    assert rows == [
+        {
+            "user_id": "4",
+            "giorno": "2024-01-02",
+            "inizio_1": "08:00",
+            "fine_1": "12:00",
+            "tipo": "NORMALE",
+            "note": "",
+        }
+    ]
+
+
 def test_df_to_pdf_creates_files_and_cleanup(tmp_path):
     rows = [
         {
