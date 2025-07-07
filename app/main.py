@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import logging
+import json
 from app.config import settings
 from app.routes import (
     users,
@@ -20,7 +21,12 @@ from app.routes import imports
 log_level = settings.LOG_LEVEL.upper()
 logging.basicConfig(level=getattr(logging, log_level, logging.INFO))
 
-app = FastAPI()
+
+def _loads_nan_as_none(data: str):
+    """Parse JSON treating ``NaN`` as ``None``."""
+    return json.loads(data, parse_constant=lambda _x: None)
+
+app = FastAPI(json_loads=_loads_nan_as_none)
 
 # Database tables are managed with Alembic migrations.
 # Tests create tables manually using `Base.metadata.create_all()`.

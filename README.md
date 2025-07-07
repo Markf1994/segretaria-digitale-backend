@@ -76,6 +76,9 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 
 The API will be available at `http://localhost:8000/` by default.
 
+Incoming JSON payloads are parsed with a custom loader that converts any
+`NaN` values to `null` before Pydantic validation.
+
 ## Authentication
 
 Obtain a JWT access token using `POST /login`. The endpoint only accepts a

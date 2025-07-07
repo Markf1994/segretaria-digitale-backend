@@ -175,3 +175,27 @@ def test_create_turno_day_off_allows_missing_times(setup_db):
     body = res.json()
     assert body["inizio_1"] is None
     assert body["fine_1"] is None
+
+
+def test_create_turno_converts_nan_to_none(setup_db):
+    headers, user_id = auth_user("nan@example.com")
+    data = {
+        "user_id": user_id,
+        "giorno": "2023-07-01",
+        "inizio_1": "08:00:00",
+        "fine_1": "12:00:00",
+        "inizio_2": float("nan"),
+        "fine_2": float("nan"),
+        "inizio_3": float("nan"),
+        "fine_3": float("nan"),
+        "tipo": "NORMALE",
+        "note": "",
+    }
+
+    res = client.post("/orari/", json=data, headers=headers)
+    assert res.status_code == 200
+    body = res.json()
+    assert body["inizio_2"] is None
+    assert body["fine_2"] is None
+    assert body["inizio_3"] is None
+    assert body["fine_3"] is None
