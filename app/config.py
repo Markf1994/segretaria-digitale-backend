@@ -13,6 +13,7 @@ class Settings:
     G_EVENT_CAL_ID: str | None = None
     G_SHIFT_CAL_ID: str | None = None
     GOOGLE_CALENDAR_ID: str | None = None
+    GOOGLE_CLIENT_ID: str | None = None
     CORS_ORIGINS: str = "*"
     LOG_LEVEL: str = "INFO"
 
@@ -40,6 +41,7 @@ def load_settings() -> Settings:
         G_EVENT_CAL_ID=os.getenv("G_EVENT_CAL_ID"),
         G_SHIFT_CAL_ID=os.getenv("G_SHIFT_CAL_ID"),
         GOOGLE_CALENDAR_ID=os.getenv("GOOGLE_CALENDAR_ID"),
+        GOOGLE_CLIENT_ID=os.getenv("GOOGLE_CLIENT_ID"),
         CORS_ORIGINS=os.getenv("CORS_ORIGINS", "*"),
         LOG_LEVEL=os.getenv("LOG_LEVEL", "INFO"),
     )
