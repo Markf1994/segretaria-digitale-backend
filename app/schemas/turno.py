@@ -3,7 +3,7 @@ from pydantic import BaseModel, model_validator
 from typing import Optional
 from uuid import UUID
 
-DAY_OFF_TYPES = {"FERIE", "RIPOSO", "FESTIVO", "FERIE RIPOSO"}
+DAY_OFF_TYPES = {"FERIE", "RIPOSO", "FESTIVO", "RECUPERO"}
 
 
 class TurnoBase(BaseModel):
