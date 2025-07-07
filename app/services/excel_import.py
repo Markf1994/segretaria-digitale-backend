@@ -22,6 +22,15 @@ def get_user_id(db: Session, agente: str) -> str:
     return str(user.id)
 
 
+def _clean(cell: Any) -> Any:
+    """Strip whitespace from strings and convert empty values to ``None``."""
+    if isinstance(cell, str):
+        cell = cell.strip()
+        if cell == "":
+            return None
+    return cell
+
+
 def parse_excel(path: str, db: Session | None = None) -> List[Dict[str, Any]]:
     """Parse an Excel file exported from Google Sheets.
 
@@ -83,12 +92,10 @@ def parse_excel(path: str, db: Session | None = None) -> List[Dict[str, Any]]:
             except ValueError as err:
                 raise HTTPException(status_code=400, detail=f"Row {row_num}: {err}")
 
-        row_type = str(row.get("Tipo", "NORMALE")).strip()
-        inizio1 = row.get("Inizio1")
-        fine1 = row.get("Fine1")
-        if (
-            pd.isna(inizio1) or pd.isna(fine1)
-        ) and row_type.upper() not in DAY_OFF_TYPES:
+        row_type = _clean(row.get("Tipo", "NORMALE")) or "NORMALE"
+        inizio1 = _clean(row.get("Inizio1"))
+        fine1 = _clean(row.get("Fine1"))
+        if (inizio1 is None or fine1 is None) and row_type.upper() not in DAY_OFF_TYPES:
             raise HTTPException(
                 status_code=400,
                 detail=f"Row {row_num}: Missing 'Inizio1' or 'Fine1'",
@@ -99,34 +106,34 @@ def parse_excel(path: str, db: Session | None = None) -> List[Dict[str, Any]]:
             "giorno": (
                 row["Data"].date() if hasattr(row["Data"], "date") else row["Data"]
             ),
-            "inizio_1": None if pd.isna(inizio1) else inizio1,
-            "fine_1": None if pd.isna(fine1) else fine1,
-            "tipo": row_type or "NORMALE",
-            "note": row.get("Note", ""),
+            "inizio_1": inizio1,
+            "fine_1": fine1,
+            "tipo": row_type,
+            "note": _clean(row.get("Note", "")) or "",
         }
 
         if (
             "Inizio2" in df.columns
-            and not pd.isna(row.get("Inizio2"))
-            and not pd.isna(row.get("Fine2"))
+            and _clean(row.get("Inizio2")) is not None
+            and _clean(row.get("Fine2")) is not None
         ):
-            payload["inizio_2"] = row["Inizio2"]
-            payload["fine_2"] = row["Fine2"]
+            payload["inizio_2"] = _clean(row["Inizio2"])
+            payload["fine_2"] = _clean(row["Fine2"])
 
         if (
             "Straordinario inizio" in df.columns
-            and not pd.isna(row.get("Straordinario inizio"))
-            and not pd.isna(row.get("Straordinario fine"))
+            and _clean(row.get("Straordinario inizio")) is not None
+            and _clean(row.get("Straordinario fine")) is not None
         ):
-            payload["inizio_3"] = row["Straordinario inizio"]
-            payload["fine_3"] = row["Straordinario fine"]
+            payload["inizio_3"] = _clean(row["Straordinario inizio"])
+            payload["fine_3"] = _clean(row["Straordinario fine"])
         elif (
             "Inizio3" in df.columns
-            and not pd.isna(row.get("Inizio3"))
-            and not pd.isna(row.get("Fine3"))
+            and _clean(row.get("Inizio3")) is not None
+            and _clean(row.get("Fine3")) is not None
         ):
-            payload["inizio_3"] = row["Inizio3"]
-            payload["fine_3"] = row["Fine3"]
+            payload["inizio_3"] = _clean(row["Inizio3"])
+            payload["fine_3"] = _clean(row["Fine3"])
 
         rows.append(payload)
 
