@@ -190,6 +190,7 @@ either a `User ID` or an `Agente` column. Optional columns are
 Valid values for `Tipo` are `NORMALE`, `STRAORD`, `FERIE`, `RIPOSO`, `FESTIVO` and `RECUPERO`.
 Rows marked as day off (with `Tipo` set to `FERIE`, `RIPOSO`, `FESTIVO` or `RECUPERO`) may leave the `Inizio1` and `Fine1` cells empty. The columns must still be present in the sheet.
 Leading and trailing spaces in time cells are ignored during parsing, but empty cells will raise a `400` error unless the row is a day off.
+Invalid time formats (for example the string `nan`) also trigger a `400` response indicating the offending row.
 
 Requests can fail with status `400` when required columns are missing, when a
 user referenced by `User ID` or `Agente` does not exist, or when the identifier
