@@ -66,7 +66,7 @@ def week_pdf(
         for t in turni
     ]
 
-    pdf_path, html_path = df_to_pdf(rows)
+    pdf_path, html_path = df_to_pdf(rows, db)
     background_tasks.add_task(os.remove, pdf_path)
     background_tasks.add_task(os.remove, html_path)
     filename = f"turni_{week}.pdf"

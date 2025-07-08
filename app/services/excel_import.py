@@ -153,15 +153,33 @@ def parse_excel(path: str, db: Session | None = None) -> List[Dict[str, Any]]:
     return rows
 
 
-def df_to_pdf(rows: List[Dict[str, Any]]) -> Tuple[str, str]:
+def df_to_pdf(rows: List[Dict[str, Any]], db: Session | None = None) -> Tuple[str, str]:
     """Generate a PDF table from row payloads and return its paths.
+
+    When a database session is provided, the ``user_id`` field is replaced
+    with the corresponding agent name in an ``Agente`` column.
 
     :return: A tuple ``(pdf_path, html_path)`` pointing to the generated files.
     """
+
     df = pd.DataFrame(rows)
+
+    if db is not None and "user_id" in df.columns:
+        ids = [uid for uid in df["user_id"].unique() if uid is not None]
+        if ids:
+            users = (
+                db.query(User.id, User.nome)
+                .filter(User.id.in_(ids))
+                .all()
+            )
+            mapping = {u.id: u.nome for u in users}
+            df["Agente"] = df["user_id"].map(mapping)
+        df = df.drop(columns=["user_id"])
+
     with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as tmp_html:
         df.to_html(tmp_html.name, index=False)
         html_path = tmp_html.name
+
     pdf_path = html_path.replace(".html", ".pdf")
     try:
         pdfkit.from_file(html_path, pdf_path)  # requires wkhtmltopdf installed
@@ -172,4 +190,5 @@ def df_to_pdf(rows: List[Dict[str, Any]]) -> Tuple[str, str]:
                 detail="wkhtmltopdf not installed",
             )
         raise
+
     return pdf_path, html_path
