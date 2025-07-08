@@ -186,6 +186,7 @@ request under the `file` field. The same functionality is available via
 The Excel sheet **must** include the `Giorno`, `Inizio1` and `Fine1` columns and
 either a `User ID` or an `Agente` column. Optional columns are
 `Inizio2`/`Fine2`, `Inizio3`/`Fine3` (or `Straordinario inizio`/`Straordinario fine`), `Tipo` and `Note`.
+Valid values for `Tipo` are `NORMALE`, `STRAORD`, `FERIE`, `RIPOSO`, `FESTIVO` and `RECUPERO`.
 Rows marked as day off (with `Tipo` set to `FERIE`, `RIPOSO`, `FESTIVO` or `RECUPERO`) may leave the `Inizio1` and `Fine1` cells empty. The columns must still be present in the sheet.
 Leading and trailing spaces in time cells are ignored during parsing, but empty cells will raise a `400` error unless the row is a day off.
 

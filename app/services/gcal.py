@@ -19,7 +19,7 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 import googleapiclient.errors as gerr
 
-from app.schemas.turno import DAY_OFF_TYPES
+from app.schemas.turno import DAY_OFF_TYPES, TipoTurno
 
 
 # ------------------------------------------------------------------- credenziali
@@ -78,7 +78,12 @@ def sync_shift_event(turno):
     Crea o aggiorna l'evento relativo a un turno
     nel calendario 'Turni di Servizio'.
     """
-    if (turno.tipo or "").upper() in DAY_OFF_TYPES:
+    try:
+        tipo = TipoTurno(turno.tipo)
+    except ValueError:
+        tipo = None
+
+    if tipo in DAY_OFF_TYPES:
         # remove any existing calendar event for day-off records
         delete_shift_event(turno.id)
         return
@@ -95,7 +100,7 @@ def sync_shift_event(turno):
         "description": turno.note or "",
         "start": {"dateTime": iso_dt(turno.giorno, start)},
         "end": {"dateTime": iso_dt(turno.giorno, end)},
-        "colorId": "11" if turno.tipo == "STRAORD" else "10",  # rosso / blu
+        "colorId": "11" if tipo == TipoTurno.STRAORD else "10",  # rosso / blu
     }
 
     gcal = get_client()

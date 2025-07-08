@@ -3,6 +3,7 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.schemas.turno import TipoTurno
 
 client = TestClient(app)
 
@@ -30,7 +31,7 @@ def test_week_pdf_filters_turni(setup_db, tmp_path):
         "fine_2": None,
         "inizio_3": None,
         "fine_3": None,
-        "tipo": "NORMALE",
+        "tipo": TipoTurno.NORMALE.value,
         "note": "",
     }
     shift2 = {
@@ -42,7 +43,7 @@ def test_week_pdf_filters_turni(setup_db, tmp_path):
         "fine_2": None,
         "inizio_3": None,
         "fine_3": None,
-        "tipo": "NORMALE",
+        "tipo": TipoTurno.NORMALE.value,
         "note": "",
     }
     shift3 = {
@@ -54,7 +55,7 @@ def test_week_pdf_filters_turni(setup_db, tmp_path):
         "fine_2": None,
         "inizio_3": None,
         "fine_3": None,
-        "tipo": "NORMALE",
+        "tipo": TipoTurno.NORMALE.value,
         "note": "",
     }
 
@@ -111,7 +112,7 @@ def test_week_pdf_temp_files_removed(setup_db, tmp_path):
         "fine_2": None,
         "inizio_3": None,
         "fine_3": None,
-        "tipo": "NORMALE",
+        "tipo": TipoTurno.NORMALE.value,
         "note": "",
     }
 

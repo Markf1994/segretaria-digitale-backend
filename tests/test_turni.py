@@ -1,5 +1,6 @@
 from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
+from app.schemas.turno import TipoTurno
 
 from app.main import app
 
@@ -29,7 +30,7 @@ def test_create_turno(setup_db):
         "fine_2": "17:00:00",
         "inizio_3": None,
         "fine_3": None,
-        "tipo": "NORMALE",
+        "tipo": TipoTurno.NORMALE.value,
         "note": "test",
     }
     res = client.post("/orari/", json=data, headers=headers)
@@ -56,14 +57,14 @@ def test_update_turno(setup_db):
         "fine_2": None,
         "inizio_3": None,
         "fine_3": None,
-        "tipo": "NORMALE",
+        "tipo": TipoTurno.NORMALE.value,
         "note": "",
     }
     first = client.post("/orari/", json=base, headers=headers)
     turno_id = first.json()["id"]
     base["inizio_1"] = "09:00:00"
     base["fine_1"] = "13:00:00"
-    base["tipo"] = "STRAORD"
+    base["tipo"] = TipoTurno.STRAORD.value
     update = client.post("/orari/", json=base, headers=headers)
     assert update.status_code == 200
     updated = update.json()
@@ -84,7 +85,7 @@ def test_delete_turno(setup_db):
         "fine_2": None,
         "inizio_3": None,
         "fine_3": None,
-        "tipo": "NORMALE",
+        "tipo": TipoTurno.NORMALE.value,
         "note": "",
     }
     res = client.post("/orari/", json=data, headers=headers)
@@ -123,7 +124,7 @@ def test_shift_event_summary_email(setup_db):
                 "fine_2": None,
                 "inizio_3": None,
                 "fine_3": None,
-                "tipo": "NORMALE",
+                "tipo": TipoTurno.NORMALE.value,
                 "note": "",
             },
             headers=headers,
@@ -144,7 +145,7 @@ def test_create_turno_unknown_user_returns_400(setup_db):
         "fine_2": None,
         "inizio_3": None,
         "fine_3": None,
-        "tipo": "NORMALE",
+        "tipo": TipoTurno.NORMALE.value,
         "note": "",
     }
 
@@ -164,7 +165,7 @@ def test_create_turno_day_off_allows_missing_times(setup_db):
         "fine_2": None,
         "inizio_3": None,
         "fine_3": None,
-        "tipo": "FESTIVO",
+        "tipo": TipoTurno.RECUPERO.value,
         "note": "",
     }
 
