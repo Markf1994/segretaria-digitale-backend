@@ -93,6 +93,8 @@ def test_week_pdf_filters_turni(setup_db, tmp_path):
     days = {r["giorno"] for r in captured["rows"]}
     assert days == {"2023-01-02", "2023-01-08"}
     assert "02/01/2023 – 08/01/2023" in captured["html_text"]
+    assert "MONDAY<br>02/01/2023" in captured["html_text"]
+    assert "SUNDAY<br>08/01/2023" in captured["html_text"]
     assert "<th>Test</th>" in captured["html_text"]
     assert "Logo.png" in captured["html_text"]
     assert (
@@ -154,6 +156,7 @@ def test_week_pdf_temp_files_removed(setup_db, tmp_path):
 
     assert res.status_code == 200
     assert "02/01/2023 – 08/01/2023" in captured["html_text"]
+    assert "MONDAY<br>02/01/2023" in captured["html_text"]
     assert "<th>Test</th>" in captured["html_text"]
     assert "Logo.png" in captured["html_text"]
     assert (
