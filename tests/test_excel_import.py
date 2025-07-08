@@ -471,3 +471,34 @@ def test_df_to_pdf_missing_logo(monkeypatch):
 
     assert exc.value.status_code == 500
     assert exc.value.detail == "Logo file missing"
+
+
+def test_df_to_pdf_escapes_html(tmp_path):
+    rows = [
+        {
+            "Agente": "<Agent>",
+            "giorno": "2023-01-01",
+            "inizio_1": "08:00:00",
+            "fine_1": "12:00:00",
+            "tipo": "NORMALE",
+            "note": "<b>hi</b>",
+        }
+    ]
+
+    def fake_from_file(html_path, pdf_path):
+        Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
+        return True
+
+    with patch(
+        "app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file
+    ):
+        pdf_path, html_path = df_to_pdf(rows, None)
+
+    html_text = Path(html_path).read_text()
+    assert "&lt;Agent&gt;" in html_text
+    assert "&lt;b&gt;hi&lt;/b&gt;" in html_text
+    assert "<Agent>" not in html_text
+    assert "<b>hi</b>" not in html_text
+
+    os.remove(pdf_path)
+    os.remove(html_path)

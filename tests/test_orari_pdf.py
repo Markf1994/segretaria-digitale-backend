@@ -162,3 +162,48 @@ def test_week_pdf_temp_files_removed(setup_db, tmp_path):
     )
     assert not os.path.exists(captured["pdf"])
     assert not os.path.exists(captured["html"])
+
+
+def test_week_pdf_escapes_html(setup_db, tmp_path):
+    headers, user_id = auth_user("escape@example.com", nome="<Agent>")
+
+    shift = {
+        "user_id": user_id,
+        "giorno": "2023-01-02",
+        "inizio_1": "08:00:00",
+        "fine_1": "12:00:00",
+        "inizio_2": None,
+        "fine_2": None,
+        "inizio_3": None,
+        "fine_3": None,
+        "tipo": TipoTurno.NORMALE.value,
+        "note": "<b>note</b>",
+    }
+
+    client.post("/orari/", json=shift, headers=headers)
+
+    captured = {}
+    real_df_to_pdf = __import__(
+        "app.services.excel_import", fromlist=["df_to_pdf"]
+    ).df_to_pdf
+
+    def fake_from_file(html_path, pdf_path):
+        Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
+        return True
+
+    def capture_df_to_pdf(rows, db):
+        pdf_path, html_path = real_df_to_pdf(rows, db)
+        captured["html_text"] = Path(html_path).read_text()
+        return pdf_path, html_path
+
+    with patch(
+        "app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file
+    ):
+        with patch("app.routes.orari.df_to_pdf", side_effect=capture_df_to_pdf):
+            res = client.get("/orari/pdf?week=2023-W01", headers=headers)
+
+    assert res.status_code == 200
+    assert "&lt;Agent&gt;" in captured["html_text"]
+    assert "&lt;b&gt;note&lt;/b&gt;" in captured["html_text"]
+    assert "<Agent>" not in captured["html_text"]
+    assert "<b>note</b>" not in captured["html_text"]
