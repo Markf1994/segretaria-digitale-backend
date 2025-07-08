@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Tuple
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 import os
+import html
 
 from app.models.user import User
 from app.schemas.turno import DAY_OFF_TYPES, TipoTurno
@@ -206,7 +207,7 @@ def df_to_pdf(rows: List[Dict[str, Any]], db: Session | None = None) -> Tuple[st
         if agent:
             by_date[day][agent] = cell
         if row.get("note"):
-            notes[day].append(str(row.get("note")))
+            notes[day].append(html.escape(str(row.get("note"))))
 
     # Generate HTML
     logo_path = os.path.abspath(
@@ -233,7 +234,9 @@ def df_to_pdf(rows: List[Dict[str, Any]], db: Session | None = None) -> Tuple[st
     </div>
     """
 
-    table_header = "<tr><th>DATA</th>" + "".join(f"<th>{a}</th>" for a in agents) + "<th>ANNOTAZIONI DI SERVIZIO</th></tr>"
+    table_header = "<tr><th>DATA</th>" + "".join(
+        f"<th>{html.escape(str(a))}</th>" for a in agents
+    ) + "<th>ANNOTAZIONI DI SERVIZIO</th></tr>"
 
     rows_html = []
     for day in sorted(by_date.keys()):
