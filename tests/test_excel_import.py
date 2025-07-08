@@ -439,3 +439,30 @@ def test_df_to_pdf_missing_wkhtmltopdf(tmp_path):
 
     assert exc.value.status_code == 500
     assert "wkhtmltopdf" in exc.value.detail
+
+
+def test_df_to_pdf_missing_logo(monkeypatch):
+    rows = [
+        {
+            "user_id": "1",
+            "giorno": "2023-01-01",
+            "inizio_1": "08:00:00",
+            "fine_1": "12:00:00",
+            "tipo": "NORMALE",
+            "note": "",
+        }
+    ]
+
+    def fake_from_file(html_path, pdf_path):
+        Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
+        return True
+
+    with patch(
+        "app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file
+    ):
+        with patch("os.path.exists", return_value=False):
+            with pytest.raises(HTTPException) as exc:
+                df_to_pdf(rows, None)
+
+    assert exc.value.status_code == 500
+    assert exc.value.detail == "Logo file missing"
