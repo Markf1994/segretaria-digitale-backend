@@ -9,16 +9,16 @@ Richiede:
   G_SHIFT_CAL_ID=…@group.calendar.google.com
 """
 
-from datetime import date, time, datetime
-from functools import lru_cache
-from app.config import settings
-
 import json
 import os
+from datetime import date, datetime, time
+from functools import lru_cache
+
+import googleapiclient.errors as gerr
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
-import googleapiclient.errors as gerr
 
+from app.config import settings
 from app.schemas.turno import DAY_OFF_TYPES, TipoTurno
 
 
@@ -130,7 +130,8 @@ def sync_shift_event(turno):
 def delete_shift_event(turno_id):
     """
     Elimina dal calendario Turni l'evento legato al turno rimosso.
-    Ignora l'errore 404 se l'evento era già assente.
+    Ignora gli errori 404 e 400 se l'evento era già assente o l'ID
+    non viene accettato da Google.
     """
     cal_id = settings.G_SHIFT_CAL_ID
     if not cal_id:
@@ -143,5 +144,5 @@ def delete_shift_event(turno_id):
             eventId=f"shift-{turno_id}",
         ).execute()
     except gerr.HttpError as e:
-        if e.resp.status != 404:
+        if e.resp.status not in (404, 400):
             raise

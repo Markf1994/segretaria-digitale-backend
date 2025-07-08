@@ -1,5 +1,6 @@
 import json
 from datetime import date, time, timedelta
+
 import pytest
 
 from app.services import gcal
@@ -80,4 +81,41 @@ def test_sync_shift_event_requires_calendar_id(monkeypatch):
 def test_delete_shift_event_requires_calendar_id(monkeypatch):
     monkeypatch.setattr(gcal.settings, "G_SHIFT_CAL_ID", None)
     with pytest.raises(RuntimeError, match="G_SHIFT_CAL_ID is not configured"):
+        gcal.delete_shift_event("dummy")
+
+
+@pytest.mark.parametrize("status", [404, 400])
+def test_delete_shift_event_ignores_known_errors(monkeypatch, status):
+    monkeypatch.setattr(gcal.settings, "G_SHIFT_CAL_ID", "cal")
+
+    class DummyEvents:
+        def delete(self, calendarId=None, eventId=None):
+            resp = type("Resp", (), {"status": status})()
+            raise gcal.gerr.HttpError(resp=resp, content=b"")
+
+    class DummyClient:
+        def events(self):
+            return DummyEvents()
+
+    monkeypatch.setattr(gcal, "get_client", lambda: DummyClient())
+
+    # Should not raise for 404 or 400
+    gcal.delete_shift_event("dummy")
+
+
+def test_delete_shift_event_propagates_other_errors(monkeypatch):
+    monkeypatch.setattr(gcal.settings, "G_SHIFT_CAL_ID", "cal")
+
+    class DummyEvents:
+        def delete(self, calendarId=None, eventId=None):
+            resp = type("Resp", (), {"status": 500})()
+            raise gcal.gerr.HttpError(resp=resp, content=b"")
+
+    class DummyClient:
+        def events(self):
+            return DummyEvents()
+
+    monkeypatch.setattr(gcal, "get_client", lambda: DummyClient())
+
+    with pytest.raises(gcal.gerr.HttpError):
         gcal.delete_shift_event("dummy")
