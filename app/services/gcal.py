@@ -53,7 +53,8 @@ SHIFT_CAL_ID = settings.G_SHIFT_CAL_ID  # nuovo calendario “Turni di Servizio�
 # ------------------------------------------------------------------- utilità
 def iso_dt(d: date, t: time) -> str:
     """2025-07-01 + 08:30 -> '2025-07-01T08:30:00+02:00'"""
-    offset = datetime.now().astimezone().utcoffset()
+    dt = datetime.combine(d, t)
+    offset = dt.astimezone().utcoffset()
     if offset is None:
         tz = "+00:00"
     else:
