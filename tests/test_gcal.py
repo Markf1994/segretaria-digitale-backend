@@ -1,5 +1,6 @@
 import json
 from datetime import date, time, timedelta
+from unittest.mock import MagicMock
 import pytest
 
 from app.services import gcal
@@ -81,3 +82,54 @@ def test_delete_shift_event_requires_calendar_id(monkeypatch):
     monkeypatch.setattr(gcal.settings, "G_SHIFT_CAL_ID", None)
     with pytest.raises(RuntimeError, match="G_SHIFT_CAL_ID is not configured"):
         gcal.delete_shift_event("dummy")
+
+
+def test_sync_shift_event_inserts_on_http_400(monkeypatch):
+    """When update fails with HTTP 400, a new event should be inserted."""
+
+    class DummyHttpError(Exception):
+        def __init__(self, status: int):
+            self.resp = type("Resp", (), {"status": status})()
+
+    monkeypatch.setattr(gcal.gerr, "HttpError", DummyHttpError)
+
+    called = {"insert": False}
+
+    class DummyEvents:
+        def update(self, *a, **k):
+            raise DummyHttpError(400)
+
+        def insert(self, *a, **k):
+            called["insert"] = True
+            return MagicMock(execute=MagicMock())
+
+    class DummyClient:
+        def __init__(self):
+            self._events = DummyEvents()
+
+        def events(self):
+            return self._events
+
+    monkeypatch.setattr(gcal, "get_client", lambda: DummyClient())
+    monkeypatch.setattr(gcal.settings, "G_SHIFT_CAL_ID", "CID")
+
+    turno = type(
+        "Turno",
+        (),
+        {
+            "id": "1",
+            "user": type("User", (), {"nome": None, "email": "test@example.com"})(),
+            "note": "",
+            "giorno": date(2023, 1, 1),
+            "inizio_1": time(8, 0),
+            "fine_1": time(12, 0),
+            "inizio_2": None,
+            "fine_2": None,
+            "inizio_3": None,
+            "fine_3": None,
+            "tipo": "NORMALE",
+        },
+    )()
+
+    gcal.sync_shift_event(turno)
+    assert called["insert"]

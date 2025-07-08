@@ -115,7 +115,7 @@ def sync_shift_event(turno):
             body=body,
         ).execute()
     except gerr.HttpError as e:
-        if e.resp.status == 404:  # evento non esiste → crealo
+        if e.resp.status in {400, 404}:  # evento mancante o non valido → crealo
             gcal.events().insert(
                 calendarId=cal_id,
                 body=body,
