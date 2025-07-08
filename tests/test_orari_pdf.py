@@ -72,9 +72,9 @@ def test_week_pdf_filters_turni(setup_db, tmp_path):
         Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
         return True
 
-    def capture_df_to_pdf(rows):
+    def capture_df_to_pdf(rows, db):
         captured["rows"] = rows
-        return real_df_to_pdf(rows)
+        return real_df_to_pdf(rows, db)
 
     with patch(
         "app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file
@@ -120,7 +120,7 @@ def test_week_pdf_temp_files_removed(setup_db, tmp_path):
 
     captured = {}
 
-    def fake_df_to_pdf(rows):
+    def fake_df_to_pdf(rows, db):
         pdf_path = tmp_path / "week.pdf"
         html_path = tmp_path / "week.html"
         pdf_path.write_bytes(b"%PDF-1.4 fake")
