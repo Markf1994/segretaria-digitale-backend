@@ -20,8 +20,8 @@ This repository contains a FastAPI backend used by Segretaria Digitale.
    locally. `wkhtmltopdf` is required by
    `app/services/excel_import.py` and must be included in deployment build
    steps.
-4. Place your `Logo.png` file at `app/static/Logo.png`. A placeholder file
-   `Logo.ts` exists in that directory for version control and should be replaced
+4. Place your `Logo.png` file at `static/Logo.png`. A placeholder file
+   is included in that directory for version control and should be replaced
    with the actual image.
 5. Copy `.env.example` to `.env` and adjust the values as needed. If you want to
    restrict cross-origin requests, set `CORS_ORIGINS` to a comma-separated list

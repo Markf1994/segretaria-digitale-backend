@@ -209,7 +209,9 @@ def df_to_pdf(rows: List[Dict[str, Any]], db: Session | None = None) -> Tuple[st
             notes[day].append(str(row.get("note")))
 
     # Generate HTML
-    logo_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "static", "Logo.png"))
+    logo_path = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "..", "static", "Logo.png")
+    )
     styles = """
     <style>
     body { font-family: Aptos, sans-serif; font-size: 12pt; }
