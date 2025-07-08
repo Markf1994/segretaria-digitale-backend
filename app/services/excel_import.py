@@ -28,7 +28,7 @@ def _clean(cell: Any) -> Any:
         return None
     if isinstance(cell, str):
         cell = cell.strip()
-        if cell == "":
+        if cell == "" or cell.lower() == "nan":
             return None
     return cell
 

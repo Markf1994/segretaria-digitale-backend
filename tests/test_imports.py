@@ -195,6 +195,38 @@ def test_import_xlsx_unknown_agent_returns_400(tmp_path):
     assert "Unknown user" in res.json()["detail"]
 
 
+def test_import_xlsx_nan_time_returns_400(tmp_path):
+    """Cells containing the string 'nan' should result in a 400 error."""
+    _, user_id, _ = auth_user("nan@example.com")
+    df = pd.DataFrame(
+        [
+            {
+                "User ID": user_id,
+                "Giorno": "2024-01-01",
+                "Inizio1": "nan",
+                "Fine1": "nan",
+            }
+        ]
+    )
+    xlsx_path = tmp_path / "nan.xlsx"
+    df.to_excel(xlsx_path, index=False)
+
+    with open(xlsx_path, "rb") as fh:
+        res = client.post(
+            "/import/xlsx",
+            files={
+                "file": (
+                    "nan.xlsx",
+                    fh,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                )
+            },
+        )
+
+    assert res.status_code == 400
+    assert "Row 2" in res.json()["detail"]
+
+
 def test_tmp_removed_on_late_failure(tmp_path):
     captured = {}
 

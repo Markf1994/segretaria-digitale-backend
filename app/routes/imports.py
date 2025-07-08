@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 import tempfile
 import os
 
+from pydantic import ValidationError
 from app.dependencies import get_db
 from app.schemas.turno import TurnoIn
 from app.crud import turno as crud_turno
@@ -33,8 +34,12 @@ async def import_xlsx(
         rows = parse_excel(tmp_path, db)
 
         # 3 – store/update each shift (DB + Google Calendar)
-        for payload in rows:
-            crud_turno.upsert_turno(db, TurnoIn(**payload))
+        for idx, payload in enumerate(rows):
+            try:
+                turno = TurnoIn(**payload)
+            except ValidationError as err:
+                raise HTTPException(status_code=400, detail=f"Row {idx+2}: {err}")
+            crud_turno.upsert_turno(db, turno)
 
         # 4 – generate PDF summary
         pdf_path, html_path = df_to_pdf(rows)
