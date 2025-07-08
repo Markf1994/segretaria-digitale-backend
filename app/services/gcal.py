@@ -115,7 +115,9 @@ def sync_shift_event(turno):
             body=body,
         ).execute()
     except gerr.HttpError as e:
-        if e.resp.status == 404:  # evento non esiste → crealo
+        if e.resp.status in (404, 400):
+            # status 400 may be returned when Google thinks the event ID is invalid,
+            # so treat it like a missing event and create it from scratch
             gcal.events().insert(
                 calendarId=cal_id,
                 body=body,
