@@ -102,6 +102,24 @@ fetch("http://localhost:8000/google-login", {
 });
 ```
 
+The response contains an `access_token` which should be stored (for example in
+`localStorage`) and then included in the `Authorization` header of subsequent
+requests:
+
+```javascript
+fetch("http://localhost:8000/google-login", { /* as above */ })
+  .then((resp) => resp.json())
+  .then(({access_token}) => {
+    localStorage.setItem("token", access_token);
+    return access_token;
+  })
+  .then((token) => {
+    fetch("http://localhost:8000/protected-endpoint", {
+      headers: {Authorization: `Bearer ${token}`},
+    });
+  });
+```
+
 
 ## Running tests
 
