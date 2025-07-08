@@ -1,5 +1,6 @@
 import json
 from datetime import date, time, timedelta
+import types
 import pytest
 
 from app.services import gcal
@@ -81,3 +82,56 @@ def test_delete_shift_event_requires_calendar_id(monkeypatch):
     monkeypatch.setattr(gcal.settings, "G_SHIFT_CAL_ID", None)
     with pytest.raises(RuntimeError, match="G_SHIFT_CAL_ID is not configured"):
         gcal.delete_shift_event("dummy")
+
+
+def test_sync_shift_event_insert_on_bad_event_id(monkeypatch):
+    """``sync_shift_event`` should insert when update fails with 400."""
+
+    class FakeHttpError(Exception):
+        def __init__(self, status):
+            self.resp = types.SimpleNamespace(status=status)
+
+    update_called = {}
+    insert_called = {}
+
+    def fake_update(**kwargs):
+        class Runner:
+            def execute(self_inner):
+                raise FakeHttpError(400)
+
+        update_called["called"] = True
+        return Runner()
+
+    def fake_insert(**kwargs):
+        class Runner:
+            def execute(self_inner):
+                insert_called["called"] = True
+
+        return Runner()
+
+    class DummyClient:
+        def events(self):
+            return types.SimpleNamespace(update=fake_update, insert=fake_insert)
+
+    monkeypatch.setattr(gcal, "get_client", lambda: DummyClient())
+    monkeypatch.setattr(gcal.gerr, "HttpError", FakeHttpError, raising=False)
+    monkeypatch.setattr(gcal.settings, "G_SHIFT_CAL_ID", "CAL")
+
+    turno = types.SimpleNamespace(
+        id="1",
+        user=types.SimpleNamespace(nome="", email="bot@example.com"),
+        giorno=date(2024, 1, 1),
+        inizio_1=time(8, 0),
+        fine_1=time(12, 0),
+        inizio_2=None,
+        fine_2=None,
+        inizio_3=None,
+        fine_3=None,
+        tipo="NORMALE",
+        note="",
+    )
+
+    gcal.sync_shift_event(turno)
+
+    assert update_called.get("called") is True
+    assert insert_called.get("called") is True
