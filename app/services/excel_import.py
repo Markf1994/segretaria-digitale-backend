@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException
 
 from app.models.user import User
-from app.schemas.turno import DAY_OFF_TYPES
+from app.schemas.turno import DAY_OFF_TYPES, TipoTurno
 
 
 def get_user_id(db: Session, agente: str) -> str:
@@ -97,7 +97,9 @@ def parse_excel(path: str, db: Session | None = None) -> List[Dict[str, Any]]:
         row_type = _clean(row.get("Tipo", "NORMALE")) or "NORMALE"
         inizio1 = _clean(row.get("Inizio1"))
         fine1 = _clean(row.get("Fine1"))
-        if (inizio1 is None or fine1 is None) and row_type.upper() not in DAY_OFF_TYPES:
+        if (
+            inizio1 is None or fine1 is None
+        ) and row_type.upper() not in {t.value for t in DAY_OFF_TYPES}:
             raise HTTPException(
                 status_code=400,
                 detail=f"Row {row_num}: Missing 'Inizio1' or 'Fine1'",

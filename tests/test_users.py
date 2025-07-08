@@ -1,5 +1,6 @@
 from unittest.mock import patch
 from fastapi.testclient import TestClient
+from app.schemas.turno import TipoTurno
 
 from app.main import app
 
@@ -73,7 +74,7 @@ def test_user_turni_listed_after_creation(setup_db):
             "fine_2": None,
             "inizio_3": None,
             "fine_3": None,
-            "tipo": "NORMALE",
+            "tipo": TipoTurno.NORMALE.value,
             "note": "",
         }
         res = client.post("/orari/", json=shift, headers=headers)

@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 from app.models.turno import Turno  # modello ORM
 from app.models.user import User
-from app.schemas.turno import TurnoIn  # Pydantic (input)
+from app.schemas.turno import TurnoIn, TipoTurno  # Pydantic (input)
 from app.services import gcal
 
 
@@ -49,7 +49,7 @@ def upsert_turno(db: Session, payload: TurnoIn) -> Turno:
     rec.inizio_3 = payload.inizio_3
     rec.fine_3 = payload.fine_3
 
-    rec.tipo = payload.tipo  # NORMALE | STRAORD | FERIE
+    rec.tipo = payload.tipo.value  # NORMALE | STRAORD | FERIE
     rec.note = payload.note
 
     # 4. salva su database
