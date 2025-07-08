@@ -8,6 +8,7 @@ import pandas as pd
 
 from fastapi import HTTPException
 from app.services.excel_import import parse_excel, df_to_pdf
+from app.schemas.turno import TipoTurno
 
 
 def test_parse_excel(tmp_path):
@@ -30,7 +31,7 @@ def test_parse_excel(tmp_path):
                 "Fine2": "18:00:00",
                 "Inizio3": "19:00:00",
                 "Fine3": "21:00:00",
-                "Tipo": "EXTRA",
+                "Tipo": TipoTurno.STRAORD.value,
                 "Note": "n2",
             },
         ]
@@ -58,7 +59,7 @@ def test_parse_excel(tmp_path):
             "fine_2": "18:00:00",
             "inizio_3": "19:00:00",
             "fine_3": "21:00:00",
-            "tipo": "EXTRA",
+            "tipo": TipoTurno.STRAORD.value,
             "note": "n2",
         },
     ]
@@ -318,6 +319,36 @@ def test_parse_excel_day_off_missing_times_recupero(tmp_path):
             "inizio_1": None,
             "fine_1": None,
             "tipo": "RECUPERO",
+            "note": "",
+        }
+    ]
+
+
+def test_parse_excel_lowercase_tipo(tmp_path):
+    """Tipo values are normalized to uppercase."""
+    df = pd.DataFrame(
+        [
+            {
+                "User ID": 10,
+                "Giorno": "2024-02-03",
+                "Inizio1": None,
+                "Fine1": None,
+                "Tipo": "ferie",
+            }
+        ]
+    )
+    xls = tmp_path / "lowercase.xlsx"
+    df.to_excel(xls, index=False)
+
+    rows = parse_excel(str(xls), None)
+
+    assert rows == [
+        {
+            "user_id": "10",
+            "giorno": "2024-02-03",
+            "inizio_1": None,
+            "fine_1": None,
+            "tipo": TipoTurno.FERIE.value,
             "note": "",
         }
     ]
