@@ -69,7 +69,7 @@ def test_week_pdf_filters_turni(setup_db, tmp_path):
         "app.services.excel_import", fromlist=["df_to_pdf"]
     ).df_to_pdf
 
-    def fake_from_file(html_path, pdf_path):
+    def fake_from_file(html_path, pdf_path, **kwargs):
         Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
         return True
 
@@ -137,7 +137,7 @@ def test_week_pdf_temp_files_removed(setup_db, tmp_path):
         "app.services.excel_import", fromlist=["df_to_pdf"]
     ).df_to_pdf
 
-    def fake_from_file(html_path, pdf_path):
+    def fake_from_file(html_path, pdf_path, **kwargs):
         Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
         return True
 
@@ -190,7 +190,7 @@ def test_week_pdf_escapes_html(setup_db, tmp_path):
         "app.services.excel_import", fromlist=["df_to_pdf"]
     ).df_to_pdf
 
-    def fake_from_file(html_path, pdf_path):
+    def fake_from_file(html_path, pdf_path, **kwargs):
         Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
         return True
 

@@ -282,7 +282,7 @@ def df_to_pdf(rows: List[Dict[str, Any]], db: Session | None = None) -> Tuple[st
 
     pdf_path = html_path.replace(".html", ".pdf")
     try:
-        pdfkit.from_file(html_path, pdf_path)
+        pdfkit.from_file(html_path, pdf_path, options={"orientation": "Landscape"})
     except OSError as err:
         if "wkhtmltopdf" in str(err):
             raise HTTPException(status_code=500, detail="wkhtmltopdf not installed")

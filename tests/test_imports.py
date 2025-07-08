@@ -37,7 +37,7 @@ def test_import_xlsx_creates_turni_and_returns_pdf(setup_db, tmp_path):
     xlsx_path = tmp_path / "shift.xlsx"
     df.to_excel(xlsx_path, index=False)
 
-    def fake_from_file(html_path, pdf_path):
+    def fake_from_file(html_path, pdf_path, **kwargs):
         Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
         return True
 
@@ -72,7 +72,7 @@ def test_temp_files_removed_after_request(setup_db, tmp_path):
         captured["xlsx"] = path
         return []
 
-    def fake_from_file(html_path, pdf_path):
+    def fake_from_file(html_path, pdf_path, **kwargs):
         captured["html"] = html_path
         captured["pdf"] = pdf_path
         Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
@@ -141,7 +141,7 @@ def test_import_excel_alias_returns_pdf(tmp_path):
     xlsx_path = tmp_path / "shift.xlsx"
     df.to_excel(xlsx_path, index=False)
 
-    def fake_from_file(html_path, pdf_path):
+    def fake_from_file(html_path, pdf_path, **kwargs):
         Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
         return True
 

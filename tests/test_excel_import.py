@@ -425,7 +425,10 @@ def test_df_to_pdf_creates_files_and_cleanup(tmp_path):
         }
     ]
 
-    def fake_from_file(html_path, pdf_path):
+    captured = {}
+
+    def fake_from_file(html_path, pdf_path, **kwargs):
+        captured["options"] = kwargs.get("options")
         Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
         return True
 
@@ -436,6 +439,7 @@ def test_df_to_pdf_creates_files_and_cleanup(tmp_path):
 
     assert os.path.exists(pdf_path)
     assert os.path.exists(html_path)
+    assert captured["options"] == {"orientation": "Landscape"}
     html_text = Path(html_path).read_text()
     assert "26/12/2022 – 01/01/2023" in html_text
     assert "SUNDAY<br>01/01/2023" in html_text
@@ -465,7 +469,7 @@ def test_df_to_pdf_missing_wkhtmltopdf(tmp_path):
         }
     ]
 
-    def fake_from_file(html_path, pdf_path):
+    def fake_from_file(html_path, pdf_path, **kwargs):
         raise OSError("No wkhtmltopdf executable found")
 
     with patch(
@@ -490,7 +494,7 @@ def test_df_to_pdf_missing_logo(monkeypatch):
         }
     ]
 
-    def fake_from_file(html_path, pdf_path):
+    def fake_from_file(html_path, pdf_path, **kwargs):
         Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
         return True
 
@@ -517,7 +521,7 @@ def test_df_to_pdf_escapes_html(tmp_path):
         }
     ]
 
-    def fake_from_file(html_path, pdf_path):
+    def fake_from_file(html_path, pdf_path, **kwargs):
         Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
         return True
 
