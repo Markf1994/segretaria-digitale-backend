@@ -1,5 +1,6 @@
 from pathlib import Path
 from unittest.mock import patch
+import os
 from fastapi.testclient import TestClient
 
 from app.main import app
