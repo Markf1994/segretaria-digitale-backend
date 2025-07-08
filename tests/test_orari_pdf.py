@@ -94,6 +94,11 @@ def test_week_pdf_filters_turni(setup_db, tmp_path):
     assert days == {"2023-01-02", "2023-01-08"}
     assert "02/01/2023 – 08/01/2023" in captured["html_text"]
     assert "<th>Test</th>" in captured["html_text"]
+    assert "Logo.png" in captured["html_text"]
+    assert (
+        "COMUNE DI CASTIONE DELLA PRESOLANA – SERVIZIO DI POLIZIA LOCALE"
+        in captured["html_text"]
+    )
 
 
 def test_week_pdf_invalid_format(setup_db):
@@ -150,5 +155,10 @@ def test_week_pdf_temp_files_removed(setup_db, tmp_path):
     assert res.status_code == 200
     assert "02/01/2023 – 08/01/2023" in captured["html_text"]
     assert "<th>Test</th>" in captured["html_text"]
+    assert "Logo.png" in captured["html_text"]
+    assert (
+        "COMUNE DI CASTIONE DELLA PRESOLANA – SERVIZIO DI POLIZIA LOCALE"
+        in captured["html_text"]
+    )
     assert not os.path.exists(captured["pdf"])
     assert not os.path.exists(captured["html"])
