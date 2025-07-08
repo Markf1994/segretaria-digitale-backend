@@ -401,7 +401,10 @@ def test_df_to_pdf_creates_files_and_cleanup(tmp_path):
     with patch(
         "app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file
     ):
-        pdf_path, html_path = df_to_pdf(rows)
+        pdf_path, html_path = df_to_pdf(rows, db=None)
+
+    html = Path(html_path).read_text()
+    assert "2023-01-01" in html
 
     assert os.path.exists(pdf_path)
     assert os.path.exists(html_path)
@@ -433,7 +436,7 @@ def test_df_to_pdf_missing_wkhtmltopdf(tmp_path):
         "app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file
     ):
         with pytest.raises(HTTPException) as exc:
-            df_to_pdf(rows)
+            df_to_pdf(rows, db=None)
 
     assert exc.value.status_code == 500
     assert "wkhtmltopdf" in exc.value.detail
