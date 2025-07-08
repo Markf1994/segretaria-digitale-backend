@@ -382,6 +382,51 @@ def test_parse_excel_day_off_nan_times(tmp_path):
     ]
 
 
+def test_parse_excel_mixed_case_tipo(tmp_path):
+    """Tipo values should be normalized to uppercase regardless of input case."""
+    df = pd.DataFrame(
+        [
+            {
+                "User ID": 6,
+                "Giorno": "2024-01-04",
+                "Inizio1": "08:00",
+                "Fine1": "12:00",
+                "Tipo": "normale",
+            },
+            {
+                "User ID": 7,
+                "Giorno": "2024-01-05",
+                "Inizio1": None,
+                "Fine1": None,
+                "Tipo": "Recupero",
+            },
+        ]
+    )
+    xls = tmp_path / "mixed.xlsx"
+    df.to_excel(xls, index=False)
+
+    rows = parse_excel(str(xls), None)
+
+    assert rows == [
+        {
+            "user_id": "6",
+            "giorno": "2024-01-04",
+            "inizio_1": "08:00",
+            "fine_1": "12:00",
+            "tipo": "NORMALE",
+            "note": "",
+        },
+        {
+            "user_id": "7",
+            "giorno": "2024-01-05",
+            "inizio_1": None,
+            "fine_1": None,
+            "tipo": "RECUPERO",
+            "note": "",
+        },
+    ]
+
+
 def test_df_to_pdf_creates_files_and_cleanup(tmp_path):
     rows = [
         {
@@ -409,8 +454,7 @@ def test_df_to_pdf_creates_files_and_cleanup(tmp_path):
     assert "01/01/2023 – 01/01/2023" in html_text
     assert "Logo.png" in html_text
     assert (
-        "COMUNE DI CASTIONE DELLA PRESOLANA – SERVIZIO DI POLIZIA LOCALE"
-        in html_text
+        "COMUNE DI CASTIONE DELLA PRESOLANA – SERVIZIO DI POLIZIA LOCALE" in html_text
     )
 
     os.remove(pdf_path)

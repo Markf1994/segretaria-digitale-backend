@@ -104,12 +104,12 @@ def parse_excel(path: str, db: Session | None = None) -> List[Dict[str, Any]]:
             except ValueError as err:
                 raise HTTPException(status_code=400, detail=f"Row {row_num}: {err}")
 
-        row_type = _clean(row.get("Tipo", "NORMALE")) or "NORMALE"
+        row_type = (_clean(row.get("Tipo", "NORMALE")) or "NORMALE").upper()
         inizio1 = _clean(row.get("Inizio1"))
         fine1 = _clean(row.get("Fine1"))
-        if (
-            inizio1 is None or fine1 is None
-        ) and row_type.upper() not in {t.value for t in DAY_OFF_TYPES}:
+        if (inizio1 is None or fine1 is None) and row_type not in {
+            t.value for t in DAY_OFF_TYPES
+        }:
             raise HTTPException(
                 status_code=400,
                 detail=f"Row {row_num}: Missing 'Inizio1' or 'Fine1'",
@@ -118,7 +118,9 @@ def parse_excel(path: str, db: Session | None = None) -> List[Dict[str, Any]]:
         payload: dict[str, Any] = {
             "user_id": user_id,
             "giorno": (
-                row["Giorno"].date() if hasattr(row["Giorno"], "date") else row["Giorno"]
+                row["Giorno"].date()
+                if hasattr(row["Giorno"], "date")
+                else row["Giorno"]
             ),
             "inizio_1": inizio1,
             "fine_1": fine1,
@@ -233,7 +235,11 @@ def df_to_pdf(rows: List[Dict[str, Any]], db: Session | None = None) -> Tuple[st
     </div>
     """
 
-    table_header = "<tr><th>DATA</th>" + "".join(f"<th>{a}</th>" for a in agents) + "<th>ANNOTAZIONI DI SERVIZIO</th></tr>"
+    table_header = (
+        "<tr><th>DATA</th>"
+        + "".join(f"<th>{a}</th>" for a in agents)
+        + "<th>ANNOTAZIONI DI SERVIZIO</th></tr>"
+    )
 
     rows_html = []
     for day in sorted(by_date.keys()):
