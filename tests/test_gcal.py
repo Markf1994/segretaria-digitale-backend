@@ -9,7 +9,7 @@ def test_iso_dt_current_offset():
     d = date(2023, 7, 1)
     t = time(8, 30)
     result = gcal.iso_dt(d, t)
-    offset = gcal.datetime.now().astimezone().utcoffset()
+    offset = gcal.datetime.combine(d, t).astimezone().utcoffset()
     if offset is None:
         expected = "+00:00"
     else:
@@ -21,7 +21,7 @@ def test_iso_dt_current_offset():
 
 
 def test_iso_dt_uses_patched_timezone(monkeypatch):
-    class DummyNow:
+    class DummyCombined:
         def astimezone(self):
             class DummyOffset:
                 def utcoffset(self, *args, **kwargs):
@@ -31,8 +31,8 @@ def test_iso_dt_uses_patched_timezone(monkeypatch):
 
     class DummyDateTime:
         @classmethod
-        def now(cls):
-            return DummyNow()
+        def combine(cls, d, t):
+            return DummyCombined()
 
     monkeypatch.setattr(gcal, "datetime", DummyDateTime)
 
