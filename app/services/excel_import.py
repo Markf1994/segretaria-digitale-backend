@@ -4,6 +4,7 @@ import tempfile
 from typing import Any, Dict, List, Tuple
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
+import os
 
 from app.models.user import User
 from app.schemas.turno import DAY_OFF_TYPES, TipoTurno
@@ -166,29 +167,105 @@ def df_to_pdf(rows: List[Dict[str, Any]], db: Session | None = None) -> Tuple[st
 
     if db is not None and "user_id" in df.columns:
         ids = [uid for uid in df["user_id"].unique() if uid is not None]
+        mapping: dict[str, str] = {}
         if ids:
-            users = (
-                db.query(User.id, User.nome)
-                .filter(User.id.in_(ids))
-                .all()
-            )
-            mapping = {u.id: u.nome for u in users}
-            df["Agente"] = df["user_id"].map(mapping)
+            users = db.query(User.id, User.nome).filter(User.id.in_(ids)).all()
+            mapping = {str(u.id): u.nome for u in users}
+        df["Agente"] = df["user_id"].map(mapping)
         df = df.drop(columns=["user_id"])
 
+    # Resolve agent list and date range
+    agents = sorted(a for a in df.get("Agente", []).unique() if a)
+    df["giorno"] = pd.to_datetime(df["giorno"])
+    start_date = df["giorno"].min().strftime("%d/%m/%Y")
+    end_date = df["giorno"].max().strftime("%d/%m/%Y")
+
+    # Build rows grouped by date
+    by_date: dict[str, dict[str, str]] = {}
+    notes: dict[str, list[str]] = {}
+    for _, row in df.iterrows():
+        day = row["giorno"].date().strftime("%d/%m/%Y")
+        by_date.setdefault(day, {a: "" for a in agents})
+        notes.setdefault(day, [])
+        agent = row.get("Agente", "")
+
+        if row["tipo"] in {t.value for t in DAY_OFF_TYPES}:
+            cell = f"<span class='dayoff'>{row['tipo']}</span>"
+        else:
+            segments: list[str] = []
+            if row.get("inizio_1") and row.get("fine_1"):
+                segments.append(f"{row['inizio_1']} – {row['fine_1']}")
+            if row.get("inizio_2") and row.get("fine_2"):
+                segments.append(f"{row['inizio_2']} – {row['fine_2']}")
+            if row.get("inizio_3") and row.get("fine_3"):
+                segments.append(
+                    f"<span class='extra'>{row['inizio_3']} – {row['fine_3']} STRAORDINARIO</span>"
+                )
+            cell = "<br>".join(segments)
+
+        if agent:
+            by_date[day][agent] = cell
+        if row.get("note"):
+            notes[day].append(str(row.get("note")))
+
+    # Generate HTML
+    logo_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "static", "Logo.png"))
+    styles = """
+    <style>
+    body { font-family: Aptos, sans-serif; font-size: 12pt; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #000; padding: 4px; text-align: center; }
+    td.notes { text-align: left; }
+    .dayoff { color: red; font-weight: bold; }
+    .extra { color: red; }
+    </style>
+    """
+
+    header = f"""
+    <div style='text-align:center;'>
+        <img src='{logo_path}' alt='logo' /><br>
+        COMUNE DI CASTIONE DELLA PRESOLANA – SERVIZIO DI POLIZIA LOCALE<br>
+        ORARIO DI SERVIZIO – {start_date} – {end_date}
+    </div>
+    """
+
+    table_header = "<tr><th>DATA</th>" + "".join(f"<th>{a}</th>" for a in agents) + "<th>ANNOTAZIONI DI SERVIZIO</th></tr>"
+
+    rows_html = []
+    for day in sorted(by_date.keys()):
+        cells = [f"<td>{day}</td>"]
+        for a in agents:
+            cells.append(f"<td>{by_date[day].get(a, '')}</td>")
+        note_text = "<br>".join(notes.get(day, []))
+        cells.append(f"<td class='notes'>{note_text}</td>")
+        rows_html.append("<tr>" + "".join(cells) + "</tr>")
+
+    html = f"""
+    <html>
+    <head>
+    <meta charset='utf-8'>
+    {styles}
+    </head>
+    <body>
+    {header}
+    <table>
+    {table_header}
+    {''.join(rows_html)}
+    </table>
+    </body>
+    </html>
+    """
+
     with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as tmp_html:
-        df.to_html(tmp_html.name, index=False)
+        tmp_html.write(html.encode("utf-8"))
         html_path = tmp_html.name
 
     pdf_path = html_path.replace(".html", ".pdf")
     try:
-        pdfkit.from_file(html_path, pdf_path)  # requires wkhtmltopdf installed
+        pdfkit.from_file(html_path, pdf_path)
     except OSError as err:
         if "wkhtmltopdf" in str(err):
-            raise HTTPException(
-                status_code=500,
-                detail="wkhtmltopdf not installed",
-            )
+            raise HTTPException(status_code=500, detail="wkhtmltopdf not installed")
         raise
 
     return pdf_path, html_path
