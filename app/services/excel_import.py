@@ -1,6 +1,7 @@
 import pandas as pd
 import pdfkit
 import tempfile
+from datetime import datetime, timedelta
 from typing import Any, Dict, List, Tuple
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
@@ -174,11 +175,14 @@ def df_to_pdf(rows: List[Dict[str, Any]], db: Session | None = None) -> Tuple[st
         df["Agente"] = df["user_id"].map(mapping)
         df = df.drop(columns=["user_id"])
 
-    # Resolve agent list and date range
+    # Resolve agent list and ISO week date range
     agents = sorted(a for a in df.get("Agente", []).unique() if a)
     df["giorno"] = pd.to_datetime(df["giorno"])
-    start_date = df["giorno"].min().strftime("%d/%m/%Y")
-    end_date = df["giorno"].max().strftime("%d/%m/%Y")
+    first_day = df["giorno"].min().date()
+    week_start_date = first_day - timedelta(days=first_day.weekday())
+    week_end_date = week_start_date + timedelta(days=6)
+    start_date = week_start_date.strftime("%d/%m/%Y")
+    end_date = week_end_date.strftime("%d/%m/%Y")
 
     # Build rows grouped by date
     by_date: dict[str, dict[str, str]] = {}
@@ -237,7 +241,9 @@ def df_to_pdf(rows: List[Dict[str, Any]], db: Session | None = None) -> Tuple[st
 
     rows_html = []
     for day in sorted(by_date.keys()):
-        cells = [f"<td>{day}</td>"]
+        date_obj = datetime.strptime(day, "%d/%m/%Y").date()
+        weekday = date_obj.strftime("%A").upper()
+        cells = [f"<td>{weekday}<br>{day}</td>"]
         for a in agents:
             cells.append(f"<td>{by_date[day].get(a, '')}</td>")
         note_text = "<br>".join(notes.get(day, []))
