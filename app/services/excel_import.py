@@ -47,6 +47,15 @@ def parse_excel(path: str, db: Session | None = None) -> List[Dict[str, Any]]:
 
     df = pd.read_excel(path)  # requires openpyxl
 
+    import numpy as np
+
+    # Normalize NaN to None for time and note columns
+    time_cols = ["Inizio1", "Fine1", "Inizio2", "Fine2", "Inizio3", "Fine3"]
+    all_cols = time_cols + ["Note"]
+    for c in all_cols:
+        if c in df.columns:
+            df[c] = df[c].replace({np.nan: None})
+
     base_required = {"Giorno", "Inizio1", "Fine1"}
 
     if "User ID" in df.columns:
