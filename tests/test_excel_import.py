@@ -405,6 +405,8 @@ def test_df_to_pdf_creates_files_and_cleanup(tmp_path):
 
     assert os.path.exists(pdf_path)
     assert os.path.exists(html_path)
+    html_text = Path(html_path).read_text()
+    assert "01/01/2023 – 01/01/2023" in html_text
 
     os.remove(pdf_path)
     os.remove(html_path)
