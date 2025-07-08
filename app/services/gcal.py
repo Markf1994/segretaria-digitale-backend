@@ -78,6 +78,9 @@ def sync_shift_event(turno):
     Crea o aggiorna l'evento relativo a un turno
     nel calendario 'Turni di Servizio'.
     """
+    cal_id = settings.G_SHIFT_CAL_ID
+    if not cal_id:
+        raise RuntimeError("G_SHIFT_CAL_ID is not configured")
     try:
         tipo = TipoTurno(turno.tipo)
     except ValueError:
@@ -106,14 +109,14 @@ def sync_shift_event(turno):
     gcal = get_client()
     try:
         gcal.events().update(
-            calendarId=SHIFT_CAL_ID,
+            calendarId=cal_id,
             eventId=evt_id,
             body=body,
         ).execute()
     except gerr.HttpError as e:
         if e.resp.status == 404:  # evento non esiste → crealo
             gcal.events().insert(
-                calendarId=SHIFT_CAL_ID,
+                calendarId=cal_id,
                 body=body,
                 sendUpdates="none",
             ).execute()
@@ -126,10 +129,14 @@ def delete_shift_event(turno_id):
     Elimina dal calendario Turni l'evento legato al turno rimosso.
     Ignora l'errore 404 se l'evento era già assente.
     """
+    cal_id = settings.G_SHIFT_CAL_ID
+    if not cal_id:
+        raise RuntimeError("G_SHIFT_CAL_ID is not configured")
+
     gcal = get_client()
     try:
         gcal.events().delete(
-            calendarId=SHIFT_CAL_ID,
+            calendarId=cal_id,
             eventId=f"shift-{turno_id}",
         ).execute()
     except gerr.HttpError as e:

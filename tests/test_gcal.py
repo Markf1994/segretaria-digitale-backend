@@ -1,5 +1,6 @@
 import json
 from datetime import date, time, timedelta
+import pytest
 
 from app.services import gcal
 
@@ -68,3 +69,15 @@ def test_get_client_from_json_string(monkeypatch):
     result = gcal.get_client()
     assert result == "CLIENT"
     assert captured["info"] == dummy_info
+
+
+def test_sync_shift_event_requires_calendar_id(monkeypatch):
+    monkeypatch.setattr(gcal.settings, "G_SHIFT_CAL_ID", None)
+    with pytest.raises(RuntimeError, match="G_SHIFT_CAL_ID is not configured"):
+        gcal.sync_shift_event(object())
+
+
+def test_delete_shift_event_requires_calendar_id(monkeypatch):
+    monkeypatch.setattr(gcal.settings, "G_SHIFT_CAL_ID", None)
+    with pytest.raises(RuntimeError, match="G_SHIFT_CAL_ID is not configured"):
+        gcal.delete_shift_event("dummy")
