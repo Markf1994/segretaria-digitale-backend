@@ -403,6 +403,11 @@ def test_df_to_pdf_creates_files_and_cleanup(tmp_path):
     ):
         pdf_path, html_path = df_to_pdf(rows, None)
 
+    with open(html_path) as fh:
+        content = fh.read()
+    assert "COMUNE DI CASTIONE DELLA PRESOLANA" in content
+    assert "ORARIO DI SERVIZIO" in content
+
     assert os.path.exists(pdf_path)
     assert os.path.exists(html_path)
 

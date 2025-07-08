@@ -209,7 +209,10 @@ def df_to_pdf(rows: List[Dict[str, Any]], db: Session | None = None) -> Tuple[st
             notes[day].append(str(row.get("note")))
 
     # Generate HTML
-    logo_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "static", "Logo.png"))
+    logo_path = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "static", "Logo.png")
+    )
+    logo_uri = f"file://{logo_path}"
     styles = """
     <style>
     body { font-family: Aptos, sans-serif; font-size: 12pt; }
@@ -223,7 +226,7 @@ def df_to_pdf(rows: List[Dict[str, Any]], db: Session | None = None) -> Tuple[st
 
     header = f"""
     <div style='text-align:center;'>
-        <img src='{logo_path}' alt='logo' /><br>
+        <img src='{logo_uri}' alt='logo' /><br>
         COMUNE DI CASTIONE DELLA PRESOLANA – SERVIZIO DI POLIZIA LOCALE<br>
         ORARIO DI SERVIZIO – {start_date} – {end_date}
     </div>
