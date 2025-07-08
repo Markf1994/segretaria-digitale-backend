@@ -212,6 +212,8 @@ def df_to_pdf(rows: List[Dict[str, Any]], db: Session | None = None) -> Tuple[st
     logo_path = os.path.abspath(
         os.path.join(os.path.dirname(__file__), "..", "..", "static", "Logo.png")
     )
+    if not os.path.exists(logo_path):
+        raise HTTPException(status_code=500, detail="Logo file missing")
     styles = """
     <style>
     body { font-family: Aptos, sans-serif; font-size: 12pt; }
