@@ -165,7 +165,7 @@ def sync_shift_event(turno):
         if e.resp.status in (404, 400):
             # status 400 may be returned when Google thinks the event ID is invalid,
             # so treat it like a missing event and create it from scratch
-            logger.warning(
+            logger.info(
                 "Update of event %s failed (%s), inserting", evt_id, e.resp.status
             )
             try:
@@ -202,7 +202,7 @@ def delete_shift_event(turno_id):
         logger.info("Deleted event %s", turno_id)
     except gerr.HttpError as e:
         if e.resp.status == 404:
-            logger.warning("Delete of event %s returned 404", turno_id)
+            logger.info("Delete of event %s returned 404", turno_id)
         else:
             logger.exception("Failed to delete event %s", turno_id)
             raise
