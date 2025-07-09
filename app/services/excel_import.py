@@ -233,9 +233,9 @@ def df_to_pdf(rows: List[Dict[str, Any]], db: Session | None = None) -> Tuple[st
         raise HTTPException(status_code=500, detail="Logo file missing")
     styles = """
     <style>
-    @page { size: A4 landscape; }
-    body { font-family: Aptos, sans-serif; font-size: 12pt; }
-    table { border-collapse: collapse; width: 100%; }
+    @page { size: A4 landscape; margin: 10mm; }
+    body { font-family: Aptos, sans-serif; font-size: 10pt; }
+    table { border-collapse: collapse; width: 100%; page-break-inside: avoid; }
     th, td { border: 1px solid #000; padding: 4px; text-align: center; }
     td.notes { text-align: left; }
     .dayoff { color: red; font-weight: bold; }
@@ -244,10 +244,12 @@ def df_to_pdf(rows: List[Dict[str, Any]], db: Session | None = None) -> Tuple[st
     """
 
     header = f"""
-    <div style='text-align:center;'>
-        <img src='{logo_path}' alt='logo' /><br>
-        COMUNE DI CASTIONE DELLA PRESOLANA – SERVIZIO DI POLIZIA LOCALE<br>
-        ORARIO DI SERVIZIO – {start_date} – {end_date}
+    <div style='display:flex; align-items:center; justify-content:center;'>
+        <img src='{logo_path}' alt='logo' style='width:70px; margin-right:8px;' />
+        <div>
+            COMUNE DI CASTIONE DELLA PRESOLANA – SERVIZIO DI POLIZIA LOCALE<br>
+            ORARIO DI SERVIZIO – {start_date} – {end_date}
+        </div>
     </div>
     """
 
