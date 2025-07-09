@@ -264,6 +264,16 @@ When an import fails, the API returns a JSON response with a `detail` field
 describing the issue. Front‑end code should display this message to the user
 instead of logging a truncated line such as `ImportExcel error: L`.
 
+## Orari endpoints
+
+These routes manage turni records and require authentication.
+
+- `POST /orari/` – create or update a turno and return the saved record.
+- `GET /orari/` – list all turni without filtering by user.
+- `DELETE /orari/{turno_id}` – remove the specified turno. When the
+  `G_SHIFT_CAL_ID` environment variable is configured, the corresponding event
+  is also deleted from Google Calendar.
+
 ## Shift PDF endpoint
 
 The `GET /orari/pdf?week=YYYY-Www` route returns a PDF summary of the shifts
