@@ -9,6 +9,7 @@ import os
 import html as html_utils
 
 from app.models.user import User
+from app.models.event import Event
 from app.schemas.turno import DAY_OFF_TYPES, TipoTurno
 from app.services.google_calendar import list_events_between
 
@@ -271,6 +272,20 @@ def df_to_pdf(rows: List[Dict[str, Any]], db: Session | None = None) -> Tuple[st
                 html_utils.escape(str(ev.get("titolo")))
             )
 
+    # Load public events from the database
+    event_notes: dict[str, list[str]] = {}
+    if db is not None:
+        public_events = (
+            db.query(Event.titolo, Event.data_ora)
+            .filter(Event.is_public == True)
+            .filter(Event.data_ora >= datetime.combine(week_start_date, time.min))
+            .filter(Event.data_ora <= datetime.combine(week_end_date, time.max))
+            .all()
+        )
+        for titolo, dt in public_events:
+            key = dt.date().strftime("%d/%m/%Y")
+            event_notes.setdefault(key, []).append(html_utils.escape(str(titolo)))
+
     # Generate HTML
     logo_path = os.path.abspath(
         os.path.join(os.path.dirname(__file__), "..", "..", "static", "Logo.png")
@@ -322,7 +337,7 @@ def df_to_pdf(rows: List[Dict[str, Any]], db: Session | None = None) -> Tuple[st
         cells = [f"<td>{weekday}<br>{day}</td>"]
         for a in agents:
             cells.append(f"<td>{by_date[day].get(a, '')}</td>")
-        note_lines = notes.get(day, []) + gcal_notes.get(day, [])
+        note_lines = notes.get(day, []) + gcal_notes.get(day, []) + event_notes.get(day, [])
         if note_lines:
             note_text = "<ul>" + "".join(f"<li>{l}</li>" for l in note_lines) + "</ul>"
         else:
