@@ -13,6 +13,10 @@ def create_user(db: Session, email: str, password: str, nome: str):
     if existing_user:
         raise HTTPException(status_code=409, detail="Email already registered")
 
+    nome = nome.strip()
+    if not nome:
+        raise HTTPException(status_code=400, detail="Invalid nome")
+
     hashed_password = pwd_context.hash(password)
     db_user = User(
         id=str(uuid.uuid4()),

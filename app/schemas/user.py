@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, constr
 from uuid import UUID
 from app.schemas.turno import TurnoOut
 
@@ -6,7 +6,7 @@ from app.schemas.turno import TurnoOut
 class UserCreate(BaseModel):
     email: str
     password: str
-    nome: str
+    nome: constr(strip_whitespace=True, min_length=1)
 
 
 class UserCredentials(BaseModel):

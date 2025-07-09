@@ -119,3 +119,11 @@ def test_get_current_user_missing_header():
     response = client.get("/users/me")
     assert response.status_code == 401
     assert response.json()["detail"] == "Authorization header missing"
+
+
+def test_create_user_rejects_blank_nome():
+    response = client.post(
+        "/users/",
+        json={"email": "blank@example.com", "password": "secret", "nome": "   "},
+    )
+    assert response.status_code in (400, 422)
