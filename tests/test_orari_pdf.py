@@ -258,6 +258,53 @@ def test_week_pdf_includes_gcal_events(setup_db, tmp_path):
     assert "Turno" not in captured["html_text"]
 
 
+def test_week_pdf_ignores_empty_gcal_titles(setup_db, tmp_path):
+    headers, user_id = auth_user("gcalnone@example.com")
+
+    shift = {
+        "user_id": user_id,
+        "giorno": "2023-01-02",
+        "inizio_1": "08:00:00",
+        "fine_1": "12:00:00",
+        "inizio_2": None,
+        "fine_2": None,
+        "inizio_3": None,
+        "fine_3": None,
+        "tipo": TipoTurno.NORMALE.value,
+        "note": "",
+    }
+
+    client.post("/orari/", json=shift, headers=headers)
+
+    gcal_events = [
+        {
+            "id": "ev1",
+            "titolo": None,
+            "descrizione": "",
+            "data_ora": datetime(2023, 1, 2, 10, 0),
+        }
+    ]
+
+    captured = {}
+    real_df_to_pdf = __import__("app.services.excel_import", fromlist=["df_to_pdf"]).df_to_pdf
+
+    def fake_write_pdf(self, target, *args, **kwargs):
+        Path(target).write_bytes(b"%PDF-1.4 fake")
+
+    def capture_df_to_pdf(rows, db):
+        pdf_path, html_path = real_df_to_pdf(rows, db)
+        captured["html_text"] = Path(html_path).read_text()
+        return pdf_path, html_path
+
+    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
+        with patch("app.services.google_calendar.list_events_between", lambda s, e: gcal_events):
+            with patch("app.routes.orari.df_to_pdf", side_effect=capture_df_to_pdf):
+                res = client.get("/orari/pdf?week=2023-W01", headers=headers)
+
+    assert res.status_code == 200
+    assert "<li>None</li>" not in captured["html_text"]
+
+
 def test_week_pdf_includes_public_events(setup_db, tmp_path):
     headers, user_id = auth_user("events@example.com")
 

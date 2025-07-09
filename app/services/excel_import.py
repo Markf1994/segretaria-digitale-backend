@@ -268,9 +268,11 @@ def df_to_pdf(rows: List[Dict[str, Any]], db: Session | None = None) -> Tuple[st
         day = ev.get("data_ora")
         if isinstance(day, datetime):
             key = day.date().strftime("%d/%m/%Y")
-            gcal_notes.setdefault(key, []).append(
-                html_utils.escape(str(ev.get("titolo")))
-            )
+            title = ev.get("titolo")
+            if title:
+                gcal_notes.setdefault(key, []).append(
+                    html_utils.escape(str(title))
+                )
 
     # Load public events from the database
     event_notes: dict[str, list[str]] = {}
