@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.dependencies import get_db, get_current_user
+import re
 from app.models.user import User
 from app.schemas.event import EventResponse
 from app.schemas.todo import ToDoResponse
@@ -40,8 +41,21 @@ def upcoming_events(
             todo_items.append(data)
 
     gcal_raw = list_upcoming_events(days)
+
+    me_name = (current_user.nome or current_user.email.split("@")[0]).strip().lower()
+
+    def include_event(item: dict) -> bool:
+        title = item.get("titolo", "")
+        m = re.match(r"^(\d{1,2}:\d{2})\s+(.+)$", title)
+        if m:
+            who = m.group(2).strip().lower()
+            return who == me_name
+        return True
+
     gcal_items = [
-        {**g, "kind": "google"} for g in gcal_raw if now <= g.get("data_ora") <= limit
+        {**g, "kind": "google"}
+        for g in gcal_raw
+        if now <= g.get("data_ora") <= limit and include_event(g)
     ]
 
     combined = ev_items + todo_items + gcal_items
