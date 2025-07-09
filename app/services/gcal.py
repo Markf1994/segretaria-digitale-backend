@@ -53,7 +53,6 @@ def get_client():
 
 
 # ------------------------------------------------------------------- calendar ID
-SHIFT_CAL_ID = settings.G_SHIFT_CAL_ID  # calendario "Turni di Servizio"
 
 
 # ------------------------------------------------------------------- utilità
