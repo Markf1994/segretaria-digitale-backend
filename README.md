@@ -6,7 +6,7 @@ This repository contains a FastAPI backend used by Segretaria Digitale.
 
 1. Ensure you have **Python 3.10–3.11** installed.
 2. Create a virtual environment and install dependencies (including `httpx`,
-   `pandas`, `openpyxl` and `WeasyPrint`):
+   `pandas`, `openpyxl`, `WeasyPrint==60.1` and `pydyf==0.8.0`):
    ```bash
    python3 -m venv .venv
    source .venv/bin/activate
