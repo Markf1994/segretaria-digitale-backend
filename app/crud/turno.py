@@ -70,23 +70,24 @@ def upsert_turno(db: Session, payload: TurnoIn) -> Turno:
 
 # ------------------------------------------------------------------------------
 def remove_turno(db: Session, turno_id: UUID) -> None:
-    """
-    Elimina turno dal DB e rimuove l'evento corrispondente dal calendario Google.
-    """
-    # 1. cancella evento su Google (ignora eventuali errori)
+    """Elimina turno dal DB e dal calendario."""
+
+    # 1. verifica che il turno esista
+    rec = db.query(Turno).filter_by(id=turno_id).first()
+    if not rec:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Turno non trovato"
+        )
+
+    # 2. cancella evento su Google (ignora eventuali errori)
     try:
         gcal.delete_shift_event(turno_id)
-    except Exception as exc:
+    except Exception as exc:  # pragma: no cover - unexpected errors
         # non bloccare l'operazione DB se G-Cal fallisce, ma loggare
         logger.error("Errore sync calendario: %s", exc)
 
-    # 2. cancella record dal DB
-    deleted = db.query(Turno).filter_by(id=turno_id).delete()
-    if not deleted:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Turno non trovato",
-        )
+    # 3. cancella record dal DB
+    db.delete(rec)
     db.commit()
 
 
