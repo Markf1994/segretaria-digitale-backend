@@ -27,7 +27,7 @@ def test_import_xlsx_creates_turni_and_returns_pdf(setup_db, tmp_path):
     df = pd.DataFrame(
         [
             {
-                "Agente": nome,
+                "Agente": nome.upper(),
                 "Data": "2023-01-01",
                 "Inizio1": "08:00:00",
                 "Fine1": "12:00:00",

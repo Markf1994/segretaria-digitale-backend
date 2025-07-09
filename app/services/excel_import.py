@@ -4,6 +4,7 @@ import tempfile
 from datetime import datetime, timedelta, time
 from typing import Any, Dict, List, Tuple
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from fastapi import HTTPException
 import os
 import html as html_utils
@@ -21,7 +22,11 @@ def get_user_id(db: Session, agente: str) -> str:
         raise ValueError("A database session is required to resolve users")
 
     name = agente.strip()
-    user = db.query(User).filter(User.nome == name).first()
+    user = (
+        db.query(User)
+        .filter(func.lower(User.nome) == name.lower())
+        .first()
+    )
     if not user:
         raise ValueError(f"Unknown user: {agente}")
     return str(user.id)

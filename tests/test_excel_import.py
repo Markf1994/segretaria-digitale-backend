@@ -110,7 +110,7 @@ def test_parse_excel_with_db(tmp_path):
     df = pd.DataFrame(
         [
             {
-                "Agente": "Agent X",
+                "Agente": "agent x",
                 "Giorno": "2023-01-03",
                 "Inizio1": "07:00:00",
                 "Fine1": "11:00:00",
