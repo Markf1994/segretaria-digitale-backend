@@ -32,6 +32,15 @@ AGENT_COLORS = {
     "mattia@comune.castione.bg.it": "7",
 }
 
+# Short names to use for specific agents in calendar event summaries. When a
+# user's email matches one of the keys here, the corresponding value is used in
+# place of the full ``nome`` or email address.
+AGENT_SHORT_NAMES = {
+    "marco@comune.castione.bg.it": "Marco",
+    "rossella@comune.castione.bg.it": "Rossella",
+    "mattia@comune.castione.bg.it": "Mattia",
+}
+
 
 # ------------------------------------------------------------------- credenziali
 @lru_cache()
@@ -113,6 +122,22 @@ def color_for_user(user) -> str:
     return colors[idx]
 
 
+def short_name_for_user(user) -> str:
+    """Return a concise name for ``user`` to use in event titles."""
+    if not isinstance(user, str):
+        email = getattr(user, "email", "")
+        if email in AGENT_SHORT_NAMES:
+            return AGENT_SHORT_NAMES[email]
+        name = getattr(user, "nome", None)
+        if isinstance(name, str) and name.strip():
+            return name.strip()
+        if email:
+            return email.split("@")[0]
+        return ""
+    else:
+        return AGENT_SHORT_NAMES.get(user, user.split("@")[0])
+
+
 # ------------------------------------------------------------------- sync turni
 def sync_shift_event(turno):
     """
@@ -144,9 +169,7 @@ def sync_shift_event(turno):
     start = first_non_null(turno.inizio_1, turno.inizio_2, turno.inizio_3)
     end = last_non_null(turno.fine_3, turno.fine_2, turno.fine_1)
 
-    title_name = (turno.user.nome or "").strip()
-    if not title_name:
-        title_name = turno.user.email.split("@")[0]
+    title_name = short_name_for_user(turno.user)
     body = {
         "id": evt_id,
         "summary": f"{start.strftime('%H:%M')} {title_name}",

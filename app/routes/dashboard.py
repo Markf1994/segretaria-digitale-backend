@@ -9,6 +9,7 @@ from app.schemas.event import EventResponse
 from app.schemas.todo import ToDoResponse
 from app.crud import event, todo
 from app.services.google_calendar import list_upcoming_events
+from app.services import gcal
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 
@@ -42,7 +43,7 @@ def upcoming_events(
 
     gcal_raw = list_upcoming_events(days)
 
-    me_name = (current_user.nome or current_user.email.split("@")[0]).strip().lower()
+    me_name = gcal.short_name_for_user(current_user).lower()
 
     def include_event(item: dict) -> bool:
         title = item.get("titolo", "")

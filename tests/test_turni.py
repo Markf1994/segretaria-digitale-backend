@@ -133,6 +133,43 @@ def test_shift_event_summary_email(setup_db):
     assert captured["body"]["summary"] == "08:00 Calendar User"
 
 
+def test_shift_event_summary_short_name(setup_db):
+    headers, user_id = auth_user(
+        "marco@comune.castione.bg.it", nome="Ag.Sc. Fenaroli Marco"
+    )
+
+    captured = {}
+
+    class DummyClient:
+        def events(self):
+            class Events:
+                def update(self, calendarId=None, eventId=None, body=None):
+                    captured["body"] = body
+                    return MagicMock(execute=MagicMock())
+
+            return Events()
+
+    with patch("app.services.gcal.get_client", return_value=DummyClient()):
+        client.post(
+            "/orari/",
+            json={
+                "user_id": user_id,
+                "giorno": "2023-05-05",
+                "inizio_1": "08:00:00",
+                "fine_1": "12:00:00",
+                "inizio_2": None,
+                "fine_2": None,
+                "inizio_3": None,
+                "fine_3": None,
+                "tipo": TipoTurno.NORMALE.value,
+                "note": "",
+            },
+            headers=headers,
+        )
+
+    assert captured["body"]["summary"] == "08:00 Marco"
+
+
 def test_create_turno_unknown_user_returns_400(setup_db):
     headers, _ = auth_user("u@example.com")
 
