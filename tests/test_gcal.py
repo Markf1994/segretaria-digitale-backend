@@ -135,3 +135,38 @@ def test_sync_shift_event_insert_on_bad_event_id(monkeypatch):
 
     assert update_called.get("called") is True
     assert insert_called.get("called") is True
+
+
+def test_sync_shift_event_sets_color_from_user(monkeypatch):
+    captured = {}
+
+    class DummyEvents:
+        def update(self, calendarId=None, eventId=None, body=None):
+            captured["color"] = body.get("colorId")
+            return types.SimpleNamespace(execute=lambda: None)
+
+    class DummyClient:
+        def events(self):
+            return DummyEvents()
+
+    monkeypatch.setattr(gcal, "get_client", lambda: DummyClient())
+    monkeypatch.setattr(gcal.settings, "G_SHIFT_CAL_ID", "CAL")
+
+    user = types.SimpleNamespace(id="u1", nome="", email="a@example.com")
+    turno = types.SimpleNamespace(
+        id="1",
+        user=user,
+        giorno=date(2024, 1, 2),
+        inizio_1=time(9, 0),
+        fine_1=time(11, 0),
+        inizio_2=None,
+        fine_2=None,
+        inizio_3=None,
+        fine_3=None,
+        tipo="NORMALE",
+        note="",
+    )
+
+    gcal.sync_shift_event(turno)
+
+    assert captured["color"] == gcal.color_for_user("u1")

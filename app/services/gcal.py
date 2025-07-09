@@ -69,6 +69,13 @@ def last_non_null(*vals):
     return next(v for v in reversed(vals) if v)
 
 
+def color_for_user(user_id: str) -> str:
+    """Return a Google Calendar color ID derived from ``user_id``."""
+    colors = [str(i) for i in range(1, 12)]
+    idx = abs(hash(user_id)) % len(colors)
+    return colors[idx]
+
+
 # ------------------------------------------------------------------- sync turni
 def sync_shift_event(turno):
     """
@@ -106,7 +113,7 @@ def sync_shift_event(turno):
         "description": turno.note or "",
         "start": {"dateTime": iso_dt(turno.giorno, start)},
         "end": {"dateTime": iso_dt(turno.giorno, end)},
-        "colorId": "11" if tipo == TipoTurno.STRAORD else "10",  # rosso / blu
+        "colorId": color_for_user(str(turno.user.id)),
     }
 
     gcal = get_client()
