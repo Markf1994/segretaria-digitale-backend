@@ -164,7 +164,15 @@ to installing packages.
 
 A `render.yaml` file is also provided for deployments on **Render**. The web
 service uses Docker and runs on port `10000`, which Render expects the
-application to bind to.
+application to bind to. Install the [Render CLI](https://render.com/docs/cli)
+and run
+
+```bash
+render blueprint deploy render.yaml
+```
+
+to create or update the service. Set the required environment variables
+(for example `DATABASE_URL` and `SECRET_KEY`) in the Render dashboard.
 
 ### Troubleshooting CORS
 
