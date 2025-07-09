@@ -99,9 +99,10 @@ def sync_shift_event(turno):
     start = first_non_null(turno.inizio_1, turno.inizio_2, turno.inizio_3)
     end = last_non_null(turno.fine_3, turno.fine_2, turno.fine_1)
 
+    title_name = turno.user.nome or turno.user.email.split("@")[0]
     body = {
         "id": evt_id,
-        "summary": turno.user.nome or turno.user.email.split("@")[0],
+        "summary": f"{start.strftime('%H:%M')} {title_name}",
         "description": turno.note or "",
         "start": {"dateTime": iso_dt(turno.giorno, start)},
         "end": {"dateTime": iso_dt(turno.giorno, end)},
