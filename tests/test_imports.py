@@ -37,13 +37,10 @@ def test_import_xlsx_creates_turni_and_returns_pdf(setup_db, tmp_path):
     xlsx_path = tmp_path / "shift.xlsx"
     df.to_excel(xlsx_path, index=False)
 
-    def fake_from_file(html_path, pdf_path, **kwargs):
-        Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
-        return True
+    def fake_write_pdf(self, target, *args, **kwargs):
+        Path(target).write_bytes(b"%PDF-1.4 fake")
 
-    with patch(
-        "app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file
-    ):
+    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
         with open(xlsx_path, "rb") as fh:
             res = client.post(
                 "/import/xlsx",
@@ -72,16 +69,13 @@ def test_temp_files_removed_after_request(setup_db, tmp_path):
         captured["xlsx"] = path
         return []
 
-    def fake_from_file(html_path, pdf_path, **kwargs):
-        captured["html"] = html_path
-        captured["pdf"] = pdf_path
-        Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
-        return True
+    def fake_write_pdf(self, target, *args, **kwargs):
+        captured["html"] = target
+        captured["pdf"] = target
+        Path(target).write_bytes(b"%PDF-1.4 fake")
 
     with patch("app.routes.imports.parse_excel", side_effect=fake_parse_excel):
-        with patch(
-            "app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file
-        ):
+        with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
             dummy = tmp_path / "shift.xlsx"
             dummy.write_bytes(b"data")
             with open(dummy, "rb") as fh:
@@ -141,13 +135,10 @@ def test_import_excel_alias_returns_pdf(tmp_path):
     xlsx_path = tmp_path / "shift.xlsx"
     df.to_excel(xlsx_path, index=False)
 
-    def fake_from_file(html_path, pdf_path, **kwargs):
-        Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
-        return True
+    def fake_write_pdf(self, target, *args, **kwargs):
+        Path(target).write_bytes(b"%PDF-1.4 fake")
 
-    with patch(
-        "app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file
-    ):
+    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
         with open(xlsx_path, "rb") as fh:
             res = client.post(
                 "/import/excel",
@@ -272,13 +263,10 @@ def test_import_xlsx_data_column_alias(setup_db, tmp_path):
     xlsx_path = tmp_path / "data_alias.xlsx"
     df.to_excel(xlsx_path, index=False)
 
-    def fake_from_file(html_path, pdf_path, **kwargs):
-        Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
-        return True
+    def fake_write_pdf(self, target, *args, **kwargs):
+        Path(target).write_bytes(b"%PDF-1.4 fake")
 
-    with patch(
-        "app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file
-    ):
+    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
         with open(xlsx_path, "rb") as fh:
             res = client.post(
                 "/import/xlsx",
