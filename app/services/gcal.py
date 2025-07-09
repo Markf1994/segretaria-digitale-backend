@@ -18,6 +18,16 @@ import googleapiclient.errors as gerr
 
 from app.schemas.turno import DAY_OFF_TYPES, TipoTurno
 
+# ------------------------------------------------------------------- agent colors
+# Mapping of agent email addresses to Google Calendar color IDs.  These values
+# are used by ``color_for_user`` when the matching email is found.  Any user not
+# listed here falls back to a hash-based color selection.
+AGENT_COLORS = {
+    "marco@comune.castione.bg.it": "1",
+    "rossella@comune.castione.bg.it": "6",
+    "mattia@comune.castione.bg.it": "7",
+}
+
 
 # ------------------------------------------------------------------- credenziali
 @lru_cache()
@@ -69,8 +79,28 @@ def last_non_null(*vals):
     return next(v for v in reversed(vals) if v)
 
 
-def color_for_user(user_id: str) -> str:
-    """Return a Google Calendar color ID derived from ``user_id``."""
+def color_for_user(user) -> str:
+    """Return a Google Calendar color ID for ``user``.
+
+    ``user`` may be a user object or a string containing an ID or email
+    address.  The function first checks :data:`AGENT_COLORS` for a matching
+    email or identifier before falling back to a deterministic hash-based
+    selection.
+    """
+
+    if not isinstance(user, str):
+        email = getattr(user, "email", None)
+        if email and email in AGENT_COLORS:
+            return AGENT_COLORS[email]
+        identifier = getattr(user, "id", None)
+        if identifier is not None and str(identifier) in AGENT_COLORS:
+            return AGENT_COLORS[str(identifier)]
+        user_id = email or str(identifier)
+    else:
+        if user in AGENT_COLORS:
+            return AGENT_COLORS[user]
+        user_id = user
+
     colors = [str(i) for i in range(1, 12)]
     idx = abs(hash(user_id)) % len(colors)
     return colors[idx]
@@ -113,7 +143,7 @@ def sync_shift_event(turno):
         "description": turno.note or "",
         "start": {"dateTime": iso_dt(turno.giorno, start)},
         "end": {"dateTime": iso_dt(turno.giorno, end)},
-        "colorId": color_for_user(str(turno.user.id)),
+        "colorId": color_for_user(turno.user),
     }
 
     gcal = get_client()

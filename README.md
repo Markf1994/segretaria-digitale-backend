@@ -43,7 +43,10 @@ If asynchronous database access becomes necessary later on, add `asyncpg` to
 - `PDF_UPLOAD_ROOT` – directory where uploaded PDF files are stored.
 - `GOOGLE_CREDENTIALS_JSON` – JSON credentials (or path) for Google APIs.
 - `GOOGLE_CALENDAR_ID` – ID of the calendar to read events from.
-- `G_SHIFT_CAL_ID` – ID of the Google Calendar used for shift syncs.
+- `G_SHIFT_CAL_ID` – ID of the Google Calendar used for shift syncs. Colors for
+  shift events are assigned per agent using the `AGENT_COLORS` mapping defined
+  in `app/services/gcal.py`. Agents not listed there fall back to a
+  hash-based color.
 - `GOOGLE_CLIENT_ID` – OAuth client ID for verifying Google sign-in tokens.
 - `CORS_ORIGINS` – (optional) comma separated list of allowed origins for
   cross-origin requests. Defaults to `"*"`.
