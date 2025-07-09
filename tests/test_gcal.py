@@ -190,6 +190,12 @@ def test_color_for_user_unknown_is_deterministic():
     assert gcal.color_for_user("bot@example.com") == "6"
 
 
+def test_color_for_user_matches_name(monkeypatch):
+    monkeypatch.dict(gcal.AGENT_COLORS, {"Mario Rossi": "10"}, clear=False)
+    user = types.SimpleNamespace(id="123", nome="  Mario Rossi  ", email="x@example.com")
+    assert gcal.color_for_user(user) == "10"
+
+
 
 class FakeHttpError(Exception):
     def __init__(self, status):
