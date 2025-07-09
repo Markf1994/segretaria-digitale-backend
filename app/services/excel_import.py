@@ -8,6 +8,7 @@ from sqlalchemy import func
 from fastapi import HTTPException
 import os
 import html as html_utils
+import re
 
 from app.models.user import User
 from app.models.event import Event
@@ -49,6 +50,18 @@ def _not_nan(value: Any) -> bool:
     if value is None:
         return False
     return not pd.isna(value)
+
+
+EMAIL_RE = re.compile(r"\S+@\S+")
+
+
+def _strip_emails(text: str) -> str:
+    """Remove email addresses from ``text`` and return the cleaned string."""
+
+    if not text:
+        return ""
+    cleaned = EMAIL_RE.sub("", text).strip()
+    return cleaned
 
 
 def parse_excel(path: str, db: Session | None = None) -> List[Dict[str, Any]]:
@@ -253,7 +266,9 @@ def df_to_pdf(rows: List[Dict[str, Any]], db: Session | None = None) -> Tuple[st
         if agent:
             by_date[day][agent] = cell
         if row.get("note"):
-            notes[day].append(html_utils.escape(str(row.get("note"))))
+            note_text = _strip_emails(str(row.get("note")))
+            if note_text:
+                notes[day].append(html_utils.escape(note_text))
 
     # Load Google Calendar events for the week
     gcal_notes: dict[str, list[str]] = {}
@@ -275,9 +290,11 @@ def df_to_pdf(rows: List[Dict[str, Any]], db: Session | None = None) -> Tuple[st
             key = day.date().strftime("%d/%m/%Y")
             title = ev.get("titolo")
             if title:
-                gcal_notes.setdefault(key, []).append(
-                    html_utils.escape(str(title))
-                )
+                clean = _strip_emails(str(title))
+                if clean:
+                    gcal_notes.setdefault(key, []).append(
+                        html_utils.escape(clean)
+                    )
 
     # Load public events from the database
     event_notes: dict[str, list[str]] = {}
@@ -291,7 +308,9 @@ def df_to_pdf(rows: List[Dict[str, Any]], db: Session | None = None) -> Tuple[st
         )
         for titolo, dt in public_events:
             key = dt.date().strftime("%d/%m/%Y")
-            event_notes.setdefault(key, []).append(html_utils.escape(str(titolo)))
+            clean = _strip_emails(str(titolo))
+            if clean:
+                event_notes.setdefault(key, []).append(html_utils.escape(clean))
 
     # Generate HTML
     logo_path = os.path.abspath(
