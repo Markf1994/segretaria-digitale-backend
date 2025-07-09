@@ -50,6 +50,9 @@ def parse_excel(path: str, db: Session | None = None) -> List[Dict[str, Any]]:
 
     df = pd.read_excel(path)  # requires openpyxl
 
+    if "Data" in df.columns:
+        df.rename(columns={"Data": "Giorno"}, inplace=True)
+
     import numpy as np
 
     # Normalize NaN to None for time and note columns

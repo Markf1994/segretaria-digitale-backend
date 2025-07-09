@@ -255,3 +255,47 @@ def test_tmp_removed_on_late_failure(tmp_path):
 
     assert res.status_code == 500
     assert not os.path.exists(captured["xlsx"])
+
+
+def test_import_xlsx_data_column_alias(setup_db, tmp_path):
+    headers, user_id, nome = auth_user("dataheader@example.com")
+    df = pd.DataFrame(
+        [
+            {
+                "Agente": nome,
+                "Data": "2024-02-01",
+                "Inizio1": "08:00:00",
+                "Fine1": "12:00:00",
+            }
+        ]
+    )
+    xlsx_path = tmp_path / "data_alias.xlsx"
+    df.to_excel(xlsx_path, index=False)
+
+    def fake_from_file(html_path, pdf_path, **kwargs):
+        Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
+        return True
+
+    with patch(
+        "app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file
+    ):
+        with open(xlsx_path, "rb") as fh:
+            res = client.post(
+                "/import/xlsx",
+                files={
+                    "file": (
+                        "data_alias.xlsx",
+                        fh,
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    )
+                },
+            )
+
+    assert res.status_code == 200
+
+    list_res = client.get("/orari/", headers=headers)
+    assert list_res.status_code == 200
+    body = list_res.json()
+    assert len(body) == 1
+    assert body[0]["user_id"] == user_id
+    assert body[0]["giorno"] == "2024-02-01"
