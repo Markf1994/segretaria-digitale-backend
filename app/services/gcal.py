@@ -170,10 +170,10 @@ def sync_shift_event(turno):
                 ).execute()
                 logger.info("Inserted event %s", evt_id)
             except gerr.HttpError as e2:
-                logger.error("Failed to insert event %s: %s", evt_id, e2)
+                logger.exception("Failed to insert event %s", evt_id)
                 raise
         else:
-            logger.error("Failed to update event %s: %s", evt_id, e)
+            logger.exception("Failed to update event %s", evt_id)
             raise
 
 
@@ -198,5 +198,5 @@ def delete_shift_event(turno_id):
         if e.resp.status == 404:
             logger.warning("Delete of event %s returned 404", turno_id)
         else:
-            logger.error("Failed to delete event %s: %s", turno_id, e)
+            logger.exception("Failed to delete event %s", turno_id)
             raise
