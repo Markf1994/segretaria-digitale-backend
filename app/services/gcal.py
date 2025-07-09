@@ -125,6 +125,7 @@ def sync_shift_event(turno):
     if tipo in DAY_OFF_TYPES:
         # remove any existing calendar event for day-off records
         delete_shift_event(turno.id)
+        logger.info("Removed calendar event for day off: %s", turno.id)
         return
 
     # Google Calendar limita l'alfabeto degli identificativi degli eventi a

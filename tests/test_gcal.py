@@ -206,6 +206,27 @@ def _dummy_turno():
     )
 
 
+def test_sync_shift_event_logs_day_off(monkeypatch, caplog):
+    """Day-off turni should remove any calendar event and log the action."""
+
+    deleted = {}
+
+    def fake_delete(turno_id):
+        deleted["id"] = turno_id
+
+    monkeypatch.setattr(gcal, "delete_shift_event", fake_delete)
+    monkeypatch.setattr(gcal.settings, "G_SHIFT_CAL_ID", "CAL")
+
+    turno = _dummy_turno()
+    turno.tipo = gcal.TipoTurno.RECUPERO.value
+
+    with caplog.at_level(logging.INFO):
+        gcal.sync_shift_event(turno)
+
+    assert deleted.get("id") == turno.id
+    assert "Removed calendar event for day off" in caplog.text
+
+
 def test_sync_shift_event_logs_warning_on_update_404(monkeypatch, caplog):
     """An update failure with status 404 should log a warning and insert."""
 
