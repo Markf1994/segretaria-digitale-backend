@@ -244,11 +244,11 @@ def df_to_pdf(rows: List[Dict[str, Any]], db: Session | None = None) -> Tuple[st
     """
 
     header = f"""
-    <div style='display:flex; align-items:center; justify-content:center;'>
+    <div style='display:flex; align-items:center; justify-content:center; margin-bottom:10px;'>
         <img src='{logo_path}' alt='logo' style='width:70px; margin-right:8px;' />
         <div>
             COMUNE DI CASTIONE DELLA PRESOLANA – SERVIZIO DI POLIZIA LOCALE<br>
-            ORARIO DI SERVIZIO – {start_date} – {end_date}
+            <span style='font-weight:bold; font-style:italic;'>ORARIO DI SERVIZIO – {start_date} – {end_date}</span>
         </div>
     </div>
     """
