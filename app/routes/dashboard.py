@@ -43,13 +43,20 @@ def upcoming_events(
     gcal_raw = list_upcoming_events(days)
 
     me_name = (current_user.nome or current_user.email.split("@")[0]).strip().lower()
+    other_names = {
+        n.strip().lower()
+        for (n,) in db.query(User.nome).filter(User.id != current_user.id).all()
+        if n
+    }
 
     def include_event(item: dict) -> bool:
-        title = item.get("titolo", "")
+        title = (item.get("titolo") or "").strip().lower()
         m = re.match(r"^(\d{1,2}:\d{2})\s+(.+)$", title)
         if m:
             who = m.group(2).strip().lower()
             return who == me_name
+        if title in other_names:
+            return False
         return True
 
     gcal_items = [

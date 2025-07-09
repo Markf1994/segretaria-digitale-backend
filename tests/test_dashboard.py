@@ -76,6 +76,12 @@ def test_dashboard_upcoming(monkeypatch, setup_db):
             "descrizione": "",
             "data_ora": now + timedelta(days=3),
         },
+        {
+            "id": "g4",
+            "titolo": "Luigi",
+            "descrizione": "",
+            "data_ora": now + timedelta(days=4),
+        },
     ]
     monkeypatch.setattr(
         "app.services.google_calendar.list_upcoming_events", lambda days: google_events
@@ -86,5 +92,6 @@ def test_dashboard_upcoming(monkeypatch, setup_db):
     data = res.json()
     assert len(data) == 4
     assert [item["kind"] for item in data] == ["event", "google", "todo", "google"]
+    assert all(item.get("id") != "g4" for item in data)
     times = [item["data_ora"] for item in data]
     assert times == sorted(times)
