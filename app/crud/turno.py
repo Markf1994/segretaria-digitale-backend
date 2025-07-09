@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 from app.models.turno import Turno  # modello ORM
 from app.models.user import User
-from app.schemas.turno import TurnoIn, TipoTurno  # Pydantic (input)
+from app.schemas.turno import DAY_OFF_TYPES, TurnoIn, TipoTurno  # Pydantic (input)
 from app.services import gcal
 
 
@@ -70,23 +70,31 @@ def upsert_turno(db: Session, payload: TurnoIn) -> Turno:
 
 # ------------------------------------------------------------------------------
 def remove_turno(db: Session, turno_id: UUID) -> None:
-    """
-    Elimina turno dal DB e rimuove l'evento corrispondente dal calendario Google.
-    """
-    # 1. cancella evento su Google (ignora eventuali errori)
-    try:
-        gcal.delete_shift_event(turno_id)
-    except Exception as exc:
-        # non bloccare l'operazione DB se G-Cal fallisce, ma loggare
-        logger.error("Errore sync calendario: %s", exc)
+    """Elimina il turno e l'eventuale evento Google Calendar."""
 
-    # 2. cancella record dal DB
-    deleted = db.query(Turno).filter_by(id=turno_id).delete()
-    if not deleted:
+    # 1. recupera il record (necessario per conoscere il tipo)
+    turno = db.query(Turno).filter_by(id=turno_id).first()
+    if turno is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Turno non trovato",
         )
+
+    try:
+        tipo = TipoTurno(turno.tipo)
+    except ValueError:
+        tipo = None
+
+    # 2. cancella evento su Google se potrebbe esistere
+    if tipo not in DAY_OFF_TYPES:
+        try:
+            gcal.delete_shift_event(turno_id)
+        except Exception as exc:
+            # non bloccare l'operazione DB se G-Cal fallisce, ma loggare
+            logger.error("Errore sync calendario: %s", exc)
+
+    # 3. cancella record dal DB
+    db.delete(turno)
     db.commit()
 
 
