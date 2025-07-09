@@ -185,6 +185,12 @@ def test_color_for_user_predefined_agents(email, expected):
     assert gcal.color_for_user(email) == expected
 
 
+def test_color_for_user_unknown_is_deterministic():
+    """Colors for unknown users should be stable."""
+    assert gcal.color_for_user("bot@example.com") == "6"
+
+
+
 class FakeHttpError(Exception):
     def __init__(self, status):
         self.resp = types.SimpleNamespace(status=status)
