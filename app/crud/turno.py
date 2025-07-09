@@ -79,12 +79,18 @@ def remove_turno(db: Session, turno_id: UUID) -> None:
             status_code=status.HTTP_404_NOT_FOUND, detail="Turno non trovato"
         )
 
-    # 2. cancella evento su Google (ignora eventuali errori)
+    # 2. cancella evento su Google se esiste (ignora eventuali errori)
     try:
-        gcal.delete_shift_event(turno_id)
-    except Exception as exc:  # pragma: no cover - unexpected errors
-        # non bloccare l'operazione DB se G-Cal fallisce, ma loggare
-        logger.error("Errore sync calendario: %s", exc)
+        tipo = TipoTurno(rec.tipo)
+    except ValueError:
+        tipo = None
+
+    if tipo not in DAY_OFF_TYPES:
+        try:
+            gcal.delete_shift_event(turno_id)
+        except Exception as exc:  # pragma: no cover - unexpected errors
+            # non bloccare l'operazione DB se G-Cal fallisce, ma loggare
+            logger.error("Errore sync calendario: %s", exc)
 
     # 3. cancella record dal DB
     db.delete(rec)
