@@ -45,12 +45,19 @@ def upcoming_events(
 
     me_name = gcal.short_name_for_user(current_user).lower()
 
+    known_agents = {n.lower() for n in gcal.AGENT_SHORT_NAMES.values()}
+
     def include_event(item: dict) -> bool:
         title = item.get("titolo", "").strip()
         m = re.match(r"^(\d{1,2}[:.]\d{2})\s+(.+)$", title)
         if m:
             who = m.group(2).strip().lower()
             return who == me_name
+
+        low = title.lower()
+        if low in known_agents:
+            return low == me_name
+
         return True
 
     gcal_items = [

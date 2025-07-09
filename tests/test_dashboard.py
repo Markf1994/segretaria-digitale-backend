@@ -60,13 +60,13 @@ def test_dashboard_upcoming(monkeypatch, setup_db):
     google_events = [
         {
             "id": "g1",
-            "titolo": " 09.00 Mario ",
+            "titolo": "Mario",
             "descrizione": "",
             "data_ora": now + timedelta(days=1),
         },
         {
             "id": "g2",
-            "titolo": "08:00 Luigi",
+            "titolo": "Luigi",
             "descrizione": "",
             "data_ora": now + timedelta(days=2),
         },

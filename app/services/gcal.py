@@ -172,8 +172,8 @@ def sync_shift_event(turno):
     title_name = short_name_for_user(turno.user)
     body = {
         "id": evt_id,
-        "summary": f"{start.strftime('%H:%M')} {title_name}",
-        "description": turno.note or "",
+        "summary": title_name,
+        "description": f"Turno servizio {title_name}",
         "start": {"dateTime": iso_dt(turno.giorno, start)},
         "end": {"dateTime": iso_dt(turno.giorno, end)},
         "colorId": color_for_user(turno.user),
