@@ -260,7 +260,7 @@ def df_to_pdf(rows: List[Dict[str, Any]], db: Session | None = None) -> Tuple[st
         cells.append(f"<td class='notes'>{note_text}</td>")
         rows_html.append("<tr>" + "".join(cells) + "</tr>")
 
-    html = f"""
+    html_content = f"""
     <html>
     <head>
     <meta charset='utf-8'>
@@ -277,7 +277,7 @@ def df_to_pdf(rows: List[Dict[str, Any]], db: Session | None = None) -> Tuple[st
     """
 
     with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as tmp_html:
-        tmp_html.write(html.encode("utf-8"))
+        tmp_html.write(html_content.encode("utf-8"))
         html_path = tmp_html.name
 
     pdf_path = html_path.replace(".html", ".pdf")
