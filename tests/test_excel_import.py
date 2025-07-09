@@ -442,11 +442,10 @@ def test_df_to_pdf_creates_files_and_cleanup(tmp_path):
     assert captured["options"] == {"orientation": "Landscape"}
     html_text = Path(html_path).read_text()
     assert "26/12/2022 – 01/01/2023" in html_text
-    assert "SUNDAY<br>01/01/2023" in html_text
+    assert "DOMENICA<br>01/01/2023" in html_text
     assert "Logo.png" in html_text
     assert (
-        "COMUNE DI CASTIONE DELLA PRESOLANA – SERVIZIO DI POLIZIA LOCALE"
-        in html_text
+        "COMUNE DI CASTIONE DELLA PRESOLANA – SERVIZIO DI POLIZIA LOCALE" in html_text
     )
 
     os.remove(pdf_path)
