@@ -88,7 +88,12 @@ def sync_shift_event(turno):
         delete_shift_event(turno.id)
         return
 
-    evt_id = f"shift-{turno.id}"  # chiave stabile = prefisso + UUID DB
+    # Google Calendar limita l'alfabeto degli identificativi degli eventi a
+    # lettere, numeri, underscore e trattino. Gli UUID generati dall'ORM
+    # contengono "-" che sono consentiti ma in alcuni casi Google restituisce
+    # "Invalid resource id value". Rimuoviamo quindi i trattini per maggiore
+    # compatibilità e generiamo un ID privo di caratteri speciali.
+    evt_id = f"shift-{str(turno.id).replace('-', '')}"
 
     # orari: primo inizio disponibile, ultimo fine disponibile
     start = first_non_null(turno.inizio_1, turno.inizio_2, turno.inizio_3)
@@ -136,7 +141,7 @@ def delete_shift_event(turno_id):
     try:
         gcal.events().delete(
             calendarId=cal_id,
-            eventId=f"shift-{turno_id}",
+            eventId=f"shift-{str(turno_id).replace('-', '')}",
         ).execute()
     except gerr.HttpError as e:
         if e.resp.status != 404:
