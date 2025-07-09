@@ -150,6 +150,7 @@ def delete_shift_event(turno_id):
         gcal.events().delete(
             calendarId=cal_id,
             eventId=f"shift-{str(turno_id).replace('-', '')}",
+            sendUpdates="none",
         ).execute()
     except gerr.HttpError as e:
         if e.resp.status != 404:
