@@ -10,7 +10,6 @@ class Settings:
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     PDF_UPLOAD_ROOT: str = "uploads/pdfs"
     GOOGLE_CREDENTIALS_JSON: str | None = None
-    G_EVENT_CAL_ID: str | None = None
     G_SHIFT_CAL_ID: str | None = None
     GOOGLE_CALENDAR_ID: str | None = None
     GOOGLE_CLIENT_ID: str | None = None
@@ -38,7 +37,6 @@ def load_settings() -> Settings:
         ACCESS_TOKEN_EXPIRE_MINUTES=int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30")),
         PDF_UPLOAD_ROOT=os.getenv("PDF_UPLOAD_ROOT", "uploads/pdfs"),
         GOOGLE_CREDENTIALS_JSON=os.getenv("GOOGLE_CREDENTIALS_JSON"),
-        G_EVENT_CAL_ID=os.getenv("G_EVENT_CAL_ID"),
         G_SHIFT_CAL_ID=os.getenv("G_SHIFT_CAL_ID"),
         GOOGLE_CALENDAR_ID=os.getenv("GOOGLE_CALENDAR_ID"),
         GOOGLE_CLIENT_ID=os.getenv("GOOGLE_CLIENT_ID"),
