@@ -9,6 +9,7 @@ Richiede:
 from datetime import date, time, datetime
 from functools import lru_cache
 from app.config import settings
+import logging
 
 import json
 import os
@@ -17,6 +18,8 @@ from googleapiclient.discovery import build
 import googleapiclient.errors as gerr
 
 from app.schemas.turno import DAY_OFF_TYPES, TipoTurno
+
+logger = logging.getLogger(__name__)
 
 # ------------------------------------------------------------------- agent colors
 # Mapping of agent email addresses to Google Calendar color IDs.  These values
@@ -157,12 +160,18 @@ def sync_shift_event(turno):
         if e.resp.status in (404, 400):
             # status 400 may be returned when Google thinks the event ID is invalid,
             # so treat it like a missing event and create it from scratch
-            gcal.events().insert(
-                calendarId=cal_id,
-                body=body,
-                sendUpdates="none",
-            ).execute()
+            logger.warning("Update of event %s failed (%s), inserting", evt_id, e.resp.status)
+            try:
+                gcal.events().insert(
+                    calendarId=cal_id,
+                    body=body,
+                    sendUpdates="none",
+                ).execute()
+            except gerr.HttpError as e2:
+                logger.error("Failed to insert event %s: %s", evt_id, e2)
+                raise
         else:
+            logger.error("Failed to update event %s: %s", evt_id, e)
             raise
 
 
@@ -183,5 +192,8 @@ def delete_shift_event(turno_id):
             sendUpdates="none",
         ).execute()
     except gerr.HttpError as e:
-        if e.resp.status != 404:
+        if e.resp.status == 404:
+            logger.warning("Delete of event %s returned 404", turno_id)
+        else:
+            logger.error("Failed to delete event %s: %s", turno_id, e)
             raise
