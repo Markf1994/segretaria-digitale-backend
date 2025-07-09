@@ -239,8 +239,8 @@ def test_sync_shift_event_logs_day_off(monkeypatch, caplog):
     assert "Removed calendar event for day off" in caplog.text
 
 
-def test_sync_shift_event_logs_warning_on_update_404(monkeypatch, caplog):
-    """An update failure with status 404 should log a warning and insert."""
+def test_sync_shift_event_logs_info_on_update_404(monkeypatch, caplog):
+    """An update failure with status 404 should log an info message and insert."""
 
     insert_called = {}
 
@@ -268,7 +268,7 @@ def test_sync_shift_event_logs_warning_on_update_404(monkeypatch, caplog):
 
     turno = _dummy_turno()
 
-    with caplog.at_level(logging.WARNING):
+    with caplog.at_level(logging.INFO):
         gcal.sync_shift_event(turno)
 
     assert insert_called.get("called") is True
@@ -336,8 +336,8 @@ def test_sync_shift_event_insert_failure_reraised(monkeypatch, caplog):
     assert "Failed to insert event" in caplog.text
 
 
-def test_delete_shift_event_logs_warning_on_404(monkeypatch, caplog):
-    """Deletion errors with 404 should only log a warning."""
+def test_delete_shift_event_logs_info_on_404(monkeypatch, caplog):
+    """Deletion errors with 404 should only log an info message."""
 
     def fake_delete(**kwargs):
         class Runner:
@@ -354,7 +354,7 @@ def test_delete_shift_event_logs_warning_on_404(monkeypatch, caplog):
     monkeypatch.setattr(gcal.gerr, "HttpError", FakeHttpError, raising=False)
     monkeypatch.setattr(gcal.settings, "G_SHIFT_CAL_ID", "CAL")
 
-    with caplog.at_level(logging.WARNING):
+    with caplog.at_level(logging.INFO):
         gcal.delete_shift_event("1")
 
     assert "Delete of event" in caplog.text
