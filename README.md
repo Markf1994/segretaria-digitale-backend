@@ -176,13 +176,31 @@ render blueprint deploy render.yaml
 to create or update the service. Set the required environment variables
 (for example `DATABASE_URL` and `SECRET_KEY`) in the Render dashboard.
 
-### Troubleshooting CORS
+## Troubleshooting
+
+### CORS
 
 Set the `CORS_ORIGINS` environment variable to a comma-separated list of allowed
 origins, for example `https://example.com,https://app.example.com`. Two common
 pitfalls are omitting the domain entirely and leaving trailing slashes after the
 origin URL. When `CORS_ORIGINS` is not set, the API defaults to `"*"`, which is
 appropriate only for local development.
+
+### PDF generation
+
+If `WeasyPrint` or its system libraries (for example **Pango** and **Cairo**) are
+missing, PDF generation can fail with an error similar to:
+
+```
+PDF.__init__() takes 1 positional argument but 3 were given
+```
+
+Install the required packages using the apt-get command shown in the **Setup**
+section:
+
+```bash
+apt-get update && apt-get install -y libpango-1.0-0 libcairo2 gdk-pixbuf2.0-0 libffi-dev
+```
 
 ## Dashboard endpoint
 
