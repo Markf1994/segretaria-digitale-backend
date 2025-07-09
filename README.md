@@ -162,6 +162,23 @@ apt-get update && apt-get install -y wkhtmltopdf && pip install -r requirements.
 If deploying with Docker, the provided `Dockerfile` installs `wkhtmltopdf` prior
 to installing packages.
 
+### Render
+
+Render can build the application directly from the included `Dockerfile`. A
+`render.yaml` file should be added at the repository root with a `web` service
+definition:
+
+```yaml
+services:
+  - type: web
+    env: docker
+    dockerfilePath: Dockerfile
+    dockerCommand: uvicorn app.main:app --host 0.0.0.0 --port 10000
+```
+
+The Dockerfile installs `wkhtmltopdf` automatically, so no additional system
+packages are needed during the build.
+
 ### Troubleshooting CORS
 
 Set the `CORS_ORIGINS` environment variable to a comma-separated list of allowed

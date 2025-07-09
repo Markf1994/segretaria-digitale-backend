@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: segretaria-digitale
+    env: docker
+    dockerfilePath: Dockerfile
+    dockerCommand: uvicorn app.main:app --host 0.0.0.0 --port 10000
+
