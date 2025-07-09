@@ -1,7 +1,7 @@
 import pandas as pd
 from weasyprint import HTML
 import tempfile
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from typing import Any, Dict, List, Tuple
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
@@ -177,6 +177,21 @@ def df_to_pdf(rows: List[Dict[str, Any]], db: Session | None = None) -> Tuple[st
     :return: A tuple ``(pdf_path, html_path)`` pointing to the generated files.
     """
 
+    def fmt(t: Any) -> str:
+        """Return ``t`` formatted as HH:MM when it is a time or string value."""
+        if t is None or t == "":
+            return ""
+        if isinstance(t, time):
+            return t.strftime("%H:%M")
+        if isinstance(t, str):
+            for fmt_str in ("%H:%M:%S", "%H:%M"):
+                try:
+                    return datetime.strptime(t, fmt_str).strftime("%H:%M")
+                except ValueError:
+                    continue
+            return t
+        return str(t)
+
     df = pd.DataFrame(rows)
 
     if db is not None and "user_id" in df.columns:
@@ -211,12 +226,12 @@ def df_to_pdf(rows: List[Dict[str, Any]], db: Session | None = None) -> Tuple[st
         else:
             segments: list[str] = []
             if row.get("inizio_1") and row.get("fine_1"):
-                segments.append(f"{row['inizio_1']} – {row['fine_1']}")
+                segments.append(f"{fmt(row['inizio_1'])} – {fmt(row['fine_1'])}")
             if row.get("inizio_2") and row.get("fine_2"):
-                segments.append(f"{row['inizio_2']} – {row['fine_2']}")
+                segments.append(f"{fmt(row['inizio_2'])} – {fmt(row['fine_2'])}")
             if row.get("inizio_3") and row.get("fine_3"):
                 segments.append(
-                    f"<span class='extra'>{row['inizio_3']} – {row['fine_3']} STRAORDINARIO</span>"
+                    f"<span class='extra'>{fmt(row['inizio_3'])} – {fmt(row['fine_3'])} STRAORDINARIO</span>"
                 )
             cell = "<br>".join(segments)
 

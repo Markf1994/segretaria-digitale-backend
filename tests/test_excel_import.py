@@ -519,3 +519,30 @@ def test_df_to_pdf_escapes_html(tmp_path):
 
     os.remove(pdf_path)
     os.remove(html_path)
+
+
+def test_df_to_pdf_formats_times_without_seconds(tmp_path):
+    rows = [
+        {
+            "Agente": "Agent",
+            "giorno": "2023-01-01",
+            "inizio_1": "08:00:00",
+            "fine_1": "12:00:00",
+            "tipo": "NORMALE",
+            "note": "",
+        }
+    ]
+
+    def fake_write_pdf(self, target, *args, **kwargs):
+        Path(target).write_bytes(b"%PDF-1.4 fake")
+
+    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
+        pdf_path, html_path = df_to_pdf(rows, None)
+
+    html_text = Path(html_path).read_text()
+    assert "08:00 – 12:00" in html_text
+    assert "08:00:00" not in html_text
+    assert "12:00:00" not in html_text
+
+    os.remove(pdf_path)
+    os.remove(html_path)
