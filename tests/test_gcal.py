@@ -371,3 +371,84 @@ def test_delete_shift_event_reraises_errors(monkeypatch, caplog):
             gcal.delete_shift_event("1")
 
     assert "Failed to delete event" in caplog.text
+
+
+def test_sync_shift_event_logs_info_on_update_success(monkeypatch, caplog):
+    """Successful update should log an info message."""
+
+    def fake_update(**kwargs):
+        class Runner:
+            def execute(self_inner):
+                pass
+
+        return Runner()
+
+    class DummyClient:
+        def events(self):
+            return types.SimpleNamespace(update=fake_update)
+
+    monkeypatch.setattr(gcal, "get_client", lambda: DummyClient())
+    monkeypatch.setattr(gcal.settings, "G_SHIFT_CAL_ID", "CAL")
+
+    turno = _dummy_turno()
+
+    with caplog.at_level(logging.INFO):
+        gcal.sync_shift_event(turno)
+
+    assert "Updated event" in caplog.text
+
+
+def test_sync_shift_event_logs_info_on_insert_success(monkeypatch, caplog):
+    """When update fails but insert succeeds, an info message should be logged."""
+
+    def fake_update(**kwargs):
+        class Runner:
+            def execute(self_inner):
+                raise FakeHttpError(404)
+
+        return Runner()
+
+    def fake_insert(**kwargs):
+        class Runner:
+            def execute(self_inner):
+                pass
+
+        return Runner()
+
+    class DummyClient:
+        def events(self):
+            return types.SimpleNamespace(update=fake_update, insert=fake_insert)
+
+    monkeypatch.setattr(gcal, "get_client", lambda: DummyClient())
+    monkeypatch.setattr(gcal.gerr, "HttpError", FakeHttpError, raising=False)
+    monkeypatch.setattr(gcal.settings, "G_SHIFT_CAL_ID", "CAL")
+
+    turno = _dummy_turno()
+
+    with caplog.at_level(logging.INFO):
+        gcal.sync_shift_event(turno)
+
+    assert "Inserted event" in caplog.text
+
+
+def test_delete_shift_event_logs_info_on_success(monkeypatch, caplog):
+    """Successful deletions should be logged at info level."""
+
+    def fake_delete(**kwargs):
+        class Runner:
+            def execute(self_inner):
+                pass
+
+        return Runner()
+
+    class DummyClient:
+        def events(self):
+            return types.SimpleNamespace(delete=fake_delete)
+
+    monkeypatch.setattr(gcal, "get_client", lambda: DummyClient())
+    monkeypatch.setattr(gcal.settings, "G_SHIFT_CAL_ID", "CAL")
+
+    with caplog.at_level(logging.INFO):
+        gcal.delete_shift_event("1")
+
+    assert "Deleted event" in caplog.text
