@@ -8,6 +8,7 @@ Richiede:
 
 from datetime import date, time, datetime
 from functools import lru_cache
+from uuid import UUID
 from app.config import settings
 
 import json
@@ -47,6 +48,11 @@ SHIFT_CAL_ID = settings.G_SHIFT_CAL_ID  # calendario "Turni di Servizio"
 
 
 # ------------------------------------------------------------------- utilità
+def make_event_id(turno_id: UUID | str) -> str:
+    """Return the Google Calendar event ID for ``turno_id``."""
+    return f"shift-{str(turno_id).replace('-', '')}"
+
+
 def iso_dt(d: date, t: time) -> str:
     """2025-07-01 + 08:30 -> '2025-07-01T08:30:00+02:00'"""
     dt = datetime.combine(d, t)
@@ -100,7 +106,7 @@ def sync_shift_event(turno):
     # contengono "-" che sono consentiti ma in alcuni casi Google restituisce
     # "Invalid resource id value". Rimuoviamo quindi i trattini per maggiore
     # compatibilità e generiamo un ID privo di caratteri speciali.
-    evt_id = f"shift-{str(turno.id).replace('-', '')}"
+    evt_id = make_event_id(turno.id)
 
     # orari: primo inizio disponibile, ultimo fine disponibile
     start = first_non_null(turno.inizio_1, turno.inizio_2, turno.inizio_3)
@@ -149,7 +155,7 @@ def delete_shift_event(turno_id):
     try:
         gcal.events().delete(
             calendarId=cal_id,
-            eventId=f"shift-{str(turno_id).replace('-', '')}",
+            eventId=make_event_id(turno_id),
         ).execute()
     except gerr.HttpError as e:
         if e.resp.status != 404:

@@ -63,7 +63,12 @@ def upsert_turno(db: Session, payload: TurnoIn) -> Turno:
             gcal.sync_shift_event(rec)
         except Exception as exc:
             # non bloccare l’operazione DB se G-Cal fallisce, ma loggare
-            logger.error("Errore sync calendario: %s", exc)
+            logger.error(
+                "Errore sync calendario turno %s (event %s): %s",
+                rec.id,
+                gcal.make_event_id(rec.id),
+                exc,
+            )
 
     return rec
 
