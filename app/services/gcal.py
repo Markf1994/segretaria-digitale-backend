@@ -155,6 +155,7 @@ def sync_shift_event(turno):
             eventId=evt_id,
             body=body,
         ).execute()
+        logger.info("Updated event %s", evt_id)
     except gerr.HttpError as e:
         if e.resp.status in (404, 400):
             # status 400 may be returned when Google thinks the event ID is invalid,
@@ -166,6 +167,7 @@ def sync_shift_event(turno):
                     body=body,
                     sendUpdates="none",
                 ).execute()
+                logger.info("Inserted event %s", evt_id)
             except gerr.HttpError as e2:
                 logger.error("Failed to insert event %s: %s", evt_id, e2)
                 raise
@@ -190,6 +192,7 @@ def delete_shift_event(turno_id):
             eventId=f"shift-{str(turno_id).replace('-', '')}",
             sendUpdates="none",
         ).execute()
+        logger.info("Deleted event %s", turno_id)
     except gerr.HttpError as e:
         if e.resp.status == 404:
             logger.warning("Delete of event %s returned 404", turno_id)
