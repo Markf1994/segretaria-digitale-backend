@@ -227,3 +227,15 @@ def test_delete_turno_calls_gcal(setup_db):
 
     assert del_res.status_code == 200
     fake_delete.assert_called_once_with(turno_id)
+
+
+def test_delete_turno_invalid_id_skips_gcal(setup_db):
+    """Deleting a non-existent turno should not call Google Calendar."""
+    headers, _ = auth_user("missing@example.com")
+    fake_id = "11111111-1111-1111-1111-111111111111"
+
+    with patch("app.services.gcal.delete_shift_event") as fake_delete:
+        res = client.delete(f"/orari/{fake_id}", headers=headers)
+
+    assert res.status_code == 404
+    fake_delete.assert_not_called()
