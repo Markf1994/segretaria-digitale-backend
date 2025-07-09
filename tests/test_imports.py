@@ -37,13 +37,11 @@ def test_import_xlsx_creates_turni_and_returns_pdf(setup_db, tmp_path):
     xlsx_path = tmp_path / "shift.xlsx"
     df.to_excel(xlsx_path, index=False)
 
-    def fake_from_file(html_path, pdf_path, **kwargs):
+    def fake_write_pdf(self, pdf_path):
         Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
-        return True
+        return None
 
-    with patch(
-        "app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file
-    ):
+    with patch("app.services.excel_import.HTML.write_pdf", side_effect=fake_write_pdf):
         with open(xlsx_path, "rb") as fh:
             res = client.post(
                 "/import/xlsx",
@@ -72,15 +70,15 @@ def test_temp_files_removed_after_request(setup_db, tmp_path):
         captured["xlsx"] = path
         return []
 
-    def fake_from_file(html_path, pdf_path, **kwargs):
-        captured["html"] = html_path
+    def fake_write_pdf(self, pdf_path):
         captured["pdf"] = pdf_path
         Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
-        return True
+        return None
 
     with patch("app.routes.imports.parse_excel", side_effect=fake_parse_excel):
         with patch(
-            "app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file
+            "app.services.excel_import.HTML.write_pdf",
+            side_effect=fake_write_pdf,
         ):
             dummy = tmp_path / "shift.xlsx"
             dummy.write_bytes(b"data")
@@ -141,13 +139,11 @@ def test_import_excel_alias_returns_pdf(tmp_path):
     xlsx_path = tmp_path / "shift.xlsx"
     df.to_excel(xlsx_path, index=False)
 
-    def fake_from_file(html_path, pdf_path, **kwargs):
+    def fake_write_pdf(self, pdf_path):
         Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
-        return True
+        return None
 
-    with patch(
-        "app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file
-    ):
+    with patch("app.services.excel_import.HTML.write_pdf", side_effect=fake_write_pdf):
         with open(xlsx_path, "rb") as fh:
             res = client.post(
                 "/import/excel",
@@ -232,7 +228,14 @@ def test_tmp_removed_on_late_failure(tmp_path):
 
     def fake_parse_excel(path, db):
         captured["xlsx"] = path
-        return [{"user_id": "1", "giorno": "2023-01-01", "inizio_1": "08:00:00", "fine_1": "12:00:00"}]
+        return [
+            {
+                "user_id": "1",
+                "giorno": "2023-01-01",
+                "inizio_1": "08:00:00",
+                "fine_1": "12:00:00",
+            }
+        ]
 
     def boom(*args, **kwargs):
         raise RuntimeError("oops")
@@ -272,13 +275,11 @@ def test_import_xlsx_data_column_alias(setup_db, tmp_path):
     xlsx_path = tmp_path / "data_alias.xlsx"
     df.to_excel(xlsx_path, index=False)
 
-    def fake_from_file(html_path, pdf_path, **kwargs):
+    def fake_write_pdf(self, pdf_path):
         Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
-        return True
+        return None
 
-    with patch(
-        "app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file
-    ):
+    with patch("app.services.excel_import.HTML.write_pdf", side_effect=fake_write_pdf):
         with open(xlsx_path, "rb") as fh:
             res = client.post(
                 "/import/xlsx",

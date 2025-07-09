@@ -69,9 +69,9 @@ def test_week_pdf_filters_turni(setup_db, tmp_path):
         "app.services.excel_import", fromlist=["df_to_pdf"]
     ).df_to_pdf
 
-    def fake_from_file(html_path, pdf_path, **kwargs):
+    def fake_write_pdf(self, pdf_path):
         Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
-        return True
+        return None
 
     def capture_df_to_pdf(rows, db):
         captured["rows"] = rows
@@ -81,9 +81,7 @@ def test_week_pdf_filters_turni(setup_db, tmp_path):
         captured["html_text"] = Path(html_path).read_text()
         return pdf_path, html_path
 
-    with patch(
-        "app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file
-    ):
+    with patch("app.services.excel_import.HTML.write_pdf", side_effect=fake_write_pdf):
         with patch("app.routes.orari.df_to_pdf", side_effect=capture_df_to_pdf):
             res = client.get("/orari/pdf?week=2023-W01", headers=headers)
 
@@ -137,9 +135,9 @@ def test_week_pdf_temp_files_removed(setup_db, tmp_path):
         "app.services.excel_import", fromlist=["df_to_pdf"]
     ).df_to_pdf
 
-    def fake_from_file(html_path, pdf_path, **kwargs):
+    def fake_write_pdf(self, pdf_path):
         Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
-        return True
+        return None
 
     def capture_df_to_pdf(rows, db):
         pdf_path, html_path = real_df_to_pdf(rows, db)
@@ -148,9 +146,7 @@ def test_week_pdf_temp_files_removed(setup_db, tmp_path):
         captured["html_text"] = Path(html_path).read_text()
         return pdf_path, html_path
 
-    with patch(
-        "app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file
-    ):
+    with patch("app.services.excel_import.HTML.write_pdf", side_effect=fake_write_pdf):
         with patch("app.routes.orari.df_to_pdf", side_effect=capture_df_to_pdf):
             res = client.get("/orari/pdf?week=2023-W01", headers=headers)
 
@@ -190,18 +186,16 @@ def test_week_pdf_escapes_html(setup_db, tmp_path):
         "app.services.excel_import", fromlist=["df_to_pdf"]
     ).df_to_pdf
 
-    def fake_from_file(html_path, pdf_path, **kwargs):
+    def fake_write_pdf(self, pdf_path):
         Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
-        return True
+        return None
 
     def capture_df_to_pdf(rows, db):
         pdf_path, html_path = real_df_to_pdf(rows, db)
         captured["html_text"] = Path(html_path).read_text()
         return pdf_path, html_path
 
-    with patch(
-        "app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file
-    ):
+    with patch("app.services.excel_import.HTML.write_pdf", side_effect=fake_write_pdf):
         with patch("app.routes.orari.df_to_pdf", side_effect=capture_df_to_pdf):
             res = client.get("/orari/pdf?week=2023-W01", headers=headers)
 

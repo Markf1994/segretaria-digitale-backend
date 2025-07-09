@@ -1,5 +1,5 @@
 import pandas as pd
-import pdfkit
+from weasyprint import HTML
 import tempfile
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Tuple
@@ -233,6 +233,7 @@ def df_to_pdf(rows: List[Dict[str, Any]], db: Session | None = None) -> Tuple[st
         raise HTTPException(status_code=500, detail="Logo file missing")
     styles = """
     <style>
+    @page { size: A4 landscape; }
     body { font-family: Aptos, sans-serif; font-size: 12pt; }
     table { border-collapse: collapse; width: 100%; }
     th, td { border: 1px solid #000; padding: 4px; text-align: center; }
@@ -299,10 +300,10 @@ def df_to_pdf(rows: List[Dict[str, Any]], db: Session | None = None) -> Tuple[st
 
     pdf_path = html_path.replace(".html", ".pdf")
     try:
-        pdfkit.from_file(html_path, pdf_path, options={"orientation": "Landscape"})
-    except OSError as err:
-        if "wkhtmltopdf" in str(err):
-            raise HTTPException(status_code=500, detail="wkhtmltopdf not installed")
-        raise
+        HTML(filename=html_path).write_pdf(pdf_path)
+    except Exception as err:
+        raise HTTPException(
+            status_code=500, detail=f"PDF generation failed: {err}"
+        ) from err
 
     return pdf_path, html_path

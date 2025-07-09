@@ -427,20 +427,20 @@ def test_df_to_pdf_creates_files_and_cleanup(tmp_path):
 
     captured = {}
 
-    def fake_from_file(html_path, pdf_path, **kwargs):
-        captured["options"] = kwargs.get("options")
+    def fake_write_pdf(self, pdf_path):
         Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
-        return True
+        return None
 
     with patch(
-        "app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file
+        "app.services.excel_import.HTML.write_pdf",
+        side_effect=fake_write_pdf,
     ):
         pdf_path, html_path = df_to_pdf(rows, None)
 
     assert os.path.exists(pdf_path)
     assert os.path.exists(html_path)
-    assert captured["options"] == {"orientation": "Landscape"}
     html_text = Path(html_path).read_text()
+    assert "@page { size: A4 landscape; }" in html_text
     assert "26/12/2022 – 01/01/2023" in html_text
     assert "DOMENICA<br>01/01/2023" in html_text
     assert "Logo.png" in html_text
@@ -455,8 +455,8 @@ def test_df_to_pdf_creates_files_and_cleanup(tmp_path):
     assert not os.path.exists(html_path)
 
 
-def test_df_to_pdf_missing_wkhtmltopdf(tmp_path):
-    """An informative HTTPException is raised when wkhtmltopdf is missing."""
+def test_df_to_pdf_write_failure(tmp_path):
+    """An informative HTTPException is raised when PDF generation fails."""
     rows = [
         {
             "user_id": "1",
@@ -468,17 +468,15 @@ def test_df_to_pdf_missing_wkhtmltopdf(tmp_path):
         }
     ]
 
-    def fake_from_file(html_path, pdf_path, **kwargs):
-        raise OSError("No wkhtmltopdf executable found")
+    def fake_write_pdf(self, pdf_path):
+        raise RuntimeError("boom")
 
-    with patch(
-        "app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file
-    ):
+    with patch("app.services.excel_import.HTML.write_pdf", side_effect=fake_write_pdf):
         with pytest.raises(HTTPException) as exc:
             df_to_pdf(rows, None)
 
     assert exc.value.status_code == 500
-    assert "wkhtmltopdf" in exc.value.detail
+    assert "PDF generation failed" in exc.value.detail
 
 
 def test_df_to_pdf_missing_logo(monkeypatch):
@@ -493,13 +491,11 @@ def test_df_to_pdf_missing_logo(monkeypatch):
         }
     ]
 
-    def fake_from_file(html_path, pdf_path, **kwargs):
+    def fake_write_pdf(self, pdf_path):
         Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
-        return True
+        return None
 
-    with patch(
-        "app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file
-    ):
+    with patch("app.services.excel_import.HTML.write_pdf", side_effect=fake_write_pdf):
         with patch("os.path.exists", return_value=False):
             with pytest.raises(HTTPException) as exc:
                 df_to_pdf(rows, None)
@@ -520,13 +516,11 @@ def test_df_to_pdf_escapes_html(tmp_path):
         }
     ]
 
-    def fake_from_file(html_path, pdf_path, **kwargs):
+    def fake_write_pdf(self, pdf_path):
         Path(pdf_path).write_bytes(b"%PDF-1.4 fake")
-        return True
+        return None
 
-    with patch(
-        "app.services.excel_import.pdfkit.from_file", side_effect=fake_from_file
-    ):
+    with patch("app.services.excel_import.HTML.write_pdf", side_effect=fake_write_pdf):
         pdf_path, html_path = df_to_pdf(rows, None)
 
     html_text = Path(html_path).read_text()
