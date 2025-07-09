@@ -162,6 +162,10 @@ apt-get update && apt-get install -y wkhtmltopdf && pip install -r requirements.
 If deploying with Docker, the provided `Dockerfile` installs `wkhtmltopdf` prior
 to installing packages.
 
+A `render.yaml` file is also provided for deployments on **Render**. The web
+service uses Docker and runs on port `10000`, which Render expects the
+application to bind to.
+
 ### Troubleshooting CORS
 
 Set the `CORS_ORIGINS` environment variable to a comma-separated list of allowed
