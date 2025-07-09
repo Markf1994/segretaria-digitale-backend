@@ -546,3 +546,55 @@ def test_df_to_pdf_formats_times_without_seconds(tmp_path):
 
     os.remove(pdf_path)
     os.remove(html_path)
+
+
+def fake_write_pdf(self, target, *args, **kwargs):
+    Path(target).write_bytes(b"%PDF-1.4 fake")
+
+
+def test_df_to_pdf_skips_nan_second_segment(tmp_path):
+    rows = [
+        {
+            "Agente": "Agent",
+            "giorno": "2023-01-01",
+            "inizio_1": "08:00",
+            "fine_1": "12:00",
+            "inizio_2": float("nan"),
+            "fine_2": float("nan"),
+            "tipo": "NORMALE",
+            "note": "",
+        }
+    ]
+
+    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
+        pdf_path, html_path = df_to_pdf(rows, None)
+
+    html_text = Path(html_path).read_text()
+    assert "nan – nan" not in html_text
+
+    os.remove(pdf_path)
+    os.remove(html_path)
+
+
+def test_df_to_pdf_skips_nan_third_segment(tmp_path):
+    rows = [
+        {
+            "Agente": "Agent",
+            "giorno": "2023-01-01",
+            "inizio_1": "08:00",
+            "fine_1": "12:00",
+            "inizio_3": float("nan"),
+            "fine_3": float("nan"),
+            "tipo": "NORMALE",
+            "note": "",
+        }
+    ]
+
+    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
+        pdf_path, html_path = df_to_pdf(rows, None)
+
+    html_text = Path(html_path).read_text()
+    assert "nan – nan" not in html_text
+
+    os.remove(pdf_path)
+    os.remove(html_path)

@@ -36,6 +36,14 @@ def _clean(cell: Any) -> Any:
     return cell
 
 
+def _not_nan(value: Any) -> bool:
+    """Return ``False`` when ``value`` is ``None`` or NaN."""
+
+    if value is None:
+        return False
+    return not pd.isna(value)
+
+
 def parse_excel(path: str, db: Session | None = None) -> List[Dict[str, Any]]:
     """Parse an Excel file exported from Google Sheets.
 
@@ -227,9 +235,9 @@ def df_to_pdf(rows: List[Dict[str, Any]], db: Session | None = None) -> Tuple[st
             segments: list[str] = []
             if row.get("inizio_1") and row.get("fine_1"):
                 segments.append(f"{fmt(row['inizio_1'])} – {fmt(row['fine_1'])}")
-            if row.get("inizio_2") and row.get("fine_2"):
+            if _not_nan(row.get("inizio_2")) and _not_nan(row.get("fine_2")):
                 segments.append(f"{fmt(row['inizio_2'])} – {fmt(row['fine_2'])}")
-            if row.get("inizio_3") and row.get("fine_3"):
+            if _not_nan(row.get("inizio_3")) and _not_nan(row.get("fine_3")):
                 segments.append(
                     f"<span class='extra'>{fmt(row['inizio_3'])} – {fmt(row['fine_3'])} STRAORDINARIO</span>"
                 )
