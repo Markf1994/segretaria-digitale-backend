@@ -201,3 +201,29 @@ def test_create_turno_recupero_skips_gcal_sync(setup_db):
     fake_sync.assert_not_called()
     payload = res.json()
     assert payload["tipo"] == "RECUPERO"
+
+
+def test_delete_turno_calls_gcal(setup_db):
+    """Deleting a turno should remove the matching Google Calendar event."""
+    headers, user_id = auth_user("gcaldelete@example.com")
+    data = {
+        "user_id": user_id,
+        "giorno": "2024-01-01",
+        "inizio_1": "08:00:00",
+        "fine_1": "12:00:00",
+        "inizio_2": None,
+        "fine_2": None,
+        "inizio_3": None,
+        "fine_3": None,
+        "tipo": TipoTurno.NORMALE.value,
+        "note": "",
+    }
+
+    res = client.post("/orari/", json=data, headers=headers)
+    turno_id = res.json()["id"]
+
+    with patch("app.services.gcal.delete_shift_event") as fake_delete:
+        del_res = client.delete(f"/orari/{turno_id}", headers=headers)
+
+    assert del_res.status_code == 200
+    fake_delete.assert_called_once_with(turno_id)
