@@ -211,7 +211,8 @@ endpoint expects the file in a `multipart/form-data` request under the `file`
 field. The same functionality is available via `/import/excel`.
 
 The Excel sheet **must** include the `Giorno`, `Inizio1` and `Fine1` columns and
-either a `User ID` or an `Agente` column. Optional columns are
+either a `User ID` or an `Agente` column. The `Giorno` column may also be
+labeled `Data`. Optional columns are
 `Inizio2`/`Fine2`, `Inizio3`/`Fine3` (or `Straordinario inizio`/`Straordinario fine`), `Tipo` and `Note`.
 Valid values for `Tipo` are `NORMALE`, `STRAORD`, `FERIE`, `RIPOSO`, `FESTIVO` and `RECUPERO`.
 Rows marked as day off (with `Tipo` set to `FERIE`, `RIPOSO`, `FESTIVO` or `RECUPERO`) may leave the `Inizio1` and `Fine1` cells empty. The columns must still be present in the sheet.
