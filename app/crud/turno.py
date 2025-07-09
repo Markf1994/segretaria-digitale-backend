@@ -57,12 +57,13 @@ def upsert_turno(db: Session, payload: TurnoIn) -> Turno:
     db.commit()
     db.refresh(rec)  # ottieni id definitivo
 
-    # 5. sincronizza l’evento Google Calendar
-    try:
-        gcal.sync_shift_event(rec)
-    except Exception as exc:
-        # non bloccare l’operazione DB se G-Cal fallisce, ma loggare
-        logger.error("Errore sync calendario: %s", exc)
+    # 5. sincronizza l’evento Google Calendar (salta per i RECUPERO)
+    if payload.tipo is not TipoTurno.RECUPERO:
+        try:
+            gcal.sync_shift_event(rec)
+        except Exception as exc:
+            # non bloccare l’operazione DB se G-Cal fallisce, ma loggare
+            logger.error("Errore sync calendario: %s", exc)
 
     return rec
 
