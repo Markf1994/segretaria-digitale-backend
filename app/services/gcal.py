@@ -1,11 +1,8 @@
 # app/services/gcal.py
 """
-Helper unico per interagire con i due calendari Google:
-– calendario Eventi   (G_EVENT_CAL_ID)
-– calendario Turni    (G_SHIFT_CAL_ID)
+Helper unico per interagire con Google Calendar per i turni di servizio.
 Richiede:
   GOOGLE_CREDENTIALS_JSON=/percorso/service_account.json
-  G_EVENT_CAL_ID=…@group.calendar.google.com
   G_SHIFT_CAL_ID=…@group.calendar.google.com
 """
 
@@ -46,8 +43,7 @@ def get_client():
 
 
 # ------------------------------------------------------------------- calendar ID
-EVENT_CAL_ID = settings.G_EVENT_CAL_ID  # già in uso per gli altri eventi
-SHIFT_CAL_ID = settings.G_SHIFT_CAL_ID  # nuovo calendario “Turni di Servizio”
+SHIFT_CAL_ID = settings.G_SHIFT_CAL_ID  # calendario "Turni di Servizio"
 
 
 # ------------------------------------------------------------------- utilità
