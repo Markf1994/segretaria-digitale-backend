@@ -1,6 +1,7 @@
 import json
 from datetime import date, time, timedelta
 import types
+import logging
 import pytest
 
 from app.services import gcal
@@ -182,3 +183,170 @@ def test_sync_shift_event_sets_color_from_user(monkeypatch):
 )
 def test_color_for_user_predefined_agents(email, expected):
     assert gcal.color_for_user(email) == expected
+
+
+class FakeHttpError(Exception):
+    def __init__(self, status):
+        self.resp = types.SimpleNamespace(status=status)
+
+
+def _dummy_turno():
+    return types.SimpleNamespace(
+        id="1",
+        user=types.SimpleNamespace(nome="", email="bot@example.com"),
+        giorno=date(2024, 1, 1),
+        inizio_1=time(8, 0),
+        fine_1=time(12, 0),
+        inizio_2=None,
+        fine_2=None,
+        inizio_3=None,
+        fine_3=None,
+        tipo="NORMALE",
+        note="",
+    )
+
+
+def test_sync_shift_event_logs_warning_on_update_404(monkeypatch, caplog):
+    """An update failure with status 404 should log a warning and insert."""
+
+    insert_called = {}
+
+    def fake_update(**kwargs):
+        class Runner:
+            def execute(self_inner):
+                raise FakeHttpError(404)
+
+        return Runner()
+
+    def fake_insert(**kwargs):
+        class Runner:
+            def execute(self_inner):
+                insert_called["called"] = True
+
+        return Runner()
+
+    class DummyClient:
+        def events(self):
+            return types.SimpleNamespace(update=fake_update, insert=fake_insert)
+
+    monkeypatch.setattr(gcal, "get_client", lambda: DummyClient())
+    monkeypatch.setattr(gcal.gerr, "HttpError", FakeHttpError, raising=False)
+    monkeypatch.setattr(gcal.settings, "G_SHIFT_CAL_ID", "CAL")
+
+    turno = _dummy_turno()
+
+    with caplog.at_level(logging.WARNING):
+        gcal.sync_shift_event(turno)
+
+    assert insert_called.get("called") is True
+    assert "Update of event" in caplog.text
+
+
+def test_sync_shift_event_update_error_reraised(monkeypatch, caplog):
+    """Non-404 errors during update should be re-raised and logged."""
+
+    def fake_update(**kwargs):
+        class Runner:
+            def execute(self_inner):
+                raise FakeHttpError(500)
+
+        return Runner()
+
+    class DummyClient:
+        def events(self):
+            return types.SimpleNamespace(update=fake_update)
+
+    monkeypatch.setattr(gcal, "get_client", lambda: DummyClient())
+    monkeypatch.setattr(gcal.gerr, "HttpError", FakeHttpError, raising=False)
+    monkeypatch.setattr(gcal.settings, "G_SHIFT_CAL_ID", "CAL")
+
+    turno = _dummy_turno()
+
+    with caplog.at_level(logging.ERROR):
+        with pytest.raises(FakeHttpError):
+            gcal.sync_shift_event(turno)
+
+    assert "Failed to update event" in caplog.text
+
+
+def test_sync_shift_event_insert_failure_reraised(monkeypatch, caplog):
+    """Errors during insert should be logged and re-raised."""
+
+    def fake_update(**kwargs):
+        class Runner:
+            def execute(self_inner):
+                raise FakeHttpError(404)
+
+        return Runner()
+
+    def fake_insert(**kwargs):
+        class Runner:
+            def execute(self_inner):
+                raise FakeHttpError(500)
+
+        return Runner()
+
+    class DummyClient:
+        def events(self):
+            return types.SimpleNamespace(update=fake_update, insert=fake_insert)
+
+    monkeypatch.setattr(gcal, "get_client", lambda: DummyClient())
+    monkeypatch.setattr(gcal.gerr, "HttpError", FakeHttpError, raising=False)
+    monkeypatch.setattr(gcal.settings, "G_SHIFT_CAL_ID", "CAL")
+
+    turno = _dummy_turno()
+
+    with caplog.at_level(logging.ERROR):
+        with pytest.raises(FakeHttpError):
+            gcal.sync_shift_event(turno)
+
+    assert "Failed to insert event" in caplog.text
+
+
+def test_delete_shift_event_logs_warning_on_404(monkeypatch, caplog):
+    """Deletion errors with 404 should only log a warning."""
+
+    def fake_delete(**kwargs):
+        class Runner:
+            def execute(self_inner):
+                raise FakeHttpError(404)
+
+        return Runner()
+
+    class DummyClient:
+        def events(self):
+            return types.SimpleNamespace(delete=fake_delete)
+
+    monkeypatch.setattr(gcal, "get_client", lambda: DummyClient())
+    monkeypatch.setattr(gcal.gerr, "HttpError", FakeHttpError, raising=False)
+    monkeypatch.setattr(gcal.settings, "G_SHIFT_CAL_ID", "CAL")
+
+    with caplog.at_level(logging.WARNING):
+        gcal.delete_shift_event("1")
+
+    assert "Delete of event" in caplog.text
+
+
+def test_delete_shift_event_reraises_errors(monkeypatch, caplog):
+    """Deletion errors other than 404 should be re-raised and logged."""
+
+    def fake_delete(**kwargs):
+        class Runner:
+            def execute(self_inner):
+                raise FakeHttpError(500)
+
+        return Runner()
+
+    class DummyClient:
+        def events(self):
+            return types.SimpleNamespace(delete=fake_delete)
+
+    monkeypatch.setattr(gcal, "get_client", lambda: DummyClient())
+    monkeypatch.setattr(gcal.gerr, "HttpError", FakeHttpError, raising=False)
+    monkeypatch.setattr(gcal.settings, "G_SHIFT_CAL_ID", "CAL")
+
+    with caplog.at_level(logging.ERROR):
+        with pytest.raises(FakeHttpError):
+            gcal.delete_shift_event("1")
+
+    assert "Failed to delete event" in caplog.text
