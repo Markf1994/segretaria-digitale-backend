@@ -598,3 +598,34 @@ def test_df_to_pdf_skips_nan_third_segment(tmp_path):
 
     os.remove(pdf_path)
     os.remove(html_path)
+
+
+def test_df_to_pdf_lists_notes(tmp_path):
+    rows = [
+        {
+            "Agente": "Agent",
+            "giorno": "2023-01-01",
+            "inizio_1": "08:00",
+            "fine_1": "12:00",
+            "tipo": "NORMALE",
+            "note": "prima"
+        },
+        {
+            "Agente": "Agent",
+            "giorno": "2023-01-01",
+            "inizio_1": "13:00",
+            "fine_1": "15:00",
+            "tipo": "NORMALE",
+            "note": "seconda"
+        },
+    ]
+
+    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
+        pdf_path, html_path = df_to_pdf(rows, None)
+
+    html_text = Path(html_path).read_text()
+    assert "<li>prima</li>" in html_text
+    assert "<li>seconda</li>" in html_text
+
+    os.remove(pdf_path)
+    os.remove(html_path)

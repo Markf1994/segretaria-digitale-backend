@@ -322,12 +322,11 @@ def df_to_pdf(rows: List[Dict[str, Any]], db: Session | None = None) -> Tuple[st
         cells = [f"<td>{weekday}<br>{day}</td>"]
         for a in agents:
             cells.append(f"<td>{by_date[day].get(a, '')}</td>")
-        note_lines = notes.get(day, [])
-        g_lines = gcal_notes.get(day, [])
-        note_text = "<br>".join(note_lines)
-        if g_lines:
-            g_html = "<ul>" + "".join(f"<li>{l}</li>" for l in g_lines) + "</ul>"
-            note_text = f"{note_text}<br>{g_html}" if note_text else g_html
+        note_lines = notes.get(day, []) + gcal_notes.get(day, [])
+        if note_lines:
+            note_text = "<ul>" + "".join(f"<li>{l}</li>" for l in note_lines) + "</ul>"
+        else:
+            note_text = ""
         cells.append(f"<td class='notes'>{note_text}</td>")
         rows_html.append("<tr>" + "".join(cells) + "</tr>")
 
