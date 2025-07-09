@@ -27,9 +27,9 @@ logger = logging.getLogger(__name__)
 # These values are used by ``color_for_user`` when the matching key is found.
 # Any user not listed here falls back to a hash-based color selection.
 AGENT_COLORS = {
-    "marco@comune.castione.bg.it": "1",
-    "rossella@comune.castione.bg.it": "6",
-    "mattia@comune.castione.bg.it": "7",
+    "marco@comune.castione.bg.it": "7",
+    "rossella@comune.castione.bg.it": "3",
+    "mattia@comune.castione.bg.it": "5",
 }
 
 # Short names to use for specific agents in calendar event summaries. When a
