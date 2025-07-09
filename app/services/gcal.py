@@ -23,9 +23,9 @@ from app.schemas.turno import DAY_OFF_TYPES, TipoTurno
 logger = logging.getLogger(__name__)
 
 # ------------------------------------------------------------------- agent colors
-# Mapping of agent email addresses to Google Calendar color IDs.  These values
-# are used by ``color_for_user`` when the matching email is found.  Any user not
-# listed here falls back to a hash-based color selection.
+# Mapping of agent email addresses, IDs or names to Google Calendar color IDs.
+# These values are used by ``color_for_user`` when the matching key is found.
+# Any user not listed here falls back to a hash-based color selection.
 AGENT_COLORS = {
     "marco@comune.castione.bg.it": "1",
     "rossella@comune.castione.bg.it": "6",
@@ -98,7 +98,10 @@ def color_for_user(user) -> str:
         identifier = getattr(user, "id", None)
         if identifier is not None and str(identifier) in AGENT_COLORS:
             return AGENT_COLORS[str(identifier)]
-        user_id = email or str(identifier)
+        name = getattr(user, "nome", None)
+        if isinstance(name, str) and name.strip() in AGENT_COLORS:
+            return AGENT_COLORS[name.strip()]
+        user_id = email or str(identifier) or (name.strip() if isinstance(name, str) else "")
     else:
         if user in AGENT_COLORS:
             return AGENT_COLORS[user]
