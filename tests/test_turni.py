@@ -229,6 +229,32 @@ def test_delete_turno_calls_gcal(setup_db):
     fake_delete.assert_called_once_with(turno_id)
 
 
+def test_delete_turno_day_off_skips_gcal(setup_db):
+    """Day-off turni should not trigger calendar deletion."""
+    headers, user_id = auth_user("dayoffdel@example.com")
+    data = {
+        "user_id": user_id,
+        "giorno": "2024-02-01",
+        "inizio_1": None,
+        "fine_1": None,
+        "inizio_2": None,
+        "fine_2": None,
+        "inizio_3": None,
+        "fine_3": None,
+        "tipo": TipoTurno.RECUPERO.value,
+        "note": "",
+    }
+
+    res = client.post("/orari/", json=data, headers=headers)
+    turno_id = res.json()["id"]
+
+    with patch("app.services.gcal.delete_shift_event") as fake_delete:
+        del_res = client.delete(f"/orari/{turno_id}", headers=headers)
+
+    assert del_res.status_code == 200
+    fake_delete.assert_not_called()
+
+
 def test_delete_turno_invalid_id_skips_gcal(setup_db):
     """Deleting a non-existent turno should not call Google Calendar."""
     headers, _ = auth_user("missing@example.com")
