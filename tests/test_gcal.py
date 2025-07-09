@@ -169,4 +169,16 @@ def test_sync_shift_event_sets_color_from_user(monkeypatch):
 
     gcal.sync_shift_event(turno)
 
-    assert captured["color"] == gcal.color_for_user("u1")
+    assert captured["color"] == gcal.color_for_user(user)
+
+
+@pytest.mark.parametrize(
+    "email,expected",
+    [
+        ("marco@comune.castione.bg.it", "1"),
+        ("rossella@comune.castione.bg.it", "6"),
+        ("mattia@comune.castione.bg.it", "7"),
+    ],
+)
+def test_color_for_user_predefined_agents(email, expected):
+    assert gcal.color_for_user(email) == expected
