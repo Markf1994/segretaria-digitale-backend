@@ -73,8 +73,12 @@ def remove_turno(db: Session, turno_id: UUID) -> None:
     """
     Elimina turno dal DB e rimuove l'evento corrispondente dal calendario Google.
     """
-    # 1. cancella evento su Google (ignora 404 se era già sparito)
-    gcal.delete_shift_event(turno_id)
+    # 1. cancella evento su Google (ignora eventuali errori)
+    try:
+        gcal.delete_shift_event(turno_id)
+    except Exception as exc:
+        # non bloccare l'operazione DB se G-Cal fallisce, ma loggare
+        logger.error("Errore sync calendario: %s", exc)
 
     # 2. cancella record dal DB
     deleted = db.query(Turno).filter_by(id=turno_id).delete()
