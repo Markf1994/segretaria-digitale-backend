@@ -10,6 +10,10 @@ from datetime import date, time, datetime
 from functools import lru_cache
 from app.config import settings
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import json
 import os
 from google.oauth2 import service_account
@@ -157,13 +161,22 @@ def sync_shift_event(turno):
         if e.resp.status in (404, 400):
             # status 400 may be returned when Google thinks the event ID is invalid,
             # so treat it like a missing event and create it from scratch
+            logger.warning(
+                "update of event %s failed with %s; inserting instead",
+                evt_id,
+                e.resp.status,
+            )
             gcal.events().insert(
                 calendarId=cal_id,
                 body=body,
                 sendUpdates="none",
             ).execute()
         else:
+            logger.error("error updating event for turno %s: %s", turno.id, e)
             raise
+    except Exception as e:  # pragma: no cover - safeguard
+        logger.error("error updating event for turno %s: %s", turno.id, e)
+        raise
 
 
 def delete_shift_event(turno_id):
@@ -176,12 +189,14 @@ def delete_shift_event(turno_id):
         raise RuntimeError("G_SHIFT_CAL_ID is not configured")
 
     gcal = get_client()
+    evt_id = f"shift-{str(turno_id).replace('-', '')}"
     try:
         gcal.events().delete(
             calendarId=cal_id,
-            eventId=f"shift-{str(turno_id).replace('-', '')}",
+            eventId=evt_id,
             sendUpdates="none",
         ).execute()
     except gerr.HttpError as e:
         if e.resp.status != 404:
+            logger.error("error deleting event %s: %s", evt_id, e)
             raise
