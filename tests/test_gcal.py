@@ -169,7 +169,7 @@ def test_sync_shift_event_sets_color_from_user(monkeypatch):
 
     gcal.sync_shift_event(turno)
 
-    assert captured["color"] == gcal.color_for_user(user)
+    assert captured["color"] == "11"
 
 
 @pytest.mark.parametrize(
@@ -182,3 +182,8 @@ def test_sync_shift_event_sets_color_from_user(monkeypatch):
 )
 def test_color_for_user_predefined_agents(email, expected):
     assert gcal.color_for_user(email) == expected
+
+
+def test_color_for_user_deterministic():
+    """Unknown users should receive a deterministic color."""
+    assert gcal.color_for_user("a@example.com") == "11"

@@ -9,6 +9,7 @@ Richiede:
 from datetime import date, time, datetime
 from functools import lru_cache
 from app.config import settings
+import hashlib
 
 import json
 import os
@@ -102,7 +103,8 @@ def color_for_user(user) -> str:
         user_id = user
 
     colors = [str(i) for i in range(1, 12)]
-    idx = abs(hash(user_id)) % len(colors)
+    digest = hashlib.sha1(str(user_id).encode()).hexdigest()
+    idx = int(digest, 16) % len(colors)
     return colors[idx]
 
 
