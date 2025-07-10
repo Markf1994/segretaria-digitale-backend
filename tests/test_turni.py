@@ -130,7 +130,7 @@ def test_shift_event_summary_email(setup_db):
             headers=headers,
         )
 
-    assert captured["body"]["summary"] == "Calendar User"
+    assert captured["body"]["summary"] == "Turno Calendar User"
 
 
 def test_shift_event_summary_short_name(setup_db):
@@ -167,7 +167,7 @@ def test_shift_event_summary_short_name(setup_db):
             headers=headers,
         )
 
-    assert captured["body"]["summary"] == "Marco"
+    assert captured["body"]["summary"] == "Turno Ag.Sc. Fenaroli Marco"
 
 
 def test_create_turno_unknown_user_returns_400(setup_db):
