@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 from app.models.turno import Turno  # modello ORM
 from app.models.user import User
-from app.schemas.turno import TurnoIn, TipoTurno  # Pydantic (input)
+from app.schemas.turno import DAY_OFF_TYPES, TurnoIn, TipoTurno  # Pydantic (input)
 from app.services import gcal
 
 
