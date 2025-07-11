@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 from app.models.turno import Turno  # modello ORM
 from app.models.user import User
 from app.schemas.turno import DAY_OFF_TYPES, TurnoIn, TipoTurno  # Pydantic (input)
+from app.config import settings
 from app.services import gcal
 
 
@@ -63,7 +64,14 @@ def upsert_turno(db: Session, payload: TurnoIn) -> Turno:
             gcal.sync_shift_event(rec)
         except Exception as exc:
             # non bloccare l’operazione DB se G-Cal fallisce, ma loggare
-            logger.error("Errore sync calendario: %s", exc)
+            cal_id = settings.G_SHIFT_CAL_ID
+            evt_id = gcal.shift_event_id(rec.id)
+            logger.error(
+                "Errore sync calendario (cal_id=%s, event_id=%s): %s",
+                cal_id,
+                evt_id,
+                exc,
+            )
 
     return rec
 
@@ -90,7 +98,14 @@ def remove_turno(db: Session, turno_id: UUID) -> None:
             gcal.delete_shift_event(turno_id)
         except Exception as exc:  # pragma: no cover - unexpected errors
             # non bloccare l'operazione DB se G-Cal fallisce, ma loggare
-            logger.error("Errore sync calendario: %s", exc)
+            cal_id = settings.G_SHIFT_CAL_ID
+            evt_id = gcal.shift_event_id(turno_id)
+            logger.error(
+                "Errore sync calendario (cal_id=%s, event_id=%s): %s",
+                cal_id,
+                evt_id,
+                exc,
+            )
 
     # 3. cancella record dal DB
     db.delete(rec)
