@@ -71,6 +71,7 @@ def list_upcoming_events(days: int) -> list[dict[str, Any]]:
                     "titolo": ev.get("summary"),
                     "descrizione": ev.get("description"),
                     "data_ora": dt,
+                    "colorId": ev.get("colorId"),
                 }
             )
         return items
@@ -143,6 +144,7 @@ def list_events_between(start: datetime, end: datetime) -> list[dict[str, Any]]:
                     "titolo": ev.get("summary"),
                     "descrizione": ev.get("description"),
                     "data_ora": dt,
+                    "colorId": ev.get("colorId"),
                 }
             )
         return items

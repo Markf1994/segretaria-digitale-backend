@@ -36,12 +36,14 @@ def test_list_events_between_success(monkeypatch):
                                 "summary": "A",
                                 "description": "desc",
                                 "start": {"dateTime": "2023-01-02T10:00:00Z"},
+                                "colorId": "1",
                             },
                             {
                                 "id": "2",
                                 "summary": "B",
                                 "description": "",
                                 "start": {"date": "2023-01-03"},
+                                "colorId": "2",
                             },
                         ]
                     }
@@ -66,6 +68,8 @@ def test_list_events_between_success(monkeypatch):
     assert result[0]["id"] == "1"
     assert isinstance(result[0]["data_ora"], datetime)
     assert result[1]["data_ora"].date() == datetime(2023, 1, 3).date()
+    assert result[0]["colorId"] == "1"
+    assert result[1]["colorId"] == "2"
 
 
 def test_list_events_between_missing_config(monkeypatch):
