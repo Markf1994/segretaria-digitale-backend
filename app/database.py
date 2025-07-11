@@ -14,6 +14,8 @@ if url.drivername.startswith("sqlite"):
     connect_args = {"check_same_thread": False}
 else:
     sslmode_env = os.getenv("DATABASE_SSLMODE")
+    if sslmode_env is not None:
+        sslmode_env = sslmode_env.strip()
     sslmode_query = url.query.get("sslmode")
     if sslmode_env is not None:
         connect_args = {"sslmode": sslmode_env}
