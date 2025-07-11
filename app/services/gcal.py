@@ -91,6 +91,11 @@ def last_non_null(*vals):
     return next(v for v in reversed(vals) if v)
 
 
+def shift_event_id(turno_id) -> str:
+    """Return the calendar event ID for a given ``turno_id``."""
+    return f"shift-{str(turno_id).replace('-', '')}"
+
+
 def color_for_user(user) -> str:
     """Return a Google Calendar color ID for ``user``.
 
@@ -163,7 +168,7 @@ def sync_shift_event(turno):
     # contengono "-" che sono consentiti ma in alcuni casi Google restituisce
     # "Invalid resource id value". Rimuoviamo quindi i trattini per maggiore
     # compatibilità e generiamo un ID privo di caratteri speciali.
-    evt_id = f"shift-{str(turno.id).replace('-', '')}"
+    evt_id = shift_event_id(turno.id)
 
     # orari: primo inizio disponibile, ultimo fine disponibile
     start = first_non_null(turno.inizio_1, turno.inizio_2, turno.inizio_3)
@@ -192,7 +197,10 @@ def sync_shift_event(turno):
             # status 400 may be returned when Google thinks the event ID is invalid,
             # so treat it like a missing event and create it from scratch
             logger.info(
-                "Update of event %s failed (%s), inserting", evt_id, e.resp.status
+                "Update of event %s on calendar %s failed (%s), inserting",
+                evt_id,
+                cal_id,
+                e.resp.status,
             )
             try:
                 gcal.events().insert(
@@ -202,10 +210,14 @@ def sync_shift_event(turno):
                 ).execute()
                 logger.info("Inserted event %s", evt_id)
             except gerr.HttpError as e2:
-                logger.exception("Failed to insert event %s", evt_id)
+                logger.exception(
+                    "Failed to insert event %s on calendar %s", evt_id, cal_id
+                )
                 raise
         else:
-            logger.exception("Failed to update event %s", evt_id)
+            logger.exception(
+                "Failed to update event %s on calendar %s", evt_id, cal_id
+            )
             raise
 
 
@@ -222,7 +234,7 @@ def delete_shift_event(turno_id):
     try:
         gcal.events().delete(
             calendarId=cal_id,
-            eventId=f"shift-{str(turno_id).replace('-', '')}",
+            eventId=shift_event_id(turno_id),
             sendUpdates="none",
         ).execute()
         logger.info("Deleted event %s", turno_id)
@@ -230,5 +242,7 @@ def delete_shift_event(turno_id):
         if e.resp.status == 404:
             logger.info("Delete of event %s returned 404", turno_id)
         else:
-            logger.exception("Failed to delete event %s", turno_id)
+            logger.exception(
+                "Failed to delete event %s on calendar %s", turno_id, cal_id
+            )
             raise
