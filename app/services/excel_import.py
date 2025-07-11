@@ -285,10 +285,12 @@ def df_to_pdf(rows: List[Dict[str, Any]], db: Session | None = None) -> Tuple[st
     for ev in events:
         if str(ev.get("id", "")).startswith("shift-"):
             continue
+        title = ev.get("titolo")
+        if isinstance(title, str) and title.strip().lower().startswith("turno"):
+            continue
         day = ev.get("data_ora")
         if isinstance(day, datetime):
             key = day.date().strftime("%d/%m/%Y")
-            title = ev.get("titolo")
             if title:
                 clean = _strip_emails(str(title))
                 if clean:
