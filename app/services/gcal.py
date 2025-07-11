@@ -174,10 +174,10 @@ def sync_shift_event(turno):
     start = first_non_null(turno.inizio_1, turno.inizio_2, turno.inizio_3)
     end = last_non_null(turno.fine_3, turno.fine_2, turno.fine_1)
 
-    title_name = short_name_for_user(turno.user)
+    title_name = getattr(turno.user, "nome", "")
     body = {
         "id": evt_id,
-        "summary": title_name,
+        "summary": f"Turno {title_name}",
         "description": f"Turno servizio {title_name}",
         "start": {"dateTime": iso_dt(turno.giorno, start)},
         "end": {"dateTime": iso_dt(turno.giorno, end)},
