@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import os
+import re
 
 
 @dataclass
@@ -17,6 +18,9 @@ class Settings:
     LOG_LEVEL: str = "INFO"
 
 
+_CAL_ID_RE = re.compile(r"^[A-Za-z0-9_-]+@group\.calendar\.google\.com$")
+
+
 def load_settings() -> Settings:
     missing = []
     database_url = os.getenv("DATABASE_URL")
@@ -30,6 +34,10 @@ def load_settings() -> Settings:
             "Missing required environment variables: " + ", ".join(missing)
         )
 
+    g_shift_cal_id = os.getenv("G_SHIFT_CAL_ID")
+    if g_shift_cal_id and not _CAL_ID_RE.fullmatch(g_shift_cal_id):
+        raise RuntimeError("Invalid G_SHIFT_CAL_ID format")
+
     return Settings(
         DATABASE_URL=database_url,
         SECRET_KEY=secret_key,
@@ -37,7 +45,7 @@ def load_settings() -> Settings:
         ACCESS_TOKEN_EXPIRE_MINUTES=int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30")),
         PDF_UPLOAD_ROOT=os.getenv("PDF_UPLOAD_ROOT", "uploads/pdfs"),
         GOOGLE_CREDENTIALS_JSON=os.getenv("GOOGLE_CREDENTIALS_JSON"),
-        G_SHIFT_CAL_ID=os.getenv("G_SHIFT_CAL_ID"),
+        G_SHIFT_CAL_ID=g_shift_cal_id,
         GOOGLE_CALENDAR_ID=os.getenv("GOOGLE_CALENDAR_ID"),
         GOOGLE_CLIENT_ID=os.getenv("GOOGLE_CLIENT_ID"),
         CORS_ORIGINS=os.getenv("CORS_ORIGINS", "*"),
