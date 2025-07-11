@@ -14,3 +14,10 @@ def test_load_settings_accepts_valid_calendar_id(monkeypatch):
     settings = config.load_settings()
     assert settings.G_SHIFT_CAL_ID == good
 
+
+def test_load_settings_trims_whitespace(monkeypatch):
+    monkeypatch.setenv("DATABASE_URL", "sqlite:///./db  ")
+    monkeypatch.setenv("SECRET_KEY", "  secret ")
+    settings = config.load_settings()
+    assert settings.DATABASE_URL == "sqlite:///./db"
+    assert settings.SECRET_KEY == "secret"
