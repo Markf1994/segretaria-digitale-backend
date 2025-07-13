@@ -190,6 +190,7 @@ def sync_shift_event(turno):
             calendarId=cal_id,
             eventId=evt_id,
             body=body,
+            sendUpdates="none",
         ).execute()
         logger.info("Updated event %s", evt_id)
     except gerr.HttpError as e:

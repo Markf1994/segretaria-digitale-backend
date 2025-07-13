@@ -101,6 +101,7 @@ def test_sync_shift_event_insert_on_bad_event_id(monkeypatch):
                 raise FakeHttpError(400)
 
         update_called["called"] = True
+        update_called["kwargs"] = kwargs
         return Runner()
 
     def fake_insert(**kwargs):
@@ -136,14 +137,22 @@ def test_sync_shift_event_insert_on_bad_event_id(monkeypatch):
 
     assert update_called.get("called") is True
     assert insert_called.get("called") is True
+    assert update_called["kwargs"].get("sendUpdates") == "none"
 
 
 def test_sync_shift_event_sets_color_from_user(monkeypatch):
     captured = {}
 
     class DummyEvents:
-        def update(self, calendarId=None, eventId=None, body=None):
+        def update(
+            self,
+            calendarId=None,
+            eventId=None,
+            body=None,
+            sendUpdates=None,
+        ):
             captured["color"] = body.get("colorId")
+            captured["sendUpdates"] = sendUpdates
             return types.SimpleNamespace(execute=lambda: None)
 
     class DummyClient:
@@ -171,6 +180,7 @@ def test_sync_shift_event_sets_color_from_user(monkeypatch):
     gcal.sync_shift_event(turno)
 
     assert captured["color"] == gcal.color_for_user(user)
+    assert captured["sendUpdates"] == "none"
 
 
 @pytest.mark.parametrize(
@@ -243,8 +253,10 @@ def test_sync_shift_event_logs_info_on_update_404(monkeypatch, caplog):
     """An update failure with status 404 should log an info message and insert."""
 
     insert_called = {}
+    update_kwargs = {}
 
     def fake_update(**kwargs):
+        update_kwargs.update(kwargs)
         class Runner:
             def execute(self_inner):
                 raise FakeHttpError(404)
@@ -273,12 +285,16 @@ def test_sync_shift_event_logs_info_on_update_404(monkeypatch, caplog):
 
     assert insert_called.get("called") is True
     assert "Update of event" in caplog.text
+    assert update_kwargs.get("sendUpdates") == "none"
 
 
 def test_sync_shift_event_update_error_reraised(monkeypatch, caplog):
     """Non-404 errors during update should be re-raised and logged."""
 
+    update_kwargs = {}
+
     def fake_update(**kwargs):
+        update_kwargs.update(kwargs)
         class Runner:
             def execute(self_inner):
                 raise FakeHttpError(500)
@@ -300,12 +316,16 @@ def test_sync_shift_event_update_error_reraised(monkeypatch, caplog):
             gcal.sync_shift_event(turno)
 
     assert "Failed to update event" in caplog.text
+    assert update_kwargs.get("sendUpdates") == "none"
 
 
 def test_sync_shift_event_insert_failure_reraised(monkeypatch, caplog):
     """Errors during insert should be logged and re-raised."""
 
+    update_kwargs = {}
+
     def fake_update(**kwargs):
+        update_kwargs.update(kwargs)
         class Runner:
             def execute(self_inner):
                 raise FakeHttpError(404)
@@ -334,6 +354,7 @@ def test_sync_shift_event_insert_failure_reraised(monkeypatch, caplog):
             gcal.sync_shift_event(turno)
 
     assert "Failed to insert event" in caplog.text
+    assert update_kwargs.get("sendUpdates") == "none"
 
 
 def test_delete_shift_event_logs_info_on_404(monkeypatch, caplog):
@@ -388,7 +409,10 @@ def test_delete_shift_event_reraises_errors(monkeypatch, caplog):
 def test_sync_shift_event_logs_info_on_update_success(monkeypatch, caplog):
     """Successful update should log an info message."""
 
+    update_kwargs = {}
+
     def fake_update(**kwargs):
+        update_kwargs.update(kwargs)
         class Runner:
             def execute(self_inner):
                 pass
@@ -408,12 +432,16 @@ def test_sync_shift_event_logs_info_on_update_success(monkeypatch, caplog):
         gcal.sync_shift_event(turno)
 
     assert "Updated event" in caplog.text
+    assert update_kwargs.get("sendUpdates") == "none"
 
 
 def test_sync_shift_event_logs_info_on_insert_success(monkeypatch, caplog):
     """When update fails but insert succeeds, an info message should be logged."""
 
+    update_kwargs = {}
+
     def fake_update(**kwargs):
+        update_kwargs.update(kwargs)
         class Runner:
             def execute(self_inner):
                 raise FakeHttpError(404)
@@ -441,6 +469,7 @@ def test_sync_shift_event_logs_info_on_insert_success(monkeypatch, caplog):
         gcal.sync_shift_event(turno)
 
     assert "Inserted event" in caplog.text
+    assert update_kwargs.get("sendUpdates") == "none"
 
 
 def test_delete_shift_event_logs_info_on_success(monkeypatch, caplog):
