@@ -10,9 +10,14 @@ from functools import lru_cache
 import os
 
 
-@lru_cache()
-def get_service():
-    """Return a cached Google Calendar client using configured credentials."""
+@lru_cache(maxsize=1)
+def get_service() -> Any:
+    """Return a cached Google Calendar service client.
+
+    Credentials are loaded from ``settings.GOOGLE_CREDENTIALS_JSON`` and the
+    resulting ``build`` object is cached so subsequent calls reuse the same
+    client instance.
+    """
 
     creds_json = settings.GOOGLE_CREDENTIALS_JSON
     if not creds_json:
