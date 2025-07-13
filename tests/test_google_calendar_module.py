@@ -8,6 +8,7 @@ from app.services import google_calendar
 
 
 def test_list_events_between_success(monkeypatch):
+    google_calendar.get_service.cache_clear()
     dummy_info = {"type": "service_account"}
     monkeypatch.setattr(google_calendar.settings, "GOOGLE_CREDENTIALS_JSON", json.dumps(dummy_info))
     monkeypatch.setattr(google_calendar.settings, "GOOGLE_CALENDAR_ID", "CAL")
@@ -73,6 +74,7 @@ def test_list_events_between_success(monkeypatch):
 
 
 def test_list_events_between_missing_config(monkeypatch):
+    google_calendar.get_service.cache_clear()
     monkeypatch.setattr(google_calendar.settings, "GOOGLE_CREDENTIALS_JSON", None)
     monkeypatch.setattr(google_calendar.settings, "GOOGLE_CALENDAR_ID", None)
 
