@@ -137,7 +137,7 @@ def test_sync_shift_event_insert_on_bad_event_id(monkeypatch):
 
     assert update_called.get("called") is True
     assert insert_called.get("called") is True
-    assert update_called["kwargs"].get("sendUpdates") == "none"
+    assert update_called["kwargs"].get("sendUpdates") == gcal.DEFAULT_SEND_UPDATES
 
 
 def test_sync_shift_event_sets_color_from_user(monkeypatch):
@@ -180,7 +180,7 @@ def test_sync_shift_event_sets_color_from_user(monkeypatch):
     gcal.sync_shift_event(turno)
 
     assert captured["color"] == gcal.color_for_user(user)
-    assert captured["sendUpdates"] == "none"
+    assert captured["sendUpdates"] == gcal.DEFAULT_SEND_UPDATES
 
 
 @pytest.mark.parametrize(
@@ -285,7 +285,7 @@ def test_sync_shift_event_logs_info_on_update_404(monkeypatch, caplog):
 
     assert insert_called.get("called") is True
     assert "Update of event" in caplog.text
-    assert update_kwargs.get("sendUpdates") == "none"
+    assert update_kwargs.get("sendUpdates") == gcal.DEFAULT_SEND_UPDATES
 
 
 def test_sync_shift_event_update_error_reraised(monkeypatch, caplog):
@@ -316,7 +316,7 @@ def test_sync_shift_event_update_error_reraised(monkeypatch, caplog):
             gcal.sync_shift_event(turno)
 
     assert "Failed to update event" in caplog.text
-    assert update_kwargs.get("sendUpdates") == "none"
+    assert update_kwargs.get("sendUpdates") == gcal.DEFAULT_SEND_UPDATES
 
 
 def test_sync_shift_event_insert_failure_reraised(monkeypatch, caplog):
@@ -354,7 +354,7 @@ def test_sync_shift_event_insert_failure_reraised(monkeypatch, caplog):
             gcal.sync_shift_event(turno)
 
     assert "Failed to insert event" in caplog.text
-    assert update_kwargs.get("sendUpdates") == "none"
+    assert update_kwargs.get("sendUpdates") == gcal.DEFAULT_SEND_UPDATES
 
 
 def test_delete_shift_event_logs_info_on_404(monkeypatch, caplog):
@@ -432,7 +432,7 @@ def test_sync_shift_event_logs_info_on_update_success(monkeypatch, caplog):
         gcal.sync_shift_event(turno)
 
     assert "Updated event" in caplog.text
-    assert update_kwargs.get("sendUpdates") == "none"
+    assert update_kwargs.get("sendUpdates") == gcal.DEFAULT_SEND_UPDATES
 
 
 def test_sync_shift_event_logs_info_on_insert_success(monkeypatch, caplog):
@@ -469,7 +469,7 @@ def test_sync_shift_event_logs_info_on_insert_success(monkeypatch, caplog):
         gcal.sync_shift_event(turno)
 
     assert "Inserted event" in caplog.text
-    assert update_kwargs.get("sendUpdates") == "none"
+    assert update_kwargs.get("sendUpdates") == gcal.DEFAULT_SEND_UPDATES
 
 
 def test_delete_shift_event_logs_info_on_success(monkeypatch, caplog):

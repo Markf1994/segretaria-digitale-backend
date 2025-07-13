@@ -22,6 +22,10 @@ from app.schemas.turno import DAY_OFF_TYPES, TipoTurno
 
 logger = logging.getLogger(__name__)
 
+# Default behaviour is to avoid sending email notifications when calendar
+# events are modified.
+DEFAULT_SEND_UPDATES = "none"
+
 # ------------------------------------------------------------------- agent colors
 # Mapping of agent email addresses, IDs or names to Google Calendar color IDs.
 # These values are used by ``color_for_user`` when the matching key is found.
@@ -190,7 +194,7 @@ def sync_shift_event(turno):
             calendarId=cal_id,
             eventId=evt_id,
             body=body,
-            sendUpdates="none",
+            sendUpdates=DEFAULT_SEND_UPDATES,
         ).execute()
         logger.info("Updated event %s", evt_id)
     except gerr.HttpError as e:
@@ -207,7 +211,7 @@ def sync_shift_event(turno):
                 gcal.events().insert(
                     calendarId=cal_id,
                     body=body,
-                    sendUpdates="none",
+                    sendUpdates=DEFAULT_SEND_UPDATES,
                 ).execute()
                 logger.info("Inserted event %s", evt_id)
             except gerr.HttpError as e2:
@@ -236,7 +240,7 @@ def delete_shift_event(turno_id):
         gcal.events().delete(
             calendarId=cal_id,
             eventId=shift_event_id(turno_id),
-            sendUpdates="none",
+            sendUpdates=DEFAULT_SEND_UPDATES,
         ).execute()
         logger.info("Deleted event %s", turno_id)
     except gerr.HttpError as e:
