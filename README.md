@@ -41,8 +41,9 @@ If asynchronous database access becomes necessary later on, add `asyncpg` to
 - `ALGORITHM` – (optional) algorithm used for JWT; defaults to `HS256`.
 - `ACCESS_TOKEN_EXPIRE_MINUTES` – (optional) lifetime of access tokens in minutes; defaults to `30`.
 - `PDF_UPLOAD_ROOT` – directory where uploaded PDF files are stored.
-- `GOOGLE_CREDENTIALS_JSON` – JSON credentials (or path) for Google APIs.
-- `GOOGLE_CALENDAR_ID` – ID of the calendar to read events from.
+- `GOOGLE_CREDENTIALS_JSON` – JSON credentials (or path) for Google APIs. The
+  credentials must allow Calendar read/write access.
+- `GOOGLE_CALENDAR_ID` – ID of the calendar used to read **and create** events.
 - `G_SHIFT_CAL_ID` – ID of the Google Calendar used for shift syncs. Colors for
   shift events are assigned per agent using the `AGENT_COLORS` mapping defined
   in `app/services/gcal.py`. Agents not listed there fall back to a

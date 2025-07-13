@@ -1,4 +1,5 @@
 from fastapi.testclient import TestClient
+import logging
 
 from app.main import app
 
@@ -119,3 +120,47 @@ def test_delete_event(setup_db):
     assert response.status_code == 200
     assert response.json()["ok"] is True
     assert client.get("/events/", headers=headers).json() == []
+
+
+def test_google_calendar_called_on_create(monkeypatch, setup_db):
+    headers, _ = auth_user("gcal@example.com")
+    called = {}
+
+    def fake_create(event):
+        called["id"] = event.id
+
+    monkeypatch.setattr("app.services.calendar_events.create_event", fake_create)
+
+    data = {
+        "titolo": "Meeting",
+        "descrizione": "Desc",
+        "data_ora": "2025-01-01T09:00:00",
+        "is_public": True,
+    }
+
+    res = client.post("/events/", json=data, headers=headers)
+
+    assert res.status_code == 201
+    assert "id" in called
+
+
+def test_google_calendar_error_does_not_fail(monkeypatch, setup_db, caplog):
+    headers, _ = auth_user("gerr@example.com")
+
+    def fail_create(event):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr("app.services.calendar_events.create_event", fail_create)
+
+    data = {
+        "titolo": "Meeting",
+        "descrizione": "Desc",
+        "data_ora": "2025-01-01T10:00:00",
+        "is_public": False,
+    }
+
+    with caplog.at_level(logging.ERROR):
+        res = client.post("/events/", json=data, headers=headers)
+
+    assert res.status_code == 201
+    assert "Errore sync calendario" in caplog.text

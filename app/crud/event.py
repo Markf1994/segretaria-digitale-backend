@@ -1,6 +1,12 @@
 from sqlalchemy.orm import Session
 from app.models.event import Event
 from app.models.user import User
+import logging
+
+from app.config import settings
+from app.services import calendar_events
+
+logger = logging.getLogger(__name__)
 
 
 def create_event(db: Session, data, user: User):
@@ -9,6 +15,16 @@ def create_event(db: Session, data, user: User):
     db.add(db_event)
     db.commit()
     db.refresh(db_event)
+    try:
+        calendar_events.create_event(db_event)
+    except Exception as exc:  # pragma: no cover - unexpected errors
+        cal_id = settings.GOOGLE_CALENDAR_ID
+        logger.error(
+            "Errore sync calendario (cal_id=%s, event_id=%s): %s",
+            cal_id,
+            db_event.id,
+            exc,
+        )
     return db_event
 
 
