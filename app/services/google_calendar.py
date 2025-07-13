@@ -6,8 +6,37 @@ from typing import Any
 
 from fastapi import HTTPException
 from app.config import settings
+from functools import lru_cache
 import os
 
+
+@lru_cache()
+def get_service():
+    """Return a cached Google Calendar client using configured credentials."""
+
+    creds_json = settings.GOOGLE_CREDENTIALS_JSON
+    if not creds_json:
+        raise RuntimeError("GOOGLE_CREDENTIALS_JSON is not configured")
+
+    from googleapiclient.discovery import build  # type: ignore
+    from google.oauth2.service_account import Credentials as SACredentials  # type: ignore
+    from google.oauth2.credentials import Credentials as UserCredentials  # type: ignore
+
+    if os.path.isfile(creds_json):
+        with open(creds_json, "r") as fh:
+            info = json.load(fh)
+    else:
+        info = json.loads(creds_json)
+
+    if info.get("type") == "service_account":
+        creds = SACredentials.from_service_account_info(
+            info,
+            scopes=["https://www.googleapis.com/auth/calendar.readonly"],
+        )
+    else:
+        creds = UserCredentials.from_authorized_user_info(info)
+
+    return build("calendar", "v3", credentials=creds)
 
 def list_upcoming_events(days: int) -> list[dict[str, Any]]:
     """Return upcoming Google Calendar events within ``days``.
@@ -22,25 +51,7 @@ def list_upcoming_events(days: int) -> list[dict[str, Any]]:
         return []
 
     try:
-        from googleapiclient.discovery import build  # type: ignore
-        from google.oauth2.service_account import Credentials as SACredentials  # type: ignore
-        from google.oauth2.credentials import Credentials as UserCredentials  # type: ignore
-
-        if os.path.isfile(creds_json):
-            with open(creds_json, "r") as fh:
-                info = json.load(fh)
-        else:
-            info = json.loads(creds_json)
-
-        if info.get("type") == "service_account":
-            creds = SACredentials.from_service_account_info(
-                info,
-                scopes=["https://www.googleapis.com/auth/calendar.readonly"],
-            )
-        else:
-            creds = UserCredentials.from_authorized_user_info(info)
-
-        service = build("calendar", "v3", credentials=creds)
+        service = get_service()
         now = datetime.utcnow()
         time_min = now.isoformat() + "Z"
         time_max = (now + timedelta(days=days)).isoformat() + "Z"
@@ -96,25 +107,7 @@ def list_events_between(start: datetime, end: datetime) -> list[dict[str, Any]]:
         return []
 
     try:
-        from googleapiclient.discovery import build  # type: ignore
-        from google.oauth2.service_account import Credentials as SACredentials  # type: ignore
-        from google.oauth2.credentials import Credentials as UserCredentials  # type: ignore
-
-        if os.path.isfile(creds_json):
-            with open(creds_json, "r") as fh:
-                info = json.load(fh)
-        else:
-            info = json.loads(creds_json)
-
-        if info.get("type") == "service_account":
-            creds = SACredentials.from_service_account_info(
-                info,
-                scopes=["https://www.googleapis.com/auth/calendar.readonly"],
-            )
-        else:
-            creds = UserCredentials.from_authorized_user_info(info)
-
-        service = build("calendar", "v3", credentials=creds)
+        service = get_service()
         time_min = start.isoformat() + "Z"
         time_max = end.isoformat() + "Z"
         result = (
