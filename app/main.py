@@ -11,6 +11,10 @@ from app.routes import (
     pdf_files,
     dashboard,
     health,
+    dispositivi,
+    segnaletica_temporanea,
+    segnaletica_verticale,
+    piani_orizzontali,
 )
 from app.routes.orari import router as orari_router
 from app.routes import imports
@@ -45,6 +49,10 @@ app.include_router(events.router)
 app.include_router(todo.router)
 app.include_router(determinazioni.router)
 app.include_router(pdf_files.router)
+app.include_router(dispositivi.router)
+app.include_router(segnaletica_temporanea.router)
+app.include_router(segnaletica_verticale.router)
+app.include_router(piani_orizzontali.router)
 app.include_router(dashboard.router)
 app.include_router(health.router)
 app.include_router(orari_router)
