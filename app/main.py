@@ -17,6 +17,7 @@ from app.routes import (
     piani_orizzontali,
 )
 from app.routes.orari import router as orari_router
+from app.routes import inventory
 from app.routes import imports
 
 # Enable automatic redirect so both `/path` and `/path/` work
@@ -56,6 +57,7 @@ app.include_router(piani_orizzontali.router)
 app.include_router(dashboard.router)
 app.include_router(health.router)
 app.include_router(orari_router)
+app.include_router(inventory.router)
 app.include_router(imports.router)
 
 from app.crud.pdf_file import get_upload_root
