@@ -50,6 +50,7 @@ app.include_router(dashboard.router)
 app.include_router(health.router)
 app.include_router(orari_router)
 app.include_router(imports.router)
+app.include_router(inventory.router)
 
 from app.crud.pdf_file import get_upload_root
 from fastapi.staticfiles import StaticFiles
