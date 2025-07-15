@@ -14,6 +14,7 @@ from app.routes import (
 )
 from app.routes.orari import router as orari_router
 from app.routes import imports
+from app.routes import inventory
 
 # Enable automatic redirect so both `/path` and `/path/` work
 # Tests continue to use the canonical routes defined in the routers
