@@ -52,6 +52,17 @@ def add_item(db: Session, piano_id: str, data):
     return item
 
 
+def update_item(db: Session, item_id: str, data):
+    db_item = db.query(SegnaleticaOrizzontaleItem).filter(SegnaleticaOrizzontaleItem.id == item_id).first()
+    if not db_item:
+        return None
+    for key, value in data.dict(exclude_unset=True).items():
+        setattr(db_item, key, value)
+    db.commit()
+    db.refresh(db_item)
+    return db_item
+
+
 def delete_item(db: Session, item_id: str):
     db_obj = db.query(SegnaleticaOrizzontaleItem).filter(SegnaleticaOrizzontaleItem.id == item_id).first()
     if db_obj:

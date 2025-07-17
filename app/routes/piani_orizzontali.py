@@ -6,6 +6,7 @@ from app.schemas.piano_segnaletica_orizzontale import (
     PianoSegnaleticaOrizzontaleResponse,
     SegnaleticaOrizzontaleItemCreate,
     SegnaleticaOrizzontaleItemResponse,
+    SegnaleticaOrizzontaleItemUpdate,
 )
 from app.crud import piano_segnaletica_orizzontale as crud
 
@@ -55,6 +56,18 @@ def add_item_route(
     item = crud.add_item(db, piano_id, data)
     if not item:
         raise HTTPException(status_code=404, detail="Piano not found")
+    return item
+
+
+@router.put("/items/{item_id}", response_model=SegnaleticaOrizzontaleItemResponse)
+def update_item_route(
+    item_id: str,
+    data: SegnaleticaOrizzontaleItemUpdate,
+    db: Session = Depends(get_db),
+):
+    item = crud.update_item(db, item_id, data)
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
     return item
 
 
