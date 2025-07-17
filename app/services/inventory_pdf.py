@@ -20,6 +20,7 @@ def build_inventory_pdf(items: List[Dict[str, Any]], year: int) -> Tuple[str, st
     <html>
     <body>
     <h1>Inventario {year}</h1>
+    <h1 style='font-size:64px; color:yellow;'>🚧 LAVORI IN CORSO 🚧</h1>
     <table border='1' style='border-collapse:collapse;'>
         <tr><th>Nome</th><th>Quantità</th></tr>
         {rows_html}
