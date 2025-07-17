@@ -330,6 +330,38 @@ Example:
 GET /inventario/signage-horizontal/pdf?year=2024
 ```
 
+## Piani orizzontali endpoints
+
+The `/piani-orizzontali/` routes manage plans for horizontal road markings.
+
+- `POST /piani-orizzontali/` – create a plan.
+- `GET /piani-orizzontali/` – list plans.
+- `PUT /piani-orizzontali/{id}` – update a plan.
+- `DELETE /piani-orizzontali/{id}` – remove a plan.
+- `POST /piani-orizzontali/{piano_id}/items` – add an item.
+- `GET /piani-orizzontali/{piano_id}/items` – list items.
+- `PUT /piani-orizzontali/items/{item_id}` – update an item.
+- `DELETE /piani-orizzontali/items/{item_id}` – remove an item.
+
+Items accept optional `luogo` and `data` fields which are returned in responses.
+
+```bash
+curl -X POST http://localhost:8000/piani-orizzontali/{piano_id}/items \
+  -H "Content-Type: application/json" \
+  -d '{"descrizione":"Segnale","quantita":1,"luogo":"Via Roma","data":"2024-05-01"}'
+```
+
+```json
+{
+  "id": "<item_id>",
+  "piano_id": "<piano_id>",
+  "descrizione": "Segnale",
+  "quantita": 1,
+  "luogo": "Via Roma",
+  "data": "2024-05-01"
+}
+```
+
 ## PDF files endpoint
 
 Uploaded PDF documents can be listed and downloaded. Files are stored in the
