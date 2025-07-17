@@ -2,7 +2,6 @@ import json
 from datetime import datetime
 import types
 
-import pytest
 
 from app.services import google_calendar
 
