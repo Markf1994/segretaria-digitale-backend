@@ -37,3 +37,26 @@ def test_update_item_not_found(setup_db):
         json={"descrizione": "X"},
     )
     assert response.status_code == 404
+
+
+def test_list_items(setup_db):
+    res = client.post(
+        "/piani-orizzontali/",
+        json={"descrizione": "Piano", "anno": 2024},
+    )
+    piano_id = res.json()["id"]
+
+    item1 = client.post(
+        f"/piani-orizzontali/{piano_id}/items",
+        json={"descrizione": "A", "quantita": 1},
+    ).json()
+    item2 = client.post(
+        f"/piani-orizzontali/{piano_id}/items",
+        json={"descrizione": "B", "quantita": 2},
+    ).json()
+
+    list_res = client.get(f"/piani-orizzontali/{piano_id}/items")
+    assert list_res.status_code == 200
+    assert sorted(list_res.json(), key=lambda x: x["id"]) == sorted(
+        [item1, item2], key=lambda x: x["id"]
+    )

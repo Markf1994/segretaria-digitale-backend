@@ -14,7 +14,9 @@ router = APIRouter(prefix="/piani-orizzontali", tags=["Piani Segnaletica Orizzon
 
 
 @router.post("/", response_model=PianoSegnaleticaOrizzontaleResponse)
-def create_piano_route(data: PianoSegnaleticaOrizzontaleCreate, db: Session = Depends(get_db)):
+def create_piano_route(
+    data: PianoSegnaleticaOrizzontaleCreate, db: Session = Depends(get_db)
+):
     return crud.create_piano(db, data)
 
 
@@ -57,6 +59,16 @@ def add_item_route(
     if not item:
         raise HTTPException(status_code=404, detail="Piano not found")
     return item
+
+
+@router.get(
+    "/{piano_id}/items", response_model=list[SegnaleticaOrizzontaleItemResponse]
+)
+def list_items(piano_id: str, db: Session = Depends(get_db)):
+    items = crud.get_items(db, piano_id)
+    if items is None:
+        raise HTTPException(status_code=404, detail="Piano not found")
+    return items
 
 
 @router.put("/items/{item_id}", response_model=SegnaleticaOrizzontaleItemResponse)
