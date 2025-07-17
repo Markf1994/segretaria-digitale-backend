@@ -8,4 +8,7 @@ class SegnaleticaVerticale(Base):
 
     id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
     descrizione = Column(String, nullable=False)
+    tipo = Column(String, nullable=True)
+    quantita = Column(Integer, nullable=False, default=1)
+    luogo = Column(String, nullable=True)
     anno = Column(Integer, nullable=True)
