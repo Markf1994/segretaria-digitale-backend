@@ -12,3 +12,4 @@ class User(Base):
     todos = relationship("ToDo", back_populates="user")
     events = relationship("Event", back_populates="user")
     turni = relationship("Turno", back_populates="user")
+    segnalazioni = relationship("Segnalazione", back_populates="user")

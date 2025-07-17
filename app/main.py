@@ -15,6 +15,7 @@ from app.routes import (
     segnaletica_temporanea,
     segnaletica_verticale,
     piani_orizzontali,
+    segnalazioni,
 )
 from app.routes.orari import router as orari_router
 from app.routes import inventory
@@ -52,6 +53,7 @@ app.include_router(todo.router)
 app.include_router(determinazioni.router)
 app.include_router(pdf_files.router)
 app.include_router(dispositivi.router)
+app.include_router(segnalazioni.router)
 app.include_router(segnaletica_temporanea.router)
 app.include_router(segnaletica_verticale.router)
 app.include_router(piani_orizzontali.router)
