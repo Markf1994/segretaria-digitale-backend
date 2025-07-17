@@ -16,19 +16,26 @@ def test_update_item(setup_db):
     # Add item
     item_res = client.post(
         f"/piani-orizzontali/{piano_id}/items",
-        json={"descrizione": "Old", "quantita": 1},
+        json={
+            "descrizione": "Old",
+            "quantita": 1,
+            "luogo": "Here",
+            "data": "2024-05-01",
+        },
     )
     item_id = item_res.json()["id"]
 
     # Update only quantita
     update_res = client.put(
         f"/piani-orizzontali/items/{item_id}",
-        json={"quantita": 5},
+        json={"quantita": 5, "luogo": "There", "data": "2024-06-01"},
     )
     assert update_res.status_code == 200
     data = update_res.json()
     assert data["quantita"] == 5
     assert data["descrizione"] == "Old"
+    assert data["luogo"] == "There"
+    assert data["data"] == "2024-06-01"
 
 
 def test_update_item_not_found(setup_db):
@@ -48,11 +55,21 @@ def test_list_items(setup_db):
 
     item1 = client.post(
         f"/piani-orizzontali/{piano_id}/items",
-        json={"descrizione": "A", "quantita": 1},
+        json={
+            "descrizione": "A",
+            "quantita": 1,
+            "luogo": "L1",
+            "data": "2024-01-01",
+        },
     ).json()
     item2 = client.post(
         f"/piani-orizzontali/{piano_id}/items",
-        json={"descrizione": "B", "quantita": 2},
+        json={
+            "descrizione": "B",
+            "quantita": 2,
+            "luogo": "L2",
+            "data": "2024-02-01",
+        },
     ).json()
 
     list_res = client.get(f"/piani-orizzontali/{piano_id}/items")

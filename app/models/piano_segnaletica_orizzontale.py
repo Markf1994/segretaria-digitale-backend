@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, ForeignKey
+from sqlalchemy import Column, String, Integer, ForeignKey, Date
 from sqlalchemy.orm import relationship
 from app.database import Base
 import uuid
@@ -25,5 +25,7 @@ class SegnaleticaOrizzontaleItem(Base):
     piano_id = Column(String, ForeignKey("piani_segnaletica_orizzontale.id"), nullable=False)
     descrizione = Column(String, nullable=False)
     quantita = Column(Integer, nullable=False, default=1)
+    luogo = Column(String, nullable=True)
+    data = Column(Date, nullable=True)
 
     piano = relationship("PianoSegnaleticaOrizzontale", back_populates="items")
