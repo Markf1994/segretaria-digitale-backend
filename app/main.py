@@ -19,6 +19,7 @@ from app.routes import (
 from app.routes.orari import router as orari_router
 from app.routes import inventory
 from app.routes import imports
+from app.routes import inventario
 
 # Enable automatic redirect so both `/path` and `/path/` work
 # Tests continue to use the canonical routes defined in the routers
@@ -59,6 +60,7 @@ app.include_router(health.router)
 app.include_router(orari_router)
 app.include_router(inventory.router)
 app.include_router(imports.router)
+app.include_router(inventario.router)
 
 from app.crud.pdf_file import get_upload_root
 from fastapi.staticfiles import StaticFiles
