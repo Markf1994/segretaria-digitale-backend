@@ -15,6 +15,14 @@ def get_segnalazioni(db: Session, user: User):
     return db.query(Segnalazione).filter(Segnalazione.user_id == user.id).all()
 
 
+def get_segnalazione(db: Session, segnalazione_id: str, user: User):
+    return (
+        db.query(Segnalazione)
+        .filter(Segnalazione.id == segnalazione_id, Segnalazione.user_id == user.id)
+        .first()
+    )
+
+
 def update_segnalazione(db: Session, segnalazione_id: str, data, user: User):
     db_obj = (
         db.query(Segnalazione)
@@ -24,6 +32,21 @@ def update_segnalazione(db: Session, segnalazione_id: str, data, user: User):
     if not db_obj:
         return None
     for key, value in data.dict().items():
+        setattr(db_obj, key, value)
+    db.commit()
+    db.refresh(db_obj)
+    return db_obj
+
+
+def patch_segnalazione(db: Session, segnalazione_id: str, data, user: User):
+    db_obj = (
+        db.query(Segnalazione)
+        .filter(Segnalazione.id == segnalazione_id, Segnalazione.user_id == user.id)
+        .first()
+    )
+    if not db_obj:
+        return None
+    for key, value in data.dict(exclude_unset=True).items():
         setattr(db_obj, key, value)
     db.commit()
     db.refresh(db_obj)
