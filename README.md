@@ -362,6 +362,44 @@ curl -X POST http://localhost:8000/piani-orizzontali/{piano_id}/items \
 }
 ```
 
+## Segnalazioni endpoints
+
+Authenticated users can record incidents or violations through the
+`/segnalazioni/` routes. Each segnalazione is tied to the creating user.
+
+- `POST /segnalazioni/` – create a new entry.
+- `GET /segnalazioni/` – list entries created by the authenticated user.
+- `PUT /segnalazioni/{id}` – update an existing entry.
+- `DELETE /segnalazioni/{id}` – remove an entry.
+
+### Segnalazione schema
+
+```json
+{
+  "id": "<uuid>",
+  "user_id": "<user_id>",
+  "tipo": "incidente",
+  "stato": "aperta",
+  "priorita": "alta",
+  "data": "2024-01-01T10:00:00",
+  "descrizione": "Descrizione dell'evento",
+  "latitudine": 45.0,
+  "longitudine": 12.0
+}
+```
+
+Valid values for `tipo` are `incidente`, `violazione` and `altro`.
+`stato` accepts `aperta`, `in lavorazione` or `chiusa`.
+
+Example request:
+
+```bash
+curl -X POST http://localhost:8000/segnalazioni/ \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"tipo":"incidente","stato":"aperta","data":"2024-01-01T10:00:00","descrizione":"Test"}'
+```
+
 ## PDF files endpoint
 
 Uploaded PDF documents can be listed and downloaded. Files are stored in the
