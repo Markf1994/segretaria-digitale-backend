@@ -318,6 +318,18 @@ curl -H "Authorization: Bearer $TOKEN" \
   http://localhost:8000/orari/pdf?week=2023-W42 -o turni.pdf
 ```
 
+## Inventario endpoints
+
+The `/inventario/signage-horizontal/pdf` route returns a PDF listing of
+horizontal signage for the specified year. The `year` query parameter is
+required and must be an integer.
+
+Example:
+
+```bash
+GET /inventario/signage-horizontal/pdf?year=2024
+```
+
 ## PDF files endpoint
 
 Uploaded PDF documents can be listed and downloaded. Files are stored in the
