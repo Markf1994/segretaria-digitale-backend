@@ -25,6 +25,16 @@ class SegnalazioneCreate(BaseModel):
     longitudine: float | None = None
 
 
+class SegnalazioneUpdate(BaseModel):
+    tipo: TipoSegnalazione | None = None
+    stato: StatoSegnalazione | None = None
+    priorita: str | None = None
+    data: datetime | None = None
+    descrizione: str | None = None
+    latitudine: float | None = None
+    longitudine: float | None = None
+
+
 class SegnalazioneResponse(SegnalazioneCreate):
     id: str
     user_id: str
