@@ -5,7 +5,7 @@ from app.models.user import User
 from app.schemas.segnalazione import (
     SegnalazioneCreate,
     SegnalazioneResponse,
-    SegnalazionePatch,
+    SegnalazioneUpdate,
 )
 from app.crud import segnalazione as crud
 
@@ -57,7 +57,7 @@ def update_segnalazione_route(
 @router.patch("/{segnalazione_id}", response_model=SegnalazioneResponse)
 def patch_segnalazione_route(
     segnalazione_id: str,
-    data: SegnalazionePatch,
+    data: SegnalazioneUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
