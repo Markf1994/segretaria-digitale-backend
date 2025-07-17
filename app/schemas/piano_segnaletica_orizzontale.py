@@ -1,7 +1,6 @@
 from pydantic import BaseModel
 from datetime import date
 from typing import List
-from datetime import date
 
 
 class SegnaleticaOrizzontaleItemCreate(BaseModel):
