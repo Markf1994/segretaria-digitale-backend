@@ -44,7 +44,7 @@ def get_segnalazione_route(
 @router.put("/{segnalazione_id}", response_model=SegnalazioneResponse)
 def update_segnalazione_route(
     segnalazione_id: str,
-    data: SegnalazioneCreate,
+    data: SegnalazioneUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):

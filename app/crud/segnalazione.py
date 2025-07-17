@@ -31,7 +31,7 @@ def update_segnalazione(db: Session, segnalazione_id: str, data, user: User):
     )
     if not db_obj:
         return None
-    for key, value in data.dict().items():
+    for key, value in data.dict(exclude_unset=True).items():
         setattr(db_obj, key, value)
     db.commit()
     db.refresh(db_obj)
