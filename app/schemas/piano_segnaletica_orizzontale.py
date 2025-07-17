@@ -1,15 +1,20 @@
 from pydantic import BaseModel
+from datetime import date
 from typing import List
 
 
 class SegnaleticaOrizzontaleItemCreate(BaseModel):
     descrizione: str
     quantita: int = 1
+    luogo: str | None = None
+    data: date | None = None
 
 
 class SegnaleticaOrizzontaleItemUpdate(BaseModel):
     descrizione: str | None = None
     quantita: int | None = None
+    luogo: str | None = None
+    data: date | None = None
 
 
 class SegnaleticaOrizzontaleItemResponse(SegnaleticaOrizzontaleItemCreate):

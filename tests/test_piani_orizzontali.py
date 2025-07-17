@@ -60,3 +60,25 @@ def test_list_items(setup_db):
     assert sorted(list_res.json(), key=lambda x: x["id"]) == sorted(
         [item1, item2], key=lambda x: x["id"]
     )
+
+
+def test_create_item_with_extra_fields(setup_db):
+    res = client.post(
+        "/piani-orizzontali/",
+        json={"descrizione": "Piano", "anno": 2024},
+    )
+    piano_id = res.json()["id"]
+
+    item_res = client.post(
+        f"/piani-orizzontali/{piano_id}/items",
+        json={
+            "descrizione": "Segn",
+            "quantita": 1,
+            "luogo": "Via",
+            "data": "2024-05-01",
+        },
+    )
+    assert item_res.status_code == 200
+    item = item_res.json()
+    assert item["luogo"] == "Via"
+    assert item["data"] == "2024-05-01"
