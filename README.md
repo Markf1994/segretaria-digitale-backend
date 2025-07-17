@@ -369,7 +369,9 @@ Authenticated users can record incidents or violations through the
 
 - `POST /segnalazioni/` – create a new entry.
 - `GET /segnalazioni/` – list entries created by the authenticated user.
+- `GET /segnalazioni/{id}` – retrieve a single entry by ID.
 - `PUT /segnalazioni/{id}` – update an existing entry.
+- `PATCH /segnalazioni/{id}` – partially update an entry.
 - `DELETE /segnalazioni/{id}` – remove an entry.
 
 ### Segnalazione schema
@@ -380,8 +382,8 @@ Authenticated users can record incidents or violations through the
   "user_id": "<user_id>",
   "tipo": "incidente",
   "stato": "aperta",
-  "priorita": "alta",
-  "data": "2024-01-01T10:00:00",
+  "priorita": 1,
+  "data_segnalazione": "2024-01-01T10:00:00",
   "descrizione": "Descrizione dell'evento",
   "latitudine": 45.0,
   "longitudine": 12.0
@@ -397,7 +399,16 @@ Example request:
 curl -X POST http://localhost:8000/segnalazioni/ \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"tipo":"incidente","stato":"aperta","data":"2024-01-01T10:00:00","descrizione":"Test"}'
+  -d '{"tipo":"incidente","stato":"aperta","data_segnalazione":"2024-01-01T10:00:00","descrizione":"Test"}'
+```
+
+Example PATCH request:
+
+```bash
+curl -X PATCH http://localhost:8000/segnalazioni/<id> \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"stato":"in lavorazione","priorita":2}'
 ```
 
 ## PDF files endpoint
