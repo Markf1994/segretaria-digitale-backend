@@ -18,11 +18,16 @@ class StatoSegnalazione(str, Enum):
 class SegnalazioneCreate(BaseModel):
     tipo: TipoSegnalazione
     stato: StatoSegnalazione
-    priorita: str | None = None
-    data: datetime
+    priorita: int | None = None
+    data_segnalazione: datetime
     descrizione: str
     latitudine: float | None = None
     longitudine: float | None = None
+
+
+class SegnalazionePatch(BaseModel):
+    stato: StatoSegnalazione | None = None
+    priorita: int | None = None
 
 
 class SegnalazioneResponse(SegnalazioneCreate):

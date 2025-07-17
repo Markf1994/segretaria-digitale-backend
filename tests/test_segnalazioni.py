@@ -22,8 +22,8 @@ def test_create_segnalazione(setup_db):
     data = {
         "tipo": "incidente",
         "stato": "aperta",
-        "priorita": "alta",
-        "data": "2024-01-01T10:00:00",
+        "priorita": 1,
+        "data_segnalazione": "2024-01-01T10:00:00",
         "descrizione": "Desc",
         "latitudine": 10.0,
         "longitudine": 20.0,
@@ -43,8 +43,8 @@ def test_update_segnalazione(setup_db):
         json={
             "tipo": "incidente",
             "stato": "aperta",
-            "priorita": "alta",
-            "data": "2024-01-01T10:00:00",
+            "priorita": 1,
+            "data_segnalazione": "2024-01-01T10:00:00",
             "descrizione": "Old",
             "latitudine": 1.0,
             "longitudine": 2.0,
@@ -57,8 +57,8 @@ def test_update_segnalazione(setup_db):
         json={
             "tipo": "violazione",
             "stato": "in lavorazione",
-            "priorita": "bassa",
-            "data": "2024-02-01T12:00:00",
+            "priorita": 2,
+            "data_segnalazione": "2024-02-01T12:00:00",
             "descrizione": "New",
             "latitudine": 0.0,
             "longitudine": 0.0,
@@ -69,6 +69,78 @@ def test_update_segnalazione(setup_db):
     assert response.json()["stato"] == "in lavorazione"
 
 
+def test_get_segnalazione(setup_db):
+    headers, _ = auth_user("get@example.com")
+    res = client.post(
+        "/segnalazioni/",
+        json={
+            "tipo": "incidente",
+            "stato": "aperta",
+            "priorita": 1,
+            "data_segnalazione": "2024-01-01T10:00:00",
+            "descrizione": "Desc",
+            "latitudine": 0.0,
+            "longitudine": 0.0,
+        },
+        headers=headers,
+    )
+    seg_id = res.json()["id"]
+    get_res = client.get(f"/segnalazioni/{seg_id}", headers=headers)
+    assert get_res.status_code == 200
+    assert get_res.json()["id"] == seg_id
+
+
+def test_patch_stato(setup_db):
+    headers, _ = auth_user("patchstato@example.com")
+    res = client.post(
+        "/segnalazioni/",
+        json={
+            "tipo": "incidente",
+            "stato": "aperta",
+            "priorita": 1,
+            "data_segnalazione": "2024-01-01T10:00:00",
+            "descrizione": "ToPatch",
+            "latitudine": 0.0,
+            "longitudine": 0.0,
+        },
+        headers=headers,
+    )
+    seg_id = res.json()["id"]
+    patch_res = client.patch(
+        f"/segnalazioni/{seg_id}",
+        json={"stato": "chiusa"},
+        headers=headers,
+    )
+    assert patch_res.status_code == 200
+    assert patch_res.json()["stato"] == "chiusa"
+    assert patch_res.json()["priorita"] == 1
+
+
+def test_patch_priorita(setup_db):
+    headers, _ = auth_user("patchprio@example.com")
+    res = client.post(
+        "/segnalazioni/",
+        json={
+            "tipo": "incidente",
+            "stato": "aperta",
+            "priorita": 1,
+            "data_segnalazione": "2024-01-01T10:00:00",
+            "descrizione": "ToPatch",
+            "latitudine": 0.0,
+            "longitudine": 0.0,
+        },
+        headers=headers,
+    )
+    seg_id = res.json()["id"]
+    patch_res = client.patch(
+        f"/segnalazioni/{seg_id}",
+        json={"priorita": 2},
+        headers=headers,
+    )
+    assert patch_res.status_code == 200
+    assert patch_res.json()["priorita"] == 2
+
+
 def test_list_segnalazioni(setup_db):
     headers, _ = auth_user("list@example.com")
     client.post(
@@ -76,8 +148,8 @@ def test_list_segnalazioni(setup_db):
         json={
             "tipo": "incidente",
             "stato": "aperta",
-            "priorita": "alta",
-            "data": "2024-01-01T10:00:00",
+            "priorita": 1,
+            "data_segnalazione": "2024-01-01T10:00:00",
             "descrizione": "A",
             "latitudine": 0.0,
             "longitudine": 0.0,
@@ -89,8 +161,8 @@ def test_list_segnalazioni(setup_db):
         json={
             "tipo": "violazione",
             "stato": "chiusa",
-            "priorita": "bassa",
-            "data": "2024-02-01T10:00:00",
+            "priorita": 2,
+            "data_segnalazione": "2024-02-01T10:00:00",
             "descrizione": "B",
             "latitudine": 0.0,
             "longitudine": 0.0,
@@ -109,8 +181,8 @@ def test_delete_segnalazione(setup_db):
         json={
             "tipo": "incidente",
             "stato": "aperta",
-            "priorita": "alta",
-            "data": "2024-01-01T10:00:00",
+            "priorita": 1,
+            "data_segnalazione": "2024-01-01T10:00:00",
             "descrizione": "Del",
             "latitudine": 0.0,
             "longitudine": 0.0,
@@ -133,8 +205,8 @@ def test_user_isolated_segnalazioni(setup_db):
         json={
             "tipo": "incidente",
             "stato": "aperta",
-            "priorita": "alta",
-            "data": "2024-01-01T10:00:00",
+            "priorita": 1,
+            "data_segnalazione": "2024-01-01T10:00:00",
             "descrizione": "U1",
             "latitudine": 0.0,
             "longitudine": 0.0,
@@ -146,8 +218,8 @@ def test_user_isolated_segnalazioni(setup_db):
         json={
             "tipo": "incidente",
             "stato": "aperta",
-            "priorita": "alta",
-            "data": "2024-02-01T10:00:00",
+            "priorita": 1,
+            "data_segnalazione": "2024-02-01T10:00:00",
             "descrizione": "U2",
             "latitudine": 0.0,
             "longitudine": 0.0,
@@ -159,8 +231,8 @@ def test_user_isolated_segnalazioni(setup_db):
         json={
             "tipo": "incidente",
             "stato": "aperta",
-            "priorita": "alta",
-            "data": "2024-03-01T10:00:00",
+            "priorita": 1,
+            "data_segnalazione": "2024-03-01T10:00:00",
             "descrizione": "U1B",
             "latitudine": 0.0,
             "longitudine": 0.0,
