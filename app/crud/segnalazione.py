@@ -4,7 +4,9 @@ from app.models.user import User
 
 
 def create_segnalazione(db: Session, data, user: User):
-    db_obj = Segnalazione(**data.dict(), user_id=user.id)
+    data_dict = data.dict()
+    data_dict["data"] = data_dict.pop("data_segnalazione")
+    db_obj = Segnalazione(**data_dict, user_id=user.id)
     db.add(db_obj)
     db.commit()
     db.refresh(db_obj)
@@ -23,7 +25,10 @@ def update_segnalazione(db: Session, segnalazione_id: str, data, user: User):
     )
     if not db_obj:
         return None
-    for key, value in data.dict().items():
+    update_data = data.dict(exclude_unset=True)
+    if "data_segnalazione" in update_data:
+        update_data["data"] = update_data.pop("data_segnalazione")
+    for key, value in update_data.items():
         setattr(db_obj, key, value)
     db.commit()
     db.refresh(db_obj)

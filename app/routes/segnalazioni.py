@@ -2,7 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.dependencies import get_db, get_current_user
 from app.models.user import User
-from app.schemas.segnalazione import SegnalazioneCreate, SegnalazioneResponse
+from app.schemas.segnalazione import (
+    SegnalazioneCreate,
+    SegnalazioneResponse,
+    SegnalazioneUpdate,
+)
 from app.crud import segnalazione as crud
 
 router = APIRouter(prefix="/segnalazioni", tags=["Segnalazioni"])
@@ -28,7 +32,7 @@ def list_segnalazioni(
 @router.put("/{segnalazione_id}", response_model=SegnalazioneResponse)
 def update_segnalazione_route(
     segnalazione_id: str,
-    data: SegnalazioneCreate,
+    data: SegnalazioneUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
