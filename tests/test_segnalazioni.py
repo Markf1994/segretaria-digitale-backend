@@ -36,6 +36,27 @@ def test_create_segnalazione(setup_db):
     assert "id" in body
 
 
+def test_get_segnalazione(setup_db):
+    headers, _ = auth_user("get@example.com")
+    res = client.post(
+        "/segnalazioni/",
+        json={
+            "tipo": "incidente",
+            "stato": "aperta",
+            "priorita": "alta",
+            "data": "2024-01-01T10:00:00",
+            "descrizione": "Desc",
+            "latitudine": 1.0,
+            "longitudine": 2.0,
+        },
+        headers=headers,
+    )
+    seg_id = res.json()["id"]
+    response = client.get(f"/segnalazioni/{seg_id}", headers=headers)
+    assert response.status_code == 200
+    assert response.json()["id"] == seg_id
+
+
 def test_update_segnalazione(setup_db):
     headers, _ = auth_user("upd@example.com")
     create = client.post(
@@ -67,6 +88,33 @@ def test_update_segnalazione(setup_db):
     )
     assert response.status_code == 200
     assert response.json()["stato"] == "in lavorazione"
+
+
+def test_patch_segnalazione(setup_db):
+    headers, _ = auth_user("patch@example.com")
+    res = client.post(
+        "/segnalazioni/",
+        json={
+            "tipo": "incidente",
+            "stato": "aperta",
+            "priorita": "alta",
+            "data": "2024-01-01T10:00:00",
+            "descrizione": "Old",
+            "latitudine": 1.0,
+            "longitudine": 2.0,
+        },
+        headers=headers,
+    )
+    seg_id = res.json()["id"]
+    response = client.patch(
+        f"/segnalazioni/{seg_id}",
+        json={"descrizione": "Patched"},
+        headers=headers,
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["descrizione"] == "Patched"
+    assert data["tipo"] == "incidente"
 
 
 def test_list_segnalazioni(setup_db):
