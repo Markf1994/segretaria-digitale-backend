@@ -10,3 +10,4 @@ class Dispositivo(Base):
     nome = Column(String, nullable=False)
     descrizione = Column(String, nullable=True)
     anno = Column(Integer, nullable=True)
+    note = Column(String, nullable=True)
