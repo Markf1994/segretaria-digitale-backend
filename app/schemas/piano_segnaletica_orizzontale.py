@@ -7,6 +7,11 @@ class SegnaleticaOrizzontaleItemCreate(BaseModel):
     quantita: int = 1
 
 
+class SegnaleticaOrizzontaleItemUpdate(BaseModel):
+    descrizione: str | None = None
+    quantita: int | None = None
+
+
 class SegnaleticaOrizzontaleItemResponse(SegnaleticaOrizzontaleItemCreate):
     id: str
     piano_id: str
