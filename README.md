@@ -72,6 +72,8 @@ alembic upgrade head
 
 After pulling the latest changes, run `alembic upgrade head` again to apply the new migration.
 
+The new revision introduces inventory tables (`dispositivi`, `segnaletica_temporanea`, `segnaletica_verticale` and `piani_segnaletica_orizzontale`). Run `alembic upgrade head` so these tables are created.
+
 After modifying the models, create a new revision and upgrade:
 
 ```bash
