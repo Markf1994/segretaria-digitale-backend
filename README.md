@@ -369,10 +369,17 @@ Authenticated users can record incidents or violations through the
 
 - `POST /segnalazioni/` – create a new entry.
 - `GET /segnalazioni/` – list entries created by the authenticated user.
+- `GET /segnalazioni/by-stato?stato=<values>` – filter entries by one or more states.
 - `GET /segnalazioni/{id}` – retrieve a single entry by ID.
 - `PUT /segnalazioni/{id}` – update an existing entry.
 - `PATCH /segnalazioni/{id}` – partially update an entry.
 - `DELETE /segnalazioni/{id}` – remove an entry.
+
+Filter by state:
+
+```bash
+GET /segnalazioni/by-stato?stato=aperta,in%20lavorazione
+```
 
 ### Segnalazione schema
 
