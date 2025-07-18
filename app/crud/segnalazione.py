@@ -18,16 +18,14 @@ def create_segnalazione(db: Session, data, user: User):
 
     tipo_val = mapping_tipo.get(tipo_val.lower(), tipo_val)
 
-    obj = Segnalazione(
-        tipo=tipo_val,
-        stato=stato_val,
-        priorita=data.priorita,
-        data_segnalazione=data.data_segnalazione,
-        descrizione=data.descrizione,
-        latitudine=data.latitudine,
-        longitudine=data.longitudine,
-        user_id=user.id,
-    )
+    data_dict = data.model_dump(mode="json")
+    data_dict.update({
+        "tipo": tipo_val,
+        "stato": stato_val,
+        "user_id": user.id,
+    })
+
+    obj = Segnalazione(**data_dict)
 
     print("DEBUG INSERT:", obj.tipo, obj.stato)
 
@@ -71,7 +69,7 @@ def update_segnalazione(db: Session, segnalazione_id: str, data, user: User):
     )
     if not db_obj:
         return None
-    for key, value in data.dict(exclude_unset=True).items():
+    for key, value in data.model_dump(mode="json", exclude_unset=True).items():
         setattr(db_obj, key, value)
     db.commit()
     db.refresh(db_obj)
@@ -86,7 +84,7 @@ def patch_segnalazione(db: Session, segnalazione_id: str, data, user: User):
     )
     if not db_obj:
         return None
-    for key, value in data.dict(exclude_unset=True).items():
+    for key, value in data.model_dump(mode="json", exclude_unset=True).items():
         setattr(db_obj, key, value)
     db.commit()
     db.refresh(db_obj)
