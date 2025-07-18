@@ -4,7 +4,7 @@ from app.models.user import User
 
 
 def create_segnalazione(db: Session, data, user: User):
-    db_obj = Segnalazione(**data.dict(), user_id=user.id)
+    db_obj = Segnalazione(**data.model_dump(mode="json"), user_id=user.id)
     db.add(db_obj)
     db.commit()
     db.refresh(db_obj)
@@ -45,7 +45,7 @@ def update_segnalazione(db: Session, segnalazione_id: str, data, user: User):
     )
     if not db_obj:
         return None
-    for key, value in data.dict(exclude_unset=True).items():
+    for key, value in data.model_dump(mode="json", exclude_unset=True).items():
         setattr(db_obj, key, value)
     db.commit()
     db.refresh(db_obj)
@@ -60,7 +60,7 @@ def patch_segnalazione(db: Session, segnalazione_id: str, data, user: User):
     )
     if not db_obj:
         return None
-    for key, value in data.dict(exclude_unset=True).items():
+    for key, value in data.model_dump(mode="json", exclude_unset=True).items():
         setattr(db_obj, key, value)
     db.commit()
     db.refresh(db_obj)
