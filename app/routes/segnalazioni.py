@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from app.dependencies import get_db, get_current_user
 from app.models.user import User
@@ -14,11 +14,14 @@ router = APIRouter(prefix="/segnalazioni", tags=["Segnalazioni"])
 
 
 @router.post("/", response_model=SegnalazioneResponse)
-def create_segnalazione_route(
-    data: SegnalazioneCreate,
+async def create_segnalazione(
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    body = await request.json()
+    print("\u26a0\ufe0f PAYLOAD ricevuto:", body)
+    data = SegnalazioneCreate(**body)
     return crud.create_segnalazione(db, data, current_user)
 
 
