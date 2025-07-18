@@ -362,6 +362,23 @@ curl -X POST http://localhost:8000/piani-orizzontali/{piano_id}/items \
 }
 ```
 
+## Segnaletica orizzontale endpoints
+
+These routes manage simple horizontal signage records and allow importing from Excel.
+
+- `POST /segnaletica-orizzontale/` – create an entry.
+- `GET /segnaletica-orizzontale/` – list entries.
+- `PUT /segnaletica-orizzontale/{id}` – update an entry.
+- `DELETE /segnaletica-orizzontale/{id}` – remove an entry.
+- `POST /segnaletica-orizzontale/import` – import an Excel file and get a PDF summary.
+
+Example:
+
+```bash
+curl -X POST -F "file=@piano.xlsx" \
+  http://localhost:8000/segnaletica-orizzontale/import -o piano.pdf
+```
+
 ## Segnalazioni endpoints
 
 Authenticated users can record incidents or violations through the
