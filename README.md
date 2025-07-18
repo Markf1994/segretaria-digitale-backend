@@ -416,6 +416,21 @@ GET /segnalazioni/by-stato?stato=aperta,in%20lavorazione
 
 Valid values for `tipo` are `Piante`, `Danneggiamenti`, `Reati`, `Animali` and `Altro`.
 `stato` accepts `aperta`, `in lavorazione` or `chiusa`.
+The `priorita` field is required when creating a segnalazione.
+
+Example JSON for `POST /segnalazioni`:
+
+```json
+{
+  "tipo": "Piante",
+  "stato": "aperta",
+  "priorita": 1,
+  "data_segnalazione": "2024-01-01T10:00:00",
+  "descrizione": "Descrizione dell'evento",
+  "latitudine": 45.0,
+  "longitudine": 12.0
+}
+```
 
 Example request:
 
@@ -423,7 +438,7 @@ Example request:
 curl -X POST http://localhost:8000/segnalazioni/ \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"tipo":"Piante","stato":"aperta","priorita":1,"data_segnalazione":"2024-01-01T10:00:00","descrizione":"Test"}'
+  -d '{"tipo":"Piante","stato":"aperta","priorita":1,"data_segnalazione":"2024-01-01T10:00:00","descrizione":"Descrizione dell\'evento","latitudine":45.0,"longitudine":12.0}'
 ```
 
 Example PATCH request:
