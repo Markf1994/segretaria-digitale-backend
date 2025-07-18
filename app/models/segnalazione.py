@@ -10,8 +10,8 @@ class Segnalazione(Base):
     __tablename__ = "segnalazioni"
 
     id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
-    tipo = Column(sa.Enum(TipoSegnalazione), nullable=False)
-    stato = Column(sa.Enum(StatoSegnalazione), nullable=False)
+    tipo = Column(String(30), nullable=False)
+    stato = Column(String(30), nullable=False)
     priorita = Column(Integer, nullable=True)
     data_segnalazione = Column(DateTime, nullable=False)
     descrizione = Column(String, nullable=False)
