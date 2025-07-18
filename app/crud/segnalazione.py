@@ -4,35 +4,25 @@ from app.models.user import User
 
 
 def create_segnalazione(db: Session, data, user: User):
-    tipo_val = getattr(data.tipo, "value", data.tipo)
-    stato_val = getattr(data.stato, "value", data.stato)
-    stato_val = stato_val.lower()
-
-    mapping_tipo = {
+    payload = data.model_dump(mode="json")
+    payload["stato"] = payload["stato"].lower()
+    tipo_map = {
         "piante": "Piante",
         "danneggiamenti": "Danneggiamenti",
         "reati": "Reati",
         "animali": "Animali",
         "altro": "Altro",
     }
+    payload["tipo"] = tipo_map.get(payload["tipo"].lower(), payload["tipo"])
 
-    tipo_val = mapping_tipo.get(tipo_val.lower(), tipo_val)
+    db_obj = Segnalazione(**payload, user_id=user.id)
 
-    data_dict = data.model_dump(mode="json")
-    data_dict.update({
-        "tipo": tipo_val,
-        "stato": stato_val,
-        "user_id": user.id,
-    })
+    print("DEBUG PRE-COMMIT:", db_obj.tipo, db_obj.stato)
 
-    obj = Segnalazione(**data_dict)
-
-    print("DEBUG INSERT:", obj.tipo, obj.stato)
-
-    db.add(obj)
+    db.add(db_obj)
     db.commit()
-    db.refresh(obj)
-    return obj
+    db.refresh(db_obj)
+    return db_obj
 
 
 def get_segnalazioni(db: Session, user: User):
@@ -69,7 +59,19 @@ def update_segnalazione(db: Session, segnalazione_id: str, data, user: User):
     )
     if not db_obj:
         return None
-    for key, value in data.model_dump(mode="json", exclude_unset=True).items():
+    payload = data.model_dump(mode="json", exclude_unset=True)
+    if "stato" in payload:
+        payload["stato"] = payload["stato"].lower()
+    if "tipo" in payload:
+        tipo_map = {
+            "piante": "Piante",
+            "danneggiamenti": "Danneggiamenti",
+            "reati": "Reati",
+            "animali": "Animali",
+            "altro": "Altro",
+        }
+        payload["tipo"] = tipo_map.get(payload["tipo"].lower(), payload["tipo"])
+    for key, value in payload.items():
         setattr(db_obj, key, value)
     db.commit()
     db.refresh(db_obj)
@@ -84,7 +86,19 @@ def patch_segnalazione(db: Session, segnalazione_id: str, data, user: User):
     )
     if not db_obj:
         return None
-    for key, value in data.model_dump(mode="json", exclude_unset=True).items():
+    payload = data.model_dump(mode="json", exclude_unset=True)
+    if "stato" in payload:
+        payload["stato"] = payload["stato"].lower()
+    if "tipo" in payload:
+        tipo_map = {
+            "piante": "Piante",
+            "danneggiamenti": "Danneggiamenti",
+            "reati": "Reati",
+            "animali": "Animali",
+            "altro": "Altro",
+        }
+        payload["tipo"] = tipo_map.get(payload["tipo"].lower(), payload["tipo"])
+    for key, value in payload.items():
         setattr(db_obj, key, value)
     db.commit()
     db.refresh(db_obj)
