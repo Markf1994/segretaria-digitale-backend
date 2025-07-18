@@ -4,11 +4,37 @@ from app.models.user import User
 
 
 def create_segnalazione(db: Session, data, user: User):
-    db_obj = Segnalazione(**data.dict(), user_id=user.id)
-    db.add(db_obj)
+    tipo_val = getattr(data.tipo, "value", data.tipo)
+    stato_val = getattr(data.stato, "value", data.stato)
+    stato_val = stato_val.lower()
+
+    mapping_tipo = {
+        "piante": "Piante",
+        "danneggiamenti": "Danneggiamenti",
+        "reati": "Reati",
+        "animali": "Animali",
+        "altro": "Altro",
+    }
+
+    tipo_val = mapping_tipo.get(tipo_val.lower(), tipo_val)
+
+    obj = Segnalazione(
+        tipo=tipo_val,
+        stato=stato_val,
+        priorita=data.priorita,
+        data_segnalazione=data.data_segnalazione,
+        descrizione=data.descrizione,
+        latitudine=data.latitudine,
+        longitudine=data.longitudine,
+        user_id=user.id,
+    )
+
+    print("DEBUG INSERT:", obj.tipo, obj.stato)
+
+    db.add(obj)
     db.commit()
-    db.refresh(db_obj)
-    return db_obj
+    db.refresh(obj)
+    return obj
 
 
 def get_segnalazioni(db: Session, user: User):
