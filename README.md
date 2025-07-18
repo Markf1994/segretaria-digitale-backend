@@ -380,7 +380,7 @@ Authenticated users can record incidents or violations through the
 {
   "id": "<uuid>",
   "user_id": "<user_id>",
-  "tipo": "incidente",
+  "tipo": "Piante",
   "stato": "aperta",
   "priorita": 1,
   "data_segnalazione": "2024-01-01T10:00:00",
@@ -390,7 +390,7 @@ Authenticated users can record incidents or violations through the
 }
 ```
 
-Valid values for `tipo` are `incidente`, `violazione` and `altro`.
+Valid values for `tipo` are `Piante`, `Danneggiamenti`, `Reati`, `Animali` and `Altro`.
 `stato` accepts `aperta`, `in lavorazione` or `chiusa`.
 
 Example request:
@@ -399,7 +399,7 @@ Example request:
 curl -X POST http://localhost:8000/segnalazioni/ \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"tipo":"incidente","stato":"aperta","data_segnalazione":"2024-01-01T10:00:00","descrizione":"Test"}'
+  -d '{"tipo":"Piante","stato":"aperta","data_segnalazione":"2024-01-01T10:00:00","descrizione":"Test"}'
 ```
 
 Example PATCH request:

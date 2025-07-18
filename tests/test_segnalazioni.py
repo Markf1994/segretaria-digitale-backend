@@ -20,7 +20,7 @@ def auth_user(email: str):
 def test_create_segnalazione(setup_db):
     headers, user_id = auth_user("seg@example.com")
     data = {
-        "tipo": "incidente",
+        "tipo": "Piante",
         "stato": "aperta",
         "priorita": 1,
         "data_segnalazione": "2024-01-01T10:00:00",
@@ -31,7 +31,7 @@ def test_create_segnalazione(setup_db):
     response = client.post("/segnalazioni/", json=data, headers=headers)
     assert response.status_code == 200
     body = response.json()
-    assert body["tipo"] == "incidente"
+    assert body["tipo"] == "Piante"
     assert body["user_id"] == user_id
     assert "id" in body
 
@@ -41,7 +41,7 @@ def test_update_segnalazione(setup_db):
     create = client.post(
         "/segnalazioni/",
         json={
-            "tipo": "incidente",
+            "tipo": "Piante",
             "stato": "aperta",
             "priorita": 1,
             "data_segnalazione": "2024-01-01T10:00:00",
@@ -55,7 +55,7 @@ def test_update_segnalazione(setup_db):
     response = client.put(
         f"/segnalazioni/{seg_id}",
         json={
-            "tipo": "violazione",
+            "tipo": "Danneggiamenti",
             "stato": "in lavorazione",
             "priorita": 2,
             "data_segnalazione": "2024-02-01T12:00:00",
@@ -74,7 +74,7 @@ def test_get_segnalazione(setup_db):
     res = client.post(
         "/segnalazioni/",
         json={
-            "tipo": "incidente",
+            "tipo": "Piante",
             "stato": "aperta",
             "priorita": 1,
             "data_segnalazione": "2024-01-01T10:00:00",
@@ -95,7 +95,7 @@ def test_patch_stato(setup_db):
     res = client.post(
         "/segnalazioni/",
         json={
-            "tipo": "incidente",
+            "tipo": "Piante",
             "stato": "aperta",
             "priorita": 1,
             "data_segnalazione": "2024-01-01T10:00:00",
@@ -121,7 +121,7 @@ def test_patch_priorita(setup_db):
     res = client.post(
         "/segnalazioni/",
         json={
-            "tipo": "incidente",
+            "tipo": "Piante",
             "stato": "aperta",
             "priorita": 1,
             "data_segnalazione": "2024-01-01T10:00:00",
@@ -146,7 +146,7 @@ def test_list_segnalazioni(setup_db):
     client.post(
         "/segnalazioni/",
         json={
-            "tipo": "incidente",
+            "tipo": "Piante",
             "stato": "aperta",
             "priorita": 1,
             "data_segnalazione": "2024-01-01T10:00:00",
@@ -159,7 +159,7 @@ def test_list_segnalazioni(setup_db):
     client.post(
         "/segnalazioni/",
         json={
-            "tipo": "violazione",
+            "tipo": "Danneggiamenti",
             "stato": "chiusa",
             "priorita": 2,
             "data_segnalazione": "2024-02-01T10:00:00",
@@ -179,7 +179,7 @@ def test_delete_segnalazione(setup_db):
     res = client.post(
         "/segnalazioni/",
         json={
-            "tipo": "incidente",
+            "tipo": "Piante",
             "stato": "aperta",
             "priorita": 1,
             "data_segnalazione": "2024-01-01T10:00:00",
@@ -203,7 +203,7 @@ def test_user_isolated_segnalazioni(setup_db):
     client.post(
         "/segnalazioni/",
         json={
-            "tipo": "incidente",
+            "tipo": "Piante",
             "stato": "aperta",
             "priorita": 1,
             "data_segnalazione": "2024-01-01T10:00:00",
@@ -216,7 +216,7 @@ def test_user_isolated_segnalazioni(setup_db):
     client.post(
         "/segnalazioni/",
         json={
-            "tipo": "incidente",
+            "tipo": "Piante",
             "stato": "aperta",
             "priorita": 1,
             "data_segnalazione": "2024-02-01T10:00:00",
@@ -229,7 +229,7 @@ def test_user_isolated_segnalazioni(setup_db):
     client.post(
         "/segnalazioni/",
         json={
-            "tipo": "incidente",
+            "tipo": "Piante",
             "stato": "aperta",
             "priorita": 1,
             "data_segnalazione": "2024-03-01T10:00:00",

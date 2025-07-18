@@ -4,9 +4,11 @@ from pydantic import BaseModel
 
 
 class TipoSegnalazione(str, Enum):
-    INCIDENTE = "incidente"
-    VIOLAZIONE = "violazione"
-    ALTRO = "altro"
+    PIANTE = "Piante"
+    DANNEGGIAMENTI = "Danneggiamenti"
+    REATI = "Reati"
+    ANIMALI = "Animali"
+    ALTRO = "Altro"
 
 
 class StatoSegnalazione(str, Enum):
