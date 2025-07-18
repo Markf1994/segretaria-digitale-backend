@@ -6,6 +6,7 @@ from app.schemas.segnalazione import (
     SegnalazioneCreate,
     SegnalazioneResponse,
     SegnalazioneUpdate,
+    StatoSegnalazione,
 )
 from app.crud import segnalazione as crud
 
@@ -27,6 +28,20 @@ def list_segnalazioni(
     current_user: User = Depends(get_current_user),
 ):
     return crud.get_segnalazioni(db, current_user)
+
+
+@router.get("/by-stato", response_model=list[SegnalazioneResponse])
+def list_segnalazioni_by_stato(
+    stato: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    parts = [s.strip() for s in stato.split(",") if s.strip()]
+    try:
+        stati = [StatoSegnalazione(p).value for p in parts]
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    return crud.get_segnalazioni_by_stato(db, current_user, stati)
 
 
 @router.get("/{segnalazione_id}", response_model=SegnalazioneResponse)

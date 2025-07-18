@@ -15,6 +15,20 @@ def get_segnalazioni(db: Session, user: User):
     return db.query(Segnalazione).filter(Segnalazione.user_id == user.id).all()
 
 
+def get_segnalazioni_by_stato(db: Session, user: User, stati: list[str]):
+    """Return segnalazioni owned by ``user`` whose ``stato`` is in ``stati``."""
+    if not stati:
+        return []
+    return (
+        db.query(Segnalazione)
+        .filter(
+            Segnalazione.user_id == user.id,
+            Segnalazione.stato.in_(stati),
+        )
+        .all()
+    )
+
+
 def get_segnalazione(db: Session, segnalazione_id: str, user: User):
     return (
         db.query(Segnalazione)

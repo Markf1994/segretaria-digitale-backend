@@ -247,3 +247,57 @@ def test_user_isolated_segnalazioni(setup_db):
     assert len(res2.json()) == 1
     assert all(s["user_id"] == id1 for s in res1.json())
     assert all(s["user_id"] == id2 for s in res2.json())
+
+
+def test_list_by_stato(setup_db):
+    headers, _ = auth_user("filter@example.com")
+
+    client.post(
+        "/segnalazioni/",
+        json={
+            "tipo": "Piante",
+            "stato": "aperta",
+            "priorita": 1,
+            "data_segnalazione": "2024-01-01T10:00:00",
+            "descrizione": "A",
+            "latitudine": 0.0,
+            "longitudine": 0.0,
+        },
+        headers=headers,
+    )
+    client.post(
+        "/segnalazioni/",
+        json={
+            "tipo": "Piante",
+            "stato": "in lavorazione",
+            "priorita": 2,
+            "data_segnalazione": "2024-02-01T10:00:00",
+            "descrizione": "B",
+            "latitudine": 0.0,
+            "longitudine": 0.0,
+        },
+        headers=headers,
+    )
+    client.post(
+        "/segnalazioni/",
+        json={
+            "tipo": "Piante",
+            "stato": "chiusa",
+            "priorita": 3,
+            "data_segnalazione": "2024-03-01T10:00:00",
+            "descrizione": "C",
+            "latitudine": 0.0,
+            "longitudine": 0.0,
+        },
+        headers=headers,
+    )
+
+    res = client.get(
+        "/segnalazioni/by-stato",
+        params={"stato": "aperta,in lavorazione"},
+        headers=headers,
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data) == 2
+    assert {s["stato"] for s in data} == {"aperta", "in lavorazione"}
