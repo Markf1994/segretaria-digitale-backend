@@ -423,7 +423,7 @@ Example request:
 curl -X POST http://localhost:8000/segnalazioni/ \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"tipo":"Piante","stato":"aperta","data_segnalazione":"2024-01-01T10:00:00","descrizione":"Test"}'
+  -d '{"tipo":"Piante","stato":"aperta","priorita":1,"data_segnalazione":"2024-01-01T10:00:00","descrizione":"Test"}'
 ```
 
 Example PATCH request:
