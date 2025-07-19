@@ -4,9 +4,18 @@ from sqlalchemy.orm import Session
 import os
 
 from app.dependencies import get_db
-from app.services.signage_horizontal import build_signage_horizontal_pdf
+from app.services.signage_horizontal import (
+    build_signage_horizontal_pdf,
+    get_years,
+)
 
 router = APIRouter(prefix="/inventario", tags=["Inventario"])
+
+
+@router.get("/signage-horizontal/years", response_model=list[int])
+def signage_horizontal_years(db: Session = Depends(get_db)):
+    """List distinct years for which horizontal signage plans exist."""
+    return get_years(db)
 
 
 @router.get("/signage-horizontal/pdf")

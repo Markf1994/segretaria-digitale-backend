@@ -56,3 +56,13 @@ def test_signage_horizontal_pdf_aggregates_items(setup_db, tmp_path):
     assert "5" in captured["html_text"]
     assert not os.path.exists(captured["pdf"])
     assert not os.path.exists(captured["html"])
+
+
+def test_signage_horizontal_years(setup_db):
+    create_piano("First", 2020)
+    create_piano("Second", 2023)
+    create_piano("Third", 2023)
+
+    res = client.get("/inventario/signage-horizontal/years")
+    assert res.status_code == 200
+    assert res.json() == [2020, 2023]
