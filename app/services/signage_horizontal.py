@@ -36,3 +36,15 @@ def build_signage_horizontal_pdf(db: Session, year: int) -> Tuple[str, str]:
     """Build a PDF inventory report for SegnaleticaOrizzontaleItem entries."""
     items = aggregate_items(db, year)
     return build_inventory_pdf(items, year)
+
+
+def get_years(db: Session) -> List[int]:
+    """Return all distinct ``anno`` values from ``PianoSegnaleticaOrizzontale``."""
+    rows = (
+        db.query(PianoSegnaleticaOrizzontale.anno)
+        .filter(PianoSegnaleticaOrizzontale.anno.isnot(None))
+        .distinct()
+        .order_by(PianoSegnaleticaOrizzontale.anno)
+        .all()
+    )
+    return [int(row[0]) for row in rows]
