@@ -2,9 +2,13 @@ from typing import List, Tuple
 from weasyprint import HTML
 import tempfile
 import html
+import os
+from fastapi import HTTPException
 
 
-def build_segnaletica_orizzontale_pdf(descrizioni: List[str], azienda: str, year: int) -> Tuple[str, str]:
+def build_segnaletica_orizzontale_pdf(
+    descrizioni: List[str], azienda: str, year: int
+) -> Tuple[str, str]:
     styles = """
     <style>
     @page { size: A4; margin: 10mm; }
@@ -13,6 +17,12 @@ def build_segnaletica_orizzontale_pdf(descrizioni: List[str], azienda: str, year
     th, td { border: 1px solid #000; padding: 4px; text-align: left; }
     </style>
     """
+
+    logo_path = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "..", "static", "Logo.png")
+    )
+    if not os.path.exists(logo_path):
+        raise HTTPException(status_code=500, detail="Logo file missing")
 
     rows_html = "".join(f"<tr><td>{html.escape(d)}</td></tr>" for d in descrizioni)
 
@@ -23,10 +33,13 @@ def build_segnaletica_orizzontale_pdf(descrizioni: List[str], azienda: str, year
     {styles}
     </head>
     <body>
-    <h1 style='text-align:center;'>Piano Segnaletica Orizzontale Anno {year}</h1>
+    <div style='display:flex; align-items:center; margin-bottom:10px;'>
+        <img src='{logo_path}' alt='logo' style='width:70px; margin-right:8px;' />
+        <h1 style='text-align:center; flex-grow:1; margin:0;'>Piano Segnaletica Orizzontale Anno {year}</h1>
+    </div>
     <h2 style='text-align:center;'>{html.escape(azienda)}</h2>
     <table>
-    <tr><th>Descrizione</th></tr>
+    <tr><th>Lavori da eseguire</th></tr>
     {rows_html}
     </table>
     </body>

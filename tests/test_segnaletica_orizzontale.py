@@ -66,6 +66,8 @@ def test_import_excel_creates_records_and_pdf(setup_db, tmp_path):
     assert "ACME" in captured["html_text"]
     assert "Linea" in captured["html_text"]
     assert "Stop" in captured["html_text"]
+    assert "Logo.png" in captured["html_text"]
+    assert "<th>Lavori da eseguire</th>" in captured["html_text"]
     assert not os.path.exists(captured["pdf"])
     assert not os.path.exists(captured["html"])
 
