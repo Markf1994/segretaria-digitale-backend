@@ -2,6 +2,7 @@ import os
 import shutil
 import importlib
 from unittest.mock import MagicMock, patch
+import sys
 
 import pytest
 
@@ -51,3 +52,12 @@ def patch_google_clients():
     ):
         with patch("googleapiclient.discovery.build", return_value=MagicMock()):
             yield
+
+
+@pytest.fixture(autouse=True)
+def patch_weasyprint(monkeypatch):
+    """Use the local stub for the weasyprint package during tests."""
+    import weasyprint_stub
+    monkeypatch.setitem(sys.modules, "weasyprint", weasyprint_stub)
+    yield
+    monkeypatch.delitem(sys.modules, "weasyprint", raising=False)

@@ -107,7 +107,7 @@ def test_plan_pdf_single_azienda(setup_db, tmp_path):
         captured["text"] = Path(html_path).read_text()
         return pdf_path, html_path
 
-    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
+    with patch("weasyprint_stub.HTML.write_pdf", side_effect=fake_write_pdf):
         with patch(
             "app.routes.signage_horizontal.build_segnaletica_orizzontale_pdf",
             side_effect=capture_build,
@@ -149,7 +149,7 @@ def test_plan_pdf_multiple_aziende(setup_db, tmp_path):
         captured["html"] = html_path
         return pdf_path, html_path
 
-    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
+    with patch("weasyprint_stub.HTML.write_pdf", side_effect=fake_write_pdf):
         with patch(
             "app.routes.signage_horizontal.build_segnaletica_orizzontale_pdf",
             side_effect=capture_build,
