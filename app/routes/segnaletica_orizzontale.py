@@ -63,12 +63,13 @@ async def import_segnaletica_orizzontale(
             tmp.write(await file.read())
             tmp_path = tmp.name
         rows = parse_excel(tmp_path)
-        descrizioni = []
-        azienda = rows[0]["azienda"] if rows else ""
         for payload in rows:
-            crud.create_segnaletica_orizzontale(db, SegnaleticaOrizzontaleCreate(**payload))
-            descrizioni.append(payload["descrizione"])
-        pdf_path, html_path = build_segnaletica_orizzontale_pdf(descrizioni, azienda, date.today().year)
+            crud.create_segnaletica_orizzontale(
+                db, SegnaleticaOrizzontaleCreate(**payload)
+            )
+        pdf_path, html_path = build_segnaletica_orizzontale_pdf(
+            db, date.today().year
+        )
         background_tasks.add_task(os.remove, pdf_path)
         background_tasks.add_task(os.remove, html_path)
         return FileResponse(pdf_path, filename="segnaletica_orizzontale.pdf")

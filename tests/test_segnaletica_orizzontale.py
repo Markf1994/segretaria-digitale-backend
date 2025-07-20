@@ -27,13 +27,11 @@ def test_import_excel_creates_records_and_pdf(setup_db, tmp_path):
     def fake_write_pdf(self, target, *args, **kwargs):
         Path(target).write_bytes(b"%PDF-1.4 fake")
 
-    def capture(descrizioni, azienda, year):
-        pdf, html = real_build(descrizioni, azienda, year)
+    def capture(db, year):
+        pdf, html = real_build(db, year)
         captured["pdf"] = pdf
         captured["html"] = html
         captured["html_text"] = Path(html).read_text()
-        captured["descrizioni"] = descrizioni
-        captured["azienda"] = azienda
         captured["year"] = year
         return pdf, html
 
@@ -61,11 +59,10 @@ def test_import_excel_creates_records_and_pdf(setup_db, tmp_path):
     assert len(records) == 2
     assert all(r["anno"] == date.today().year for r in records)
 
-    assert captured["descrizioni"] == ["Linea", "Stop"]
-    assert f"Piano Segnaletica Orizzontale Anno {date.today().year}" in captured["html_text"]
-    assert "ACME" in captured["html_text"]
     assert "Linea" in captured["html_text"]
     assert "Stop" in captured["html_text"]
+    assert f"Piano Segnaletica Orizzontale Anno {date.today().year}" in captured["html_text"]
+    assert "ACME" in captured["html_text"]
     assert "Logo.png" in captured["html_text"]
     assert "<th>Lavori da eseguire</th>" in captured["html_text"]
     assert not os.path.exists(captured["pdf"])
@@ -79,7 +76,7 @@ def test_import_temp_files_removed(setup_db, tmp_path):
         captured["xlsx"] = path
         return [{"azienda": "A", "descrizione": "B", "anno": date.today().year}]
 
-    def fake_build(rows, azienda, year):
+    def fake_build(db, year):
         pdf = tmp_path / "out.pdf"
         html = tmp_path / "out.html"
         pdf.write_bytes(b"%PDF-1.4 fake")
