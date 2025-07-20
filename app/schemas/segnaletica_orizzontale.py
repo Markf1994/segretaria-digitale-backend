@@ -6,13 +6,9 @@ class SegnaleticaOrizzontaleCreate(BaseModel):
     descrizione: str
 
 
-class SegnaleticaOrizzontaleUpdate(BaseModel):
-    azienda: str | None = None
-    descrizione: str | None = None
-
-
 class SegnaleticaOrizzontaleResponse(SegnaleticaOrizzontaleCreate):
     id: str
+    anno: int
 
     model_config = {
         "from_attributes": True,
@@ -22,7 +18,6 @@ class SegnaleticaOrizzontaleResponse(SegnaleticaOrizzontaleCreate):
 class SegnaleticaOrizzontaleUpdate(BaseModel):
     azienda: str | None = None
     descrizione: str | None = None
-    anno: int | None = None
 
 
 class SignageInventoryItem(BaseModel):

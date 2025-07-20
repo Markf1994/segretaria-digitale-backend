@@ -2,6 +2,7 @@ from fastapi.testclient import TestClient
 from pathlib import Path
 from unittest.mock import patch
 import os
+import datetime
 
 from app.main import app
 
@@ -9,27 +10,28 @@ client = TestClient(app)
 
 
 def test_create_signage_horizontal(setup_db):
-    data = {"azienda": "ACME", "descrizione": "Linea", "anno": 2024}
+    data = {"azienda": "ACME", "descrizione": "Linea"}
     res = client.post("/inventario/signage-horizontal/", json=data)
     assert res.status_code == 200
     body = res.json()
     assert body["azienda"] == "ACME"
     assert body["descrizione"] == "Linea"
-    assert body["anno"] == 2024
+    assert body["anno"] == datetime.date.today().year
     assert "id" in body
 
 
 def test_update_signage_horizontal(setup_db):
-    base = {"azienda": "ACME", "descrizione": "Old", "anno": 2023}
+    base = {"azienda": "ACME", "descrizione": "Old"}
     res = client.post("/inventario/signage-horizontal/", json=base)
     rec_id = res.json()["id"]
-    update = {"azienda": "Beta", "descrizione": "New", "anno": 2024}
+    year = res.json()["anno"]
+    update = {"azienda": "Beta", "descrizione": "New"}
     res = client.put(f"/inventario/signage-horizontal/{rec_id}", json=update)
     assert res.status_code == 200
     data = res.json()
     assert data["azienda"] == "Beta"
     assert data["descrizione"] == "New"
-    assert data["anno"] == 2024
+    assert data["anno"] == year
 
 
 def test_list_signage_horizontal(setup_db):
