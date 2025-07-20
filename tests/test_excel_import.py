@@ -428,7 +428,7 @@ def test_df_to_pdf_creates_files_and_cleanup(tmp_path):
     def fake_write_pdf(self, target, *args, **kwargs):
         Path(target).write_bytes(b"%PDF-1.4 fake")
 
-    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
+    with patch("weasyprint_stub.HTML.write_pdf", side_effect=fake_write_pdf):
         pdf_path, html_path = df_to_pdf(rows, None)
 
     assert os.path.exists(pdf_path)
@@ -464,7 +464,7 @@ def test_df_to_pdf_write_pdf_error(tmp_path):
     def fake_write_pdf(self, target, *args, **kwargs):
         raise OSError("boom")
 
-    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
+    with patch("weasyprint_stub.HTML.write_pdf", side_effect=fake_write_pdf):
         with pytest.raises(OSError):
             df_to_pdf(rows, None)
 
@@ -484,7 +484,7 @@ def test_df_to_pdf_missing_logo(monkeypatch):
     def fake_write_pdf(self, target, *args, **kwargs):
         Path(target).write_bytes(b"%PDF-1.4 fake")
 
-    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
+    with patch("weasyprint_stub.HTML.write_pdf", side_effect=fake_write_pdf):
         with patch("os.path.exists", return_value=False):
             with pytest.raises(HTTPException) as exc:
                 df_to_pdf(rows, None)
@@ -508,7 +508,7 @@ def test_df_to_pdf_escapes_html(tmp_path):
     def fake_write_pdf(self, target, *args, **kwargs):
         Path(target).write_bytes(b"%PDF-1.4 fake")
 
-    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
+    with patch("weasyprint_stub.HTML.write_pdf", side_effect=fake_write_pdf):
         pdf_path, html_path = df_to_pdf(rows, None)
 
     html_text = Path(html_path).read_text()
@@ -536,7 +536,7 @@ def test_df_to_pdf_formats_times_without_seconds(tmp_path):
     def fake_write_pdf(self, target, *args, **kwargs):
         Path(target).write_bytes(b"%PDF-1.4 fake")
 
-    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
+    with patch("weasyprint_stub.HTML.write_pdf", side_effect=fake_write_pdf):
         pdf_path, html_path = df_to_pdf(rows, None)
 
     html_text = Path(html_path).read_text()
@@ -566,7 +566,7 @@ def test_df_to_pdf_skips_nan_second_segment(tmp_path):
         }
     ]
 
-    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
+    with patch("weasyprint_stub.HTML.write_pdf", side_effect=fake_write_pdf):
         pdf_path, html_path = df_to_pdf(rows, None)
 
     html_text = Path(html_path).read_text()
@@ -590,7 +590,7 @@ def test_df_to_pdf_skips_nan_third_segment(tmp_path):
         }
     ]
 
-    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
+    with patch("weasyprint_stub.HTML.write_pdf", side_effect=fake_write_pdf):
         pdf_path, html_path = df_to_pdf(rows, None)
 
     html_text = Path(html_path).read_text()
@@ -620,7 +620,7 @@ def test_df_to_pdf_lists_notes(tmp_path):
         },
     ]
 
-    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
+    with patch("weasyprint_stub.HTML.write_pdf", side_effect=fake_write_pdf):
         pdf_path, html_path = df_to_pdf(rows, None)
 
     html_text = Path(html_path).read_text()

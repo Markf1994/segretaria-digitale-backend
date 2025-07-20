@@ -81,7 +81,7 @@ def test_week_pdf_filters_turni(setup_db, tmp_path):
         captured["html_text"] = Path(html_path).read_text()
         return pdf_path, html_path
 
-    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
+    with patch("weasyprint_stub.HTML.write_pdf", side_effect=fake_write_pdf):
         with patch("app.routes.orari.df_to_pdf", side_effect=capture_df_to_pdf):
             res = client.get("/orari/pdf?week=2023-W01", headers=headers)
 
@@ -145,7 +145,7 @@ def test_week_pdf_temp_files_removed(setup_db, tmp_path):
         captured["html_text"] = Path(html_path).read_text()
         return pdf_path, html_path
 
-    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
+    with patch("weasyprint_stub.HTML.write_pdf", side_effect=fake_write_pdf):
         with patch("app.routes.orari.df_to_pdf", side_effect=capture_df_to_pdf):
             res = client.get("/orari/pdf?week=2023-W01", headers=headers)
 
@@ -193,7 +193,7 @@ def test_week_pdf_escapes_html(setup_db, tmp_path):
         captured["html_text"] = Path(html_path).read_text()
         return pdf_path, html_path
 
-    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
+    with patch("weasyprint_stub.HTML.write_pdf", side_effect=fake_write_pdf):
         with patch("app.routes.orari.df_to_pdf", side_effect=capture_df_to_pdf):
             res = client.get("/orari/pdf?week=2023-W01", headers=headers)
 
@@ -248,7 +248,7 @@ def test_week_pdf_includes_gcal_events(setup_db, tmp_path):
         captured["html_text"] = Path(html_path).read_text()
         return pdf_path, html_path
 
-    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
+    with patch("weasyprint_stub.HTML.write_pdf", side_effect=fake_write_pdf):
         with patch("app.services.google_calendar.list_events_between", lambda s, e: gcal_events):
             with patch("app.routes.orari.df_to_pdf", side_effect=capture_df_to_pdf):
                 res = client.get("/orari/pdf?week=2023-W01", headers=headers)
@@ -296,7 +296,7 @@ def test_week_pdf_excludes_turno_titles(setup_db, tmp_path):
         captured["html_text"] = Path(html_path).read_text()
         return pdf_path, html_path
 
-    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
+    with patch("weasyprint_stub.HTML.write_pdf", side_effect=fake_write_pdf):
         with patch("app.services.google_calendar.list_events_between", lambda s, e: gcal_events):
             with patch("app.routes.orari.df_to_pdf", side_effect=capture_df_to_pdf):
                 res = client.get("/orari/pdf?week=2023-W01", headers=headers)
@@ -343,7 +343,7 @@ def test_week_pdf_ignores_empty_gcal_titles(setup_db, tmp_path):
         captured["html_text"] = Path(html_path).read_text()
         return pdf_path, html_path
 
-    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
+    with patch("weasyprint_stub.HTML.write_pdf", side_effect=fake_write_pdf):
         with patch("app.services.google_calendar.list_events_between", lambda s, e: gcal_events):
             with patch("app.routes.orari.df_to_pdf", side_effect=capture_df_to_pdf):
                 res = client.get("/orari/pdf?week=2023-W01", headers=headers)
@@ -403,7 +403,7 @@ def test_week_pdf_includes_public_events(setup_db, tmp_path):
         captured["html_text"] = Path(html_path).read_text()
         return pdf_path, html_path
 
-    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
+    with patch("weasyprint_stub.HTML.write_pdf", side_effect=fake_write_pdf):
         with patch("app.services.google_calendar.list_events_between", lambda s, e: []):
             with patch("app.routes.orari.df_to_pdf", side_effect=capture_df_to_pdf):
                 res = client.get("/orari/pdf?week=2023-W01", headers=headers)
@@ -442,7 +442,7 @@ def test_week_pdf_strips_emails_from_notes(setup_db, tmp_path):
         captured["html_text"] = Path(html_path).read_text()
         return pdf_path, html_path
 
-    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
+    with patch("weasyprint_stub.HTML.write_pdf", side_effect=fake_write_pdf):
         with patch("app.routes.orari.df_to_pdf", side_effect=capture_df_to_pdf):
             res = client.get("/orari/pdf?week=2023-W01", headers=headers)
 
@@ -500,7 +500,7 @@ def test_week_pdf_strips_emails_from_gcal_and_events(setup_db, tmp_path):
         captured["html_text"] = Path(html_path).read_text()
         return pdf_path, html_path
 
-    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
+    with patch("weasyprint_stub.HTML.write_pdf", side_effect=fake_write_pdf):
         with patch("app.services.google_calendar.list_events_between", lambda s, e: gcal_events):
             with patch("app.routes.orari.df_to_pdf", side_effect=capture_df_to_pdf):
                 res = client.get("/orari/pdf?week=2023-W01", headers=headers)

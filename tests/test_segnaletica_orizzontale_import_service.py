@@ -31,7 +31,7 @@ def test_parse_and_pdf_generation(setup_db, tmp_path):
     def fake_write_pdf(self, target, *args, **kwargs):
         Path(target).write_bytes(b"%PDF-1.4 fake")
 
-    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
+    with patch("weasyprint_stub.HTML.write_pdf", side_effect=fake_write_pdf):
         pdf_path, html_path = build_segnaletica_orizzontale_pdf(db, date.today().year)
 
     html_text = Path(html_path).read_text()
