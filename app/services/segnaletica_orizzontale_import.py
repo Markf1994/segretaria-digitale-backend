@@ -1,5 +1,4 @@
 import pandas as pd
-from datetime import date
 from typing import Any, Dict, List
 from fastapi import HTTPException
 
@@ -27,7 +26,6 @@ def parse_excel(path: str) -> List[Dict[str, Any]]:
             {
                 "azienda": str(azienda).strip(),
                 "descrizione": str(descr).strip(),
-                "anno": date.today().year,
             }
         )
     return rows
