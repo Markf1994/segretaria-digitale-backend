@@ -40,7 +40,9 @@ def build_segnaletica_orizzontale_pdf(db: Session, year: int) -> Tuple[str, str]
 
     rows_html = "".join(f"<tr><td>{html.escape(d)}</td></tr>" for d in descrizioni)
     azienda_html = (
-        f"<h2 style='text-align:center;'>{html.escape(azienda)}</h2>" if azienda else ""
+        f"<h2 style='text-align:center;'>Azienda incaricata: {html.escape(azienda)}</h2>"
+        if azienda
+        else ""
     )
 
     html_content = f"""
