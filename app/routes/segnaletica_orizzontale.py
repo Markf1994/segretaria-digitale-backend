@@ -21,6 +21,8 @@ router = APIRouter(prefix="/segnaletica-orizzontale", tags=["Segnaletica Orizzon
 def create_segnaletica_orizzontale_route(
     data: SegnaleticaOrizzontaleCreate, db: Session = Depends(get_db)
 ):
+    if data.anno is None:
+        data.anno = date.today().year
     return crud.create_segnaletica_orizzontale(db, data)
 
 
@@ -66,7 +68,9 @@ async def import_segnaletica_orizzontale(
         descrizioni = []
         azienda = rows[0]["azienda"] if rows else ""
         for payload in rows:
-            crud.create_segnaletica_orizzontale(db, SegnaleticaOrizzontaleCreate(**payload))
+            create_segnaletica_orizzontale_route(
+                SegnaleticaOrizzontaleCreate(**payload), db
+            )
             descrizioni.append(payload["descrizione"])
         pdf_path, html_path = build_segnaletica_orizzontale_pdf(descrizioni, azienda, date.today().year)
         background_tasks.add_task(os.remove, pdf_path)

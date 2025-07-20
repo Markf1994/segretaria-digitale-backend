@@ -4,7 +4,7 @@ from pydantic import BaseModel
 class SegnaleticaOrizzontaleCreate(BaseModel):
     azienda: str
     descrizione: str
-    anno: int
+    anno: int | None = None
 
 
 class SegnaleticaOrizzontaleResponse(SegnaleticaOrizzontaleCreate):

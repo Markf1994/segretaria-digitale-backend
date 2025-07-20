@@ -77,7 +77,7 @@ def test_import_temp_files_removed(setup_db, tmp_path):
 
     def fake_parse(path):
         captured["xlsx"] = path
-        return [{"azienda": "A", "descrizione": "B", "anno": date.today().year}]
+        return [{"azienda": "A", "descrizione": "B"}]
 
     def fake_build(rows, azienda, year):
         pdf = tmp_path / "out.pdf"
