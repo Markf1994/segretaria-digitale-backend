@@ -112,3 +112,34 @@ async def import_signage_horizontal(
     finally:
         if tmp_path and os.path.exists(tmp_path):
             os.remove(tmp_path)
+
+
+@router.post("/import-excel", response_model=list[SegnaleticaOrizzontaleResponse])
+async def import_signage_horizontal_excel(
+    file: UploadFile, db: Session = Depends(get_db)
+):
+    """Create signage records from an uploaded Excel file."""
+    tmp_path = None
+    try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp:
+            tmp.write(await file.read())
+            tmp_path = tmp.name
+
+        rows = parse_excel(tmp_path)
+
+        created = []
+        for payload in rows:
+            rec = crud.create_segnaletica_orizzontale(
+                db, SegnaleticaOrizzontaleCreate(**payload)
+            )
+            created.append(rec)
+
+        return created
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("Errore import-excel")
+        raise HTTPException(500, f"Errore import: {e}")
+    finally:
+        if tmp_path and os.path.exists(tmp_path):
+            os.remove(tmp_path)

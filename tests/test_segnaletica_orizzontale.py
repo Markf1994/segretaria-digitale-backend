@@ -262,3 +262,62 @@ def test_import_signage_horizontal_tmp_removed_on_late_failure(tmp_path):
 
     assert res.status_code == 500
     assert not os.path.exists(captured["xlsx"])
+
+
+def test_import_excel_endpoint_creates_records(setup_db, tmp_path):
+    captured = {}
+
+    def fake_parse(path):
+        captured["xlsx"] = path
+        return [
+            {"azienda": "A", "descrizione": "One"},
+            {"azienda": "B", "descrizione": "Two"},
+        ]
+
+    with patch("app.routes.signage_horizontal.parse_excel", side_effect=fake_parse):
+        dummy = tmp_path / "imp.xlsx"
+        dummy.write_bytes(b"data")
+        with open(dummy, "rb") as fh:
+            res = client.post(
+                "/inventario/signage-horizontal/import-excel",
+                files={
+                    "file": (
+                        "imp.xlsx",
+                        fh,
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    )
+                },
+            )
+
+    assert res.status_code == 200
+    body = res.json()
+    assert len(body) == 2
+    assert body[0]["azienda"] == "A"
+    assert not os.path.exists(captured["xlsx"])
+    assert len(client.get("/inventario/signage-horizontal/").json()) == 2
+
+
+def test_import_excel_endpoint_validation_error(tmp_path):
+    captured = {}
+
+    def fake_parse(path):
+        captured["xlsx"] = path
+        raise HTTPException(status_code=400, detail="bad")
+
+    with patch("app.routes.signage_horizontal.parse_excel", side_effect=fake_parse):
+        dummy = tmp_path / "imp.xlsx"
+        dummy.write_bytes(b"data")
+        with open(dummy, "rb") as fh:
+            res = client.post(
+                "/inventario/signage-horizontal/import-excel",
+                files={
+                    "file": (
+                        "imp.xlsx",
+                        fh,
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    )
+                },
+            )
+
+    assert res.status_code == 400
+    assert not os.path.exists(captured["xlsx"])
