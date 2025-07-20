@@ -8,27 +8,24 @@ from app.main import app
 client = TestClient(app)
 
 
-def create_piano(descr, anno):
-    res = client.post("/piani-orizzontali/", json={"descrizione": descr, "anno": anno})
-    return res.json()["id"]
-
-
-def add_item(piano_id, descr, qty):
+def create_record(descr: str, anno: int, azienda: str = "ACME"):  # new helper
+    """Create a SegnaleticaOrizzontale entry used by the inventory tests."""
     client.post(
-        f"/piani-orizzontali/{piano_id}/items",
-        json={"descrizione": descr, "quantita": qty},
+        "/segnaletica-orizzontale/",
+        json={"azienda": azienda, "descrizione": descr, "anno": anno},
     )
 
 
 def test_signage_horizontal_pdf_aggregates_items(setup_db, tmp_path):
-    p1 = create_piano("P1", 2023)
-    p2 = create_piano("P2", 2023)
-    p_old = create_piano("Old", 2022)
+    # create records for the requested year
+    for _ in range(2):
+        create_record("Linee", 2023)
+    for _ in range(3):
+        create_record("Linee", 2023)
+    create_record("Stop", 2023)
 
-    add_item(p1, "Linee", 2)
-    add_item(p2, "Linee", 3)
-    add_item(p1, "Stop", 1)
-    add_item(p_old, "Stop", 5)
+    # add some data for other years that should be ignored
+    create_record("Stop", 2022)
 
     captured = {}
     real_build = __import__(
@@ -67,9 +64,9 @@ def test_signage_horizontal_pdf_aggregates_items(setup_db, tmp_path):
 
 
 def test_signage_horizontal_years(setup_db):
-    create_piano("First", 2020)
-    create_piano("Second", 2023)
-    create_piano("Third", 2023)
+    create_record("First", 2020)
+    create_record("Second", 2023)
+    create_record("Third", 2023)
 
     res = client.get("/inventario/signage-horizontal/years")
     assert res.status_code == 200
@@ -77,14 +74,10 @@ def test_signage_horizontal_years(setup_db):
 
 
 def test_signage_horizontal_items(setup_db):
-    p1 = create_piano("P1", 2023)
-    p2 = create_piano("P2", 2023)
-    old = create_piano("Old", 2022)
-
-    add_item(p1, "Linee", 2)
-    add_item(p2, "Linee", 3)
-    add_item(p1, "Stop", 1)
-    add_item(old, "Stop", 5)
+    for _ in range(5):
+        create_record("Linee", 2023)
+    create_record("Stop", 2023)
+    create_record("Stop", 2022)
 
     res = client.get("/inventario/signage-horizontal/?year=2023")
     assert res.status_code == 200
