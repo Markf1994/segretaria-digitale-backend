@@ -17,8 +17,6 @@ def create_segnalazione(db: Session, data, user: User):
 
     db_obj = Segnalazione(**payload, user_id=user.id)
 
-    print("DEBUG PRE-COMMIT:", db_obj.tipo, db_obj.stato)
-
     db.add(db_obj)
     db.commit()
     db.refresh(db_obj)
