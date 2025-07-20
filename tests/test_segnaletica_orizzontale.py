@@ -117,6 +117,7 @@ def test_plan_pdf_single_azienda(setup_db, tmp_path):
     assert res.status_code == 200
     assert "Linea 1" in captured["text"]
     assert "Linea 2" in captured["text"]
+    assert "Azienda incaricata" in captured["text"]
     assert "Solo" in captured["text"]
     assert "Logo.png" in captured["text"]
     assert not os.path.exists(captured["pdf"])
@@ -159,6 +160,7 @@ def test_plan_pdf_multiple_aziende(setup_db, tmp_path):
     assert res.status_code == 200
     assert "Desc" in captured["text"]
     assert "Other" in captured["text"]
+    assert "Azienda incaricata" not in captured["text"]
     assert "A" not in captured["text"] or "B" not in captured["text"]
     assert not os.path.exists(captured["pdf"])
     assert not os.path.exists(captured["html"])
