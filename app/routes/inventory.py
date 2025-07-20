@@ -5,10 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 from app.dependencies import get_db
-from app.models.piano_segnaletica_orizzontale import (
-    PianoSegnaleticaOrizzontale,
-    SegnaleticaOrizzontaleItem,
-)
+from app.models.segnaletica_orizzontale import SegnaleticaOrizzontale
 
 from app.services.inventory_pdf import build_inventory_pdf
 
@@ -25,15 +22,11 @@ def inventory_pdf(
 
     query = (
         db.query(
-            SegnaleticaOrizzontaleItem.descrizione.label("name"),
-            func.sum(SegnaleticaOrizzontaleItem.quantita).label("count"),
+            SegnaleticaOrizzontale.descrizione.label("name"),
+            func.count(SegnaleticaOrizzontale.id).label("count"),
         )
-        .join(
-            PianoSegnaleticaOrizzontale,
-            SegnaleticaOrizzontaleItem.piano_id == PianoSegnaleticaOrizzontale.id,
-        )
-        .filter(PianoSegnaleticaOrizzontale.anno == year)
-        .group_by(SegnaleticaOrizzontaleItem.descrizione)
+        .filter(SegnaleticaOrizzontale.anno == year)
+        .group_by(SegnaleticaOrizzontale.descrizione)
     )
     items = [
         {"name": row.name, "count": int(row.count)}

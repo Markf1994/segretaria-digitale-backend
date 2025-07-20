@@ -13,3 +13,10 @@ class SegnaleticaOrizzontaleResponse(SegnaleticaOrizzontaleCreate):
     model_config = {
         "from_attributes": True,
     }
+
+
+class SignageInventoryItem(BaseModel):
+    """Aggregated inventory entry used by inventory endpoints."""
+
+    name: str
+    count: int

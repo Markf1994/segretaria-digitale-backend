@@ -2,27 +2,20 @@ from typing import Tuple, List, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
-from app.models.piano_segnaletica_orizzontale import (
-    PianoSegnaleticaOrizzontale,
-    SegnaleticaOrizzontaleItem,
-)
+from app.models.segnaletica_orizzontale import SegnaleticaOrizzontale
 from .inventory_pdf import build_inventory_pdf
 
 
 def aggregate_items(db: Session, year: int) -> List[Dict[str, Any]]:
-    """Return SegnaleticaOrizzontaleItem counts grouped by description for ``year``."""
+    """Return ``SegnaleticaOrizzontale`` counts grouped by description for ``year``."""
     rows = (
         db.query(
-            SegnaleticaOrizzontaleItem.descrizione,
-            func.sum(SegnaleticaOrizzontaleItem.quantita).label("count"),
+            SegnaleticaOrizzontale.descrizione,
+            func.count(SegnaleticaOrizzontale.id).label("count"),
         )
-        .join(
-            PianoSegnaleticaOrizzontale,
-            SegnaleticaOrizzontaleItem.piano_id == PianoSegnaleticaOrizzontale.id,
-        )
-        .filter(PianoSegnaleticaOrizzontale.anno == year)
-        .group_by(SegnaleticaOrizzontaleItem.descrizione)
-        .order_by(SegnaleticaOrizzontaleItem.descrizione)
+        .filter(SegnaleticaOrizzontale.anno == year)
+        .group_by(SegnaleticaOrizzontale.descrizione)
+        .order_by(SegnaleticaOrizzontale.descrizione)
         .all()
     )
 
@@ -39,12 +32,12 @@ def build_signage_horizontal_pdf(db: Session, year: int) -> Tuple[str, str]:
 
 
 def get_years(db: Session) -> List[int]:
-    """Return all distinct ``anno`` values from ``PianoSegnaleticaOrizzontale``."""
+    """Return all distinct ``anno`` values from ``SegnaleticaOrizzontale``."""
     rows = (
-        db.query(PianoSegnaleticaOrizzontale.anno)
-        .filter(PianoSegnaleticaOrizzontale.anno.isnot(None))
+        db.query(SegnaleticaOrizzontale.anno)
+        .filter(SegnaleticaOrizzontale.anno.isnot(None))
         .distinct()
-        .order_by(PianoSegnaleticaOrizzontale.anno)
+        .order_by(SegnaleticaOrizzontale.anno)
         .all()
     )
     return [int(row[0]) for row in rows]
