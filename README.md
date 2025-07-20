@@ -346,6 +346,9 @@ These routes manage horizontal signage records.
 - `DELETE /inventario/signage-horizontal/{id}` – remove an entry.
 - `GET /inventario/signage-horizontal/years` – list stored years.
 - `GET /inventario/signage-horizontal/pdf?year=<YEAR>` – download the inventory PDF.
+- `POST /inventario/signage-horizontal/import` – import entries from an Excel file and return a PDF summary.
+
+`anno` is set server-side to the current year and is not accepted from the client when creating new records.
 
 ## Segnalazioni endpoints
 
