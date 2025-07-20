@@ -14,13 +14,13 @@ from app.routes import (
     dispositivi,
     segnaletica_temporanea,
     segnaletica_verticale,
-    segnaletica_orizzontale,
+    signage_horizontal,
     segnalazioni,
 )
 from app.routes.orari import router as orari_router
 from app.routes import inventory
 from app.routes import imports
-from app.routes import inventario
+
 
 # Enable automatic redirect so both `/path` and `/path/` work
 # Tests continue to use the canonical routes defined in the routers
@@ -56,13 +56,12 @@ app.include_router(dispositivi.router)
 app.include_router(segnalazioni.router)
 app.include_router(segnaletica_temporanea.router)
 app.include_router(segnaletica_verticale.router)
-app.include_router(segnaletica_orizzontale.router)
+app.include_router(signage_horizontal.router)
 app.include_router(dashboard.router)
 app.include_router(health.router)
 app.include_router(orari_router)
 app.include_router(inventory.router)
 app.include_router(imports.router)
-app.include_router(inventario.router)
 
 from app.crud.pdf_file import get_upload_root
 from fastapi.staticfiles import StaticFiles
