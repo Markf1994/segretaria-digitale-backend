@@ -1,7 +1,16 @@
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    HTTPException,
+    UploadFile,
+)
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 import os
+import tempfile
+import logging
+import datetime
 
 from app.dependencies import get_db
 from app.schemas.segnaletica_orizzontale import (
@@ -13,6 +22,9 @@ from app.crud import segnaletica_orizzontale as crud
 from app.services.segnaletica_orizzontale_pdf import (
     build_segnaletica_orizzontale_pdf,
 )
+from app.services.segnaletica_orizzontale_import import parse_excel
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/inventario/signage-horizontal", tags=["Inventario"])
 
@@ -35,7 +47,9 @@ def create_record(data: SegnaleticaOrizzontaleCreate, db: Session = Depends(get_
 
 
 @router.put("/{record_id}", response_model=SegnaleticaOrizzontaleResponse)
-def update_record(record_id: str, data: SegnaleticaOrizzontaleUpdate, db: Session = Depends(get_db)):
+def update_record(
+    record_id: str, data: SegnaleticaOrizzontaleUpdate, db: Session = Depends(get_db)
+):
     db_obj = crud.update_segnaletica_orizzontale(db, record_id, data)
     if not db_obj:
         raise HTTPException(status_code=404, detail="Segnaletica orizzontale not found")
@@ -62,3 +76,39 @@ def signage_horizontal_pdf(
     background_tasks.add_task(os.remove, html_path)
     filename = f"signage_horizontal_{year}.pdf"
     return FileResponse(pdf_path, filename=filename)
+
+
+@router.post("/import")
+async def import_signage_horizontal(
+    file: UploadFile,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
+    """Import signage entries from an Excel file and return a PDF summary."""
+    tmp_path = None
+    try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp:
+            tmp.write(await file.read())
+            tmp_path = tmp.name
+
+        rows = parse_excel(tmp_path)
+
+        for payload in rows:
+            crud.create_segnaletica_orizzontale(
+                db, SegnaleticaOrizzontaleCreate(**payload)
+            )
+
+        year = rows[0]["anno"] if rows else datetime.date.today().year
+        pdf_path, html_path = build_segnaletica_orizzontale_pdf(db, year)
+        background_tasks.add_task(os.remove, pdf_path)
+        background_tasks.add_task(os.remove, html_path)
+        filename = f"signage_horizontal_{year}.pdf"
+        return FileResponse(pdf_path, filename=filename)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("Errore import")
+        raise HTTPException(500, f"Errore import: {e}")
+    finally:
+        if tmp_path and os.path.exists(tmp_path):
+            os.remove(tmp_path)
