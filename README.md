@@ -338,20 +338,14 @@ GET /inventario/signage-horizontal/pdf?year=2024
 
 ## Segnaletica orizzontale endpoints
 
-These routes manage simple horizontal signage records and allow importing from Excel.
+These routes manage horizontal signage records.
 
-- `POST /segnaletica-orizzontale/` – create an entry.
-- `GET /segnaletica-orizzontale/` – list entries.
-- `PUT /segnaletica-orizzontale/{id}` – update an entry.
-- `DELETE /segnaletica-orizzontale/{id}` – remove an entry.
-- `POST /segnaletica-orizzontale/import` – import an Excel file and get a PDF summary.
-
-Example:
-
-```bash
-curl -X POST -F "file=@piano.xlsx" \
-  http://localhost:8000/segnaletica-orizzontale/import -o piano.pdf
-```
+- `POST /inventario/signage-horizontal/` – create an entry.
+- `GET /inventario/signage-horizontal/` – list entries.
+- `PUT /inventario/signage-horizontal/{id}` – update an entry.
+- `DELETE /inventario/signage-horizontal/{id}` – remove an entry.
+- `GET /inventario/signage-horizontal/years` – list stored years.
+- `GET /inventario/signage-horizontal/pdf?year=<YEAR>` – download the inventory PDF.
 
 ## Segnalazioni endpoints
 

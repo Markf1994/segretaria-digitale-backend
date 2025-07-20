@@ -1,112 +1,61 @@
-from pathlib import Path
-from datetime import date
 from fastapi.testclient import TestClient
-from unittest.mock import patch
-import os
-import pandas as pd
 
 from app.main import app
 
 client = TestClient(app)
 
 
-def test_import_excel_creates_records_and_pdf(setup_db, tmp_path):
-    df = pd.DataFrame([
-        {"azienda": "ACME", "descrizione": "Linea"},
-        {"azienda": "ACME", "descrizione": "Stop"},
-    ])
-    xlsx = tmp_path / "segna.xlsx"
-    df.to_excel(xlsx, index=False)
-
-    captured = {}
-    real_build = __import__(
-        "app.services.segnaletica_orizzontale_pdf",
-        fromlist=["build_segnaletica_orizzontale_pdf"],
-    ).build_segnaletica_orizzontale_pdf
-
-    def fake_write_pdf(self, target, *args, **kwargs):
-        Path(target).write_bytes(b"%PDF-1.4 fake")
-
-    def capture(descrizioni, azienda, year):
-        pdf, html = real_build(descrizioni, azienda, year)
-        captured["pdf"] = pdf
-        captured["html"] = html
-        captured["html_text"] = Path(html).read_text()
-        captured["descrizioni"] = descrizioni
-        captured["azienda"] = azienda
-        captured["year"] = year
-        return pdf, html
-
-    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
-        with patch(
-            "app.routes.segnaletica_orizzontale.build_segnaletica_orizzontale_pdf",
-            side_effect=capture,
-        ):
-            with open(xlsx, "rb") as fh:
-                res = client.post(
-                    "/segnaletica-orizzontale/import",
-                    files={
-                        "file": (
-                            "segna.xlsx",
-                            fh,
-                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                        )
-                    },
-                )
+def test_create_signage_horizontal(setup_db):
+    data = {"azienda": "ACME", "descrizione": "Linea", "anno": 2024}
+    res = client.post("/inventario/signage-horizontal/", json=data)
     assert res.status_code == 200
-    assert res.headers["content-type"] == "application/pdf"
-
-    list_res = client.get("/segnaletica-orizzontale/")
-    records = list_res.json()
-    assert len(records) == 2
-    assert all(r["anno"] == date.today().year for r in records)
-
-    assert captured["descrizioni"] == ["Linea", "Stop"]
-    assert f"Piano Segnaletica Orizzontale Anno {date.today().year}" in captured["html_text"]
-    assert "ACME" in captured["html_text"]
-    assert "Linea" in captured["html_text"]
-    assert "Stop" in captured["html_text"]
-    assert "Logo.png" in captured["html_text"]
-    assert "<th>Lavori da eseguire</th>" in captured["html_text"]
-    assert not os.path.exists(captured["pdf"])
-    assert not os.path.exists(captured["html"])
+    body = res.json()
+    assert body["azienda"] == "ACME"
+    assert body["descrizione"] == "Linea"
+    assert body["anno"] == 2024
+    assert "id" in body
 
 
-def test_import_temp_files_removed(setup_db, tmp_path):
-    captured = {}
-
-    def fake_parse(path):
-        captured["xlsx"] = path
-        return [{"azienda": "A", "descrizione": "B", "anno": date.today().year}]
-
-    def fake_build(rows, azienda, year):
-        pdf = tmp_path / "out.pdf"
-        html = tmp_path / "out.html"
-        pdf.write_bytes(b"%PDF-1.4 fake")
-        html.write_text("html")
-        captured["pdf"] = str(pdf)
-        captured["html"] = str(html)
-        return str(pdf), str(html)
-
-    with patch("app.routes.segnaletica_orizzontale.parse_excel", side_effect=fake_parse):
-        with patch(
-            "app.routes.segnaletica_orizzontale.build_segnaletica_orizzontale_pdf",
-            side_effect=fake_build,
-        ):
-            dummy = tmp_path / "s.xlsx"
-            dummy.write_bytes(b"data")
-            with open(dummy, "rb") as fh:
-                res = client.post(
-                    "/segnaletica-orizzontale/import",
-                    files={
-                        "file": (
-                            "s.xlsx",
-                            fh,
-                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                        )
-                    },
-                )
+def test_update_signage_horizontal(setup_db):
+    base = {"azienda": "ACME", "descrizione": "Old", "anno": 2023}
+    res = client.post("/inventario/signage-horizontal/", json=base)
+    rec_id = res.json()["id"]
+    update = {"azienda": "Beta", "descrizione": "New", "anno": 2024}
+    res = client.put(f"/inventario/signage-horizontal/{rec_id}", json=update)
     assert res.status_code == 200
-    assert not os.path.exists(captured["xlsx"])
-    assert not os.path.exists(captured["pdf"])
-    assert not os.path.exists(captured["html"])
+    data = res.json()
+    assert data["azienda"] == "Beta"
+    assert data["descrizione"] == "New"
+    assert data["anno"] == 2024
+
+
+def test_list_signage_horizontal(setup_db):
+    client.post("/inventario/signage-horizontal/", json={"azienda": "A", "descrizione": "A", "anno": 2023})
+    client.post("/inventario/signage-horizontal/", json={"azienda": "B", "descrizione": "B", "anno": 2024})
+
+    res = client.get("/inventario/signage-horizontal/")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data) == 2
+
+    res = client.get("/inventario/signage-horizontal/?year=2023")
+    assert res.status_code == 200
+    assert len(res.json()) == 1
+    assert res.json()[0]["anno"] == 2023
+
+
+def test_delete_signage_horizontal(setup_db):
+    res = client.post("/inventario/signage-horizontal/", json={"azienda": "C", "descrizione": "C", "anno": 2022})
+    rec_id = res.json()["id"]
+    del_res = client.delete(f"/inventario/signage-horizontal/{rec_id}")
+    assert del_res.status_code == 200
+    assert del_res.json()["ok"] is True
+    assert client.get("/inventario/signage-horizontal/").json() == []
+
+
+def test_get_years(setup_db):
+    client.post("/inventario/signage-horizontal/", json={"azienda": "A", "descrizione": "A", "anno": 2022})
+    client.post("/inventario/signage-horizontal/", json={"azienda": "B", "descrizione": "B", "anno": 2024})
+    res = client.get("/inventario/signage-horizontal/years")
+    assert res.status_code == 200
+    assert res.json() == [2022, 2024]

@@ -36,3 +36,16 @@ def delete_segnaletica_orizzontale(db: Session, so_id: str):
         db.delete(db_obj)
         db.commit()
     return db_obj
+
+
+def get_years(db: Session) -> list[int]:
+    """Return all distinct ``anno`` values."""
+    rows = (
+        db.query(SegnaleticaOrizzontale.anno)
+        .filter(SegnaleticaOrizzontale.anno.isnot(None))
+        .distinct()
+        .order_by(SegnaleticaOrizzontale.anno)
+        .all()
+    )
+    return [int(row[0]) for row in rows]
+
