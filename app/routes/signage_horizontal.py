@@ -9,7 +9,9 @@ from app.schemas.segnaletica_orizzontale import (
     SegnaleticaOrizzontaleResponse,
 )
 from app.crud import segnaletica_orizzontale as crud
-from app.services.signage_horizontal import build_signage_horizontal_pdf
+from app.services.segnaletica_orizzontale_pdf import (
+    build_segnaletica_orizzontale_pdf,
+)
 
 router = APIRouter(prefix="/inventario/signage-horizontal", tags=["Inventario"])
 
@@ -53,8 +55,8 @@ def signage_horizontal_pdf(
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
-    """Return an inventory PDF for the given ``year``."""
-    pdf_path, html_path = build_signage_horizontal_pdf(db, year)
+    """Return a signage plan PDF for the given ``year``."""
+    pdf_path, html_path = build_segnaletica_orizzontale_pdf(db, year)
     background_tasks.add_task(os.remove, pdf_path)
     background_tasks.add_task(os.remove, html_path)
     filename = f"signage_horizontal_{year}.pdf"

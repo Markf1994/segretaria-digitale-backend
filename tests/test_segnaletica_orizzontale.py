@@ -1,4 +1,7 @@
 from fastapi.testclient import TestClient
+from pathlib import Path
+from unittest.mock import patch
+import os
 
 from app.main import app
 
@@ -59,3 +62,86 @@ def test_get_years(setup_db):
     res = client.get("/inventario/signage-horizontal/years")
     assert res.status_code == 200
     assert res.json() == [2022, 2024]
+
+
+def test_plan_pdf_single_azienda(setup_db, tmp_path):
+    client.post(
+        "/inventario/signage-horizontal/",
+        json={"azienda": "Solo", "descrizione": "Linea 1", "anno": 2024},
+    )
+    client.post(
+        "/inventario/signage-horizontal/",
+        json={"azienda": "Solo", "descrizione": "Linea 2", "anno": 2024},
+    )
+
+    captured = {}
+    real_build = __import__(
+        "app.services.segnaletica_orizzontale_pdf",
+        fromlist=["build_segnaletica_orizzontale_pdf"],
+    ).build_segnaletica_orizzontale_pdf
+
+    def fake_write_pdf(self, target, *args, **kwargs):
+        Path(target).write_bytes(b"%PDF-1.4 fake")
+
+    def capture_build(db, year):
+        pdf_path, html_path = real_build(db, year)
+        captured["pdf"] = pdf_path
+        captured["html"] = html_path
+        captured["text"] = Path(html_path).read_text()
+        return pdf_path, html_path
+
+    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
+        with patch(
+            "app.routes.signage_horizontal.build_segnaletica_orizzontale_pdf",
+            side_effect=capture_build,
+        ):
+            res = client.get("/inventario/signage-horizontal/pdf?year=2024")
+
+    assert res.status_code == 200
+    assert "Linea 1" in captured["text"]
+    assert "Linea 2" in captured["text"]
+    assert "Solo" in captured["text"]
+    assert "Logo.png" in captured["text"]
+    assert not os.path.exists(captured["pdf"])
+    assert not os.path.exists(captured["html"])
+
+
+def test_plan_pdf_multiple_aziende(setup_db, tmp_path):
+    client.post(
+        "/inventario/signage-horizontal/",
+        json={"azienda": "A", "descrizione": "Desc", "anno": 2023},
+    )
+    client.post(
+        "/inventario/signage-horizontal/",
+        json={"azienda": "B", "descrizione": "Other", "anno": 2023},
+    )
+
+    captured = {}
+    real_build = __import__(
+        "app.services.segnaletica_orizzontale_pdf",
+        fromlist=["build_segnaletica_orizzontale_pdf"],
+    ).build_segnaletica_orizzontale_pdf
+
+    def fake_write_pdf(self, target, *args, **kwargs):
+        Path(target).write_bytes(b"%PDF-1.4 fake")
+
+    def capture_build(db, year):
+        pdf_path, html_path = real_build(db, year)
+        captured["text"] = Path(html_path).read_text()
+        captured["pdf"] = pdf_path
+        captured["html"] = html_path
+        return pdf_path, html_path
+
+    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
+        with patch(
+            "app.routes.signage_horizontal.build_segnaletica_orizzontale_pdf",
+            side_effect=capture_build,
+        ):
+            res = client.get("/inventario/signage-horizontal/pdf?year=2023")
+
+    assert res.status_code == 200
+    assert "Desc" in captured["text"]
+    assert "Other" in captured["text"]
+    assert "A" not in captured["text"] or "B" not in captured["text"]
+    assert not os.path.exists(captured["pdf"])
+    assert not os.path.exists(captured["html"])
