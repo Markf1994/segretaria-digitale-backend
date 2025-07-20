@@ -33,8 +33,14 @@ def test_update_signage_horizontal(setup_db):
 
 
 def test_list_signage_horizontal(setup_db):
-    client.post("/inventario/signage-horizontal/", json={"azienda": "A", "descrizione": "A", "anno": 2023})
-    client.post("/inventario/signage-horizontal/", json={"azienda": "B", "descrizione": "B", "anno": 2024})
+    client.post(
+        "/inventario/signage-horizontal/",
+        json={"azienda": "A", "descrizione": "A", "anno": 2023},
+    )
+    client.post(
+        "/inventario/signage-horizontal/",
+        json={"azienda": "B", "descrizione": "B", "anno": 2024},
+    )
 
     res = client.get("/inventario/signage-horizontal/")
     assert res.status_code == 200
@@ -48,7 +54,10 @@ def test_list_signage_horizontal(setup_db):
 
 
 def test_delete_signage_horizontal(setup_db):
-    res = client.post("/inventario/signage-horizontal/", json={"azienda": "C", "descrizione": "C", "anno": 2022})
+    res = client.post(
+        "/inventario/signage-horizontal/",
+        json={"azienda": "C", "descrizione": "C", "anno": 2022},
+    )
     rec_id = res.json()["id"]
     del_res = client.delete(f"/inventario/signage-horizontal/{rec_id}")
     assert del_res.status_code == 200
@@ -57,8 +66,14 @@ def test_delete_signage_horizontal(setup_db):
 
 
 def test_get_years(setup_db):
-    client.post("/inventario/signage-horizontal/", json={"azienda": "A", "descrizione": "A", "anno": 2022})
-    client.post("/inventario/signage-horizontal/", json={"azienda": "B", "descrizione": "B", "anno": 2024})
+    client.post(
+        "/inventario/signage-horizontal/",
+        json={"azienda": "A", "descrizione": "A", "anno": 2022},
+    )
+    client.post(
+        "/inventario/signage-horizontal/",
+        json={"azienda": "B", "descrizione": "B", "anno": 2024},
+    )
     res = client.get("/inventario/signage-horizontal/years")
     assert res.status_code == 200
     assert res.json() == [2022, 2024]
@@ -145,3 +160,105 @@ def test_plan_pdf_multiple_aziende(setup_db, tmp_path):
     assert "A" not in captured["text"] or "B" not in captured["text"]
     assert not os.path.exists(captured["pdf"])
     assert not os.path.exists(captured["html"])
+
+
+def test_import_signage_horizontal_creates_records_and_returns_pdf(setup_db, tmp_path):
+    captured = {}
+
+    def fake_parse(path):
+        captured["xlsx"] = path
+        return [
+            {"azienda": "A", "descrizione": "One", "anno": 2024},
+            {"azienda": "A", "descrizione": "Two", "anno": 2024},
+        ]
+
+    def fake_build(db, year):
+        pdf = tmp_path / "plan.pdf"
+        html = tmp_path / "plan.html"
+        pdf.write_bytes(b"%PDF-1.4 fake")
+        html.write_text("x")
+        captured["pdf"] = str(pdf)
+        captured["html"] = str(html)
+        return str(pdf), str(html)
+
+    with patch("app.routes.signage_horizontal.parse_excel", side_effect=fake_parse):
+        with patch(
+            "app.routes.signage_horizontal.build_segnaletica_orizzontale_pdf",
+            side_effect=fake_build,
+        ):
+            dummy = tmp_path / "imp.xlsx"
+            dummy.write_bytes(b"data")
+            with open(dummy, "rb") as fh:
+                res = client.post(
+                    "/inventario/signage-horizontal/import",
+                    files={
+                        "file": (
+                            "imp.xlsx",
+                            fh,
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        )
+                    },
+                )
+
+    assert res.status_code == 200
+    assert res.headers["content-type"] == "application/pdf"
+    assert not os.path.exists(captured["xlsx"])
+    assert not os.path.exists(captured["pdf"])
+    assert not os.path.exists(captured["html"])
+    assert len(client.get("/inventario/signage-horizontal/").json()) == 2
+
+
+def test_import_signage_horizontal_parse_error_returns_400(tmp_path):
+    captured = {}
+
+    def fake_parse(path):
+        captured["xlsx"] = path
+        raise HTTPException(status_code=400, detail="bad")
+
+    with patch("app.routes.signage_horizontal.parse_excel", side_effect=fake_parse):
+        dummy = tmp_path / "imp.xlsx"
+        dummy.write_bytes(b"data")
+        with open(dummy, "rb") as fh:
+            res = client.post(
+                "/inventario/signage-horizontal/import",
+                files={
+                    "file": (
+                        "imp.xlsx",
+                        fh,
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    )
+                },
+            )
+
+    assert res.status_code == 400
+    assert not os.path.exists(captured["xlsx"])
+
+
+def test_import_signage_horizontal_tmp_removed_on_late_failure(tmp_path):
+    captured = {}
+
+    def fake_parse(path):
+        captured["xlsx"] = path
+        return [{"azienda": "A", "descrizione": "X", "anno": 2024}]
+
+    with patch("app.routes.signage_horizontal.parse_excel", side_effect=fake_parse):
+        with patch(
+            "app.routes.signage_horizontal.crud.create_segnaletica_orizzontale",
+            side_effect=RuntimeError("boom"),
+        ):
+            dummy = tmp_path / "imp.xlsx"
+            dummy.write_bytes(b"data")
+            with open(dummy, "rb") as fh:
+                res = client.post(
+                    "/inventario/signage-horizontal/import",
+                    files={
+                        "file": (
+                            "imp.xlsx",
+                            fh,
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        )
+                    },
+                )
+
+    assert res.status_code == 500
+    assert not os.path.exists(captured["xlsx"])
