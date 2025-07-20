@@ -9,7 +9,7 @@ from app.services.signage_horizontal import (
     get_years,
     aggregate_items,
 )
-from app.schemas.piano_segnaletica_orizzontale import SignageInventoryItem
+from app.schemas.segnaletica_orizzontale import SignageInventoryItem
 
 router = APIRouter(prefix="/inventario", tags=["Inventario"])
 
