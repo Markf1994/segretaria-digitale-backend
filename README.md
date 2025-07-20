@@ -346,6 +346,15 @@ These routes manage horizontal signage records.
 - `DELETE /inventario/signage-horizontal/{id}` – remove an entry.
 - `GET /inventario/signage-horizontal/years` – list stored years.
 - `GET /inventario/signage-horizontal/pdf?year=<YEAR>` – download the inventory PDF.
+- `POST /inventario/signage-horizontal/import-excel` – import entries from an Excel file.
+
+Upload a workbook containing `azienda` and `descrizione` columns to create
+records in bulk:
+
+```bash
+curl -X POST -F "file=@signage.xlsx" \
+  http://localhost:8000/inventario/signage-horizontal/import-excel
+```
 
 ## Segnalazioni endpoints
 
