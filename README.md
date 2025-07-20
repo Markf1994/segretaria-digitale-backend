@@ -72,7 +72,7 @@ alembic upgrade head
 
 After pulling the latest changes, run `alembic upgrade head` again to apply the new migration.
 
-The new revision introduces inventory tables (`dispositivi`, `segnaletica_temporanea`, `segnaletica_verticale` and `piani_segnaletica_orizzontale`). Run `alembic upgrade head` so these tables are created.
+The new revision introduces inventory tables (`dispositivi`, `segnaletica_temporanea` and `segnaletica_verticale`). Run `alembic upgrade head` so these tables are created.
 
 After modifying the models, create a new revision and upgrade:
 
@@ -320,50 +320,20 @@ curl -H "Authorization: Bearer $TOKEN" \
 
 ## Inventario endpoints
 
-The `/inventario/signage-horizontal/pdf` route returns a PDF listing of
-horizontal signage for the specified year. The `year` query parameter is
-required and must be an integer.
+The `segnaletica_orizzontale` table stores rows describing horizontal
+signage. `/inventario/signage-horizontal/years` lists all distinct `anno`
+values found in that table. Use this endpoint to discover which years are
+available.
 
-Use `/inventario/signage-horizontal/?year=<YEAR>` to obtain the raw JSON
-counts instead of a PDF. The response is a list of objects with `name` and
-`count` fields.
+`/inventario/signage-horizontal/pdf` builds a PDF summary of the
+`segnaletica_orizzontale` records for the given `year`, aggregating the
+descriptions and counts. Supply the year as a query parameter. To obtain the
+raw JSON instead of a PDF, call `/inventario/signage-horizontal/?year=<YEAR>`.
 
 Example:
 
 ```bash
 GET /inventario/signage-horizontal/pdf?year=2024
-```
-
-## Piani orizzontali endpoints
-
-The `/piani-orizzontali/` routes manage plans for horizontal road markings.
-
-- `POST /piani-orizzontali/` – create a plan.
-- `GET /piani-orizzontali/` – list plans.
-- `PUT /piani-orizzontali/{id}` – update a plan.
-- `DELETE /piani-orizzontali/{id}` – remove a plan.
-- `POST /piani-orizzontali/{piano_id}/items` – add an item.
-- `GET /piani-orizzontali/{piano_id}/items` – list items.
-- `PUT /piani-orizzontali/items/{item_id}` – update an item.
-- `DELETE /piani-orizzontali/items/{item_id}` – remove an item.
-
-Items accept optional `luogo` and `data` fields which are returned in responses.
-
-```bash
-curl -X POST http://localhost:8000/piani-orizzontali/{piano_id}/items \
-  -H "Content-Type: application/json" \
-  -d '{"descrizione":"Segnale","quantita":1,"luogo":"Via Roma","data":"2024-05-01"}'
-```
-
-```json
-{
-  "id": "<item_id>",
-  "piano_id": "<piano_id>",
-  "descrizione": "Segnale",
-  "quantita": 1,
-  "luogo": "Via Roma",
-  "data": "2024-05-01"
-}
 ```
 
 ## Segnaletica orizzontale endpoints
