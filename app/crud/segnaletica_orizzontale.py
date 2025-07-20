@@ -1,9 +1,14 @@
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
 from app.models.segnaletica_orizzontale import SegnaleticaOrizzontale
 
 
 def create_segnaletica_orizzontale(db: Session, data):
-    db_obj = SegnaleticaOrizzontale(**data.dict())
+    if isinstance(data, BaseModel):
+        payload = data.dict()
+    else:
+        payload = data
+    db_obj = SegnaleticaOrizzontale(**payload)
     db.add(db_obj)
     db.commit()
     db.refresh(db_obj)
