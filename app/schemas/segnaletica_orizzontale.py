@@ -4,7 +4,11 @@ from pydantic import BaseModel
 class SegnaleticaOrizzontaleCreate(BaseModel):
     azienda: str
     descrizione: str
-    anno: int
+
+
+class SegnaleticaOrizzontaleUpdate(BaseModel):
+    azienda: str | None = None
+    descrizione: str | None = None
 
 
 class SegnaleticaOrizzontaleResponse(SegnaleticaOrizzontaleCreate):
