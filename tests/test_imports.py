@@ -40,7 +40,7 @@ def test_import_xlsx_creates_turni_and_returns_pdf(setup_db, tmp_path):
     def fake_write_pdf(self, target, *args, **kwargs):
         Path(target).write_bytes(b"%PDF-1.4 fake")
 
-    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
+    with patch("weasyprint_stub.HTML.write_pdf", side_effect=fake_write_pdf):
         with open(xlsx_path, "rb") as fh:
             res = client.post(
                 "/import/xlsx",
@@ -75,7 +75,7 @@ def test_temp_files_removed_after_request(setup_db, tmp_path):
         Path(target).write_bytes(b"%PDF-1.4 fake")
 
     with patch("app.routes.imports.parse_excel", side_effect=fake_parse_excel):
-        with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
+        with patch("weasyprint_stub.HTML.write_pdf", side_effect=fake_write_pdf):
             dummy = tmp_path / "shift.xlsx"
             dummy.write_bytes(b"data")
             with open(dummy, "rb") as fh:
@@ -138,7 +138,7 @@ def test_import_excel_alias_returns_pdf(tmp_path):
     def fake_write_pdf(self, target, *args, **kwargs):
         Path(target).write_bytes(b"%PDF-1.4 fake")
 
-    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
+    with patch("weasyprint_stub.HTML.write_pdf", side_effect=fake_write_pdf):
         with open(xlsx_path, "rb") as fh:
             res = client.post(
                 "/import/excel",
@@ -266,7 +266,7 @@ def test_import_xlsx_data_column_alias(setup_db, tmp_path):
     def fake_write_pdf(self, target, *args, **kwargs):
         Path(target).write_bytes(b"%PDF-1.4 fake")
 
-    with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
+    with patch("weasyprint_stub.HTML.write_pdf", side_effect=fake_write_pdf):
         with open(xlsx_path, "rb") as fh:
             res = client.post(
                 "/import/xlsx",
