@@ -7,6 +7,12 @@ class SegnaleticaOrizzontaleCreate(BaseModel):
     anno: int
 
 
+class SegnaleticaOrizzontaleUpdate(BaseModel):
+    azienda: str | None = None
+    descrizione: str | None = None
+    anno: int | None = None
+
+
 class SegnaleticaOrizzontaleResponse(SegnaleticaOrizzontaleCreate):
     id: str
 

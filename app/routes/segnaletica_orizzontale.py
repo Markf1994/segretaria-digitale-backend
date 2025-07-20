@@ -9,6 +9,7 @@ from app.dependencies import get_db
 from app.schemas.segnaletica_orizzontale import (
     SegnaleticaOrizzontaleCreate,
     SegnaleticaOrizzontaleResponse,
+    SegnaleticaOrizzontaleUpdate,
 )
 from app.crud import segnaletica_orizzontale as crud
 from app.services.segnaletica_orizzontale_import import parse_excel
@@ -27,15 +28,15 @@ def create_segnaletica_orizzontale_route(
 @router.get("/", response_model=list[SegnaleticaOrizzontaleResponse])
 def list_segnaletica_orizzontale(
     search: str | None = None,
-    anno: int | None = None,
+    year: int | None = None,
     db: Session = Depends(get_db),
 ):
-    return crud.get_segnaletica_orizzontale(db, search=search, anno=anno)
+    return crud.get_segnaletica_orizzontale(db, search=search, year=year)
 
 
 @router.put("/{so_id}", response_model=SegnaleticaOrizzontaleResponse)
 def update_segnaletica_orizzontale_route(
-    so_id: str, data: SegnaleticaOrizzontaleCreate, db: Session = Depends(get_db)
+    so_id: str, data: SegnaleticaOrizzontaleUpdate, db: Session = Depends(get_db)
 ):
     db_obj = crud.update_segnaletica_orizzontale(db, so_id, data)
     if not db_obj:
