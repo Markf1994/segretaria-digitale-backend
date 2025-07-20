@@ -14,7 +14,10 @@ def create_piano(descr, anno):
 
 
 def add_item(piano_id, descr, qty):
-    client.post(f"/piani-orizzontali/{piano_id}/items", json={"descrizione": descr, "quantita": qty})
+    client.post(
+        f"/piani-orizzontali/{piano_id}/items",
+        json={"descrizione": descr, "quantita": qty},
+    )
 
 
 def test_signage_horizontal_pdf_aggregates_items(setup_db, tmp_path):
@@ -28,7 +31,9 @@ def test_signage_horizontal_pdf_aggregates_items(setup_db, tmp_path):
     add_item(p_old, "Stop", 5)
 
     captured = {}
-    real_build = __import__("app.services.inventory_pdf", fromlist=["build_inventory_pdf"]).build_inventory_pdf
+    real_build = __import__(
+        "app.services.inventory_pdf", fromlist=["build_inventory_pdf"]
+    ).build_inventory_pdf
 
     def fake_write_pdf(self, target, *args, **kwargs):
         Path(target).write_bytes(b"%PDF-1.4 fake")
@@ -42,7 +47,10 @@ def test_signage_horizontal_pdf_aggregates_items(setup_db, tmp_path):
         return pdf_path, html_path
 
     with patch("weasyprint.HTML.write_pdf", side_effect=fake_write_pdf):
-        with patch("app.services.signage_horizontal.build_inventory_pdf", side_effect=capture_build):
+        with patch(
+            "app.services.signage_horizontal.build_inventory_pdf",
+            side_effect=capture_build,
+        ):
             res = client.get("/inventario/signage-horizontal/pdf?year=2023")
 
     assert res.status_code == 200
@@ -66,3 +74,21 @@ def test_signage_horizontal_years(setup_db):
     res = client.get("/inventario/signage-horizontal/years")
     assert res.status_code == 200
     assert res.json() == [2020, 2023]
+
+
+def test_signage_horizontal_items(setup_db):
+    p1 = create_piano("P1", 2023)
+    p2 = create_piano("P2", 2023)
+    old = create_piano("Old", 2022)
+
+    add_item(p1, "Linee", 2)
+    add_item(p2, "Linee", 3)
+    add_item(p1, "Stop", 1)
+    add_item(old, "Stop", 5)
+
+    res = client.get("/inventario/signage-horizontal/?year=2023")
+    assert res.status_code == 200
+    assert sorted(res.json(), key=lambda x: x["name"]) == [
+        {"name": "Linee", "count": 5},
+        {"name": "Stop", "count": 1},
+    ]
