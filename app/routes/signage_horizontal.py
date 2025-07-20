@@ -22,7 +22,7 @@ from app.crud import segnaletica_orizzontale as crud
 from app.services.segnaletica_orizzontale_pdf import (
     build_segnaletica_orizzontale_pdf,
 )
-from app.services.segnaletica_orizzontale_import import parse_excel
+from app.services.segnaletica_orizzontale_import import parse_file
 
 logger = logging.getLogger(__name__)
 
@@ -84,24 +84,32 @@ async def import_signage_horizontal(
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
-    """Import signage entries from an Excel file and return a PDF summary."""
+    """Import signage entries from a spreadsheet and return a PDF summary."""
     tmp_path = None
+    year = datetime.date.today().year
     try:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp:
+        suffix = os.path.splitext(file.filename or "")[1].lower()
+        if suffix not in {".csv", ".xlsx"}:
+            suffix = ".xlsx"
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
             tmp.write(await file.read())
             tmp_path = tmp.name
 
-        rows = parse_excel(tmp_path)
+        rows = parse_file(tmp_path)
 
         for payload in rows:
             crud.create_segnaletica_orizzontale(
                 db, SegnaleticaOrizzontaleCreate(**payload)
             )
 
-        year = rows[0]["anno"] if rows else datetime.date.today().year
         pdf_path, html_path = build_segnaletica_orizzontale_pdf(db, year)
         background_tasks.add_task(os.remove, pdf_path)
         background_tasks.add_task(os.remove, html_path)
+        logger.info(
+            "Import segnaletica orizzontale: %d record creati per anno %d",
+            len(rows),
+            year,
+        )
         filename = f"signage_horizontal_{year}.pdf"
         return FileResponse(pdf_path, filename=filename)
     except HTTPException:
@@ -114,32 +122,4 @@ async def import_signage_horizontal(
             os.remove(tmp_path)
 
 
-@router.post("/import-excel", response_model=list[SegnaleticaOrizzontaleResponse])
-async def import_signage_horizontal_excel(
-    file: UploadFile, db: Session = Depends(get_db)
-):
-    """Create signage records from an uploaded Excel file."""
-    tmp_path = None
-    try:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp:
-            tmp.write(await file.read())
-            tmp_path = tmp.name
 
-        rows = parse_excel(tmp_path)
-
-        created = []
-        for payload in rows:
-            rec = crud.create_segnaletica_orizzontale(
-                db, SegnaleticaOrizzontaleCreate(**payload)
-            )
-            created.append(rec)
-
-        return created
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.exception("Errore import-excel")
-        raise HTTPException(500, f"Errore import: {e}")
-    finally:
-        if tmp_path and os.path.exists(tmp_path):
-            os.remove(tmp_path)

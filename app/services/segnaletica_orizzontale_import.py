@@ -1,10 +1,20 @@
 import pandas as pd
 from typing import Any, Dict, List
 from fastapi import HTTPException
+from pathlib import Path
 
 
-def parse_excel(path: str) -> List[Dict[str, Any]]:
-    df = pd.read_excel(path)
+def parse_file(path: str) -> List[Dict[str, Any]]:
+    """Return rows with ``azienda`` and ``descrizione`` from ``path``.
+
+    The file may be an Excel workbook or a CSV document. Only the
+    ``azienda`` and ``descrizione`` columns are considered. Extra columns
+    are ignored.
+    """
+    if Path(path).suffix.lower() == ".csv":
+        df = pd.read_csv(path)
+    else:
+        df = pd.read_excel(path)
     lower_cols = {c.lower(): c for c in df.columns}
     required = {"azienda", "descrizione"}
     missing = required - set(lower_cols.keys())
@@ -29,3 +39,7 @@ def parse_excel(path: str) -> List[Dict[str, Any]]:
             }
         )
     return rows
+
+
+# ``parse_excel`` is kept for backward compatibility
+parse_excel = parse_file
