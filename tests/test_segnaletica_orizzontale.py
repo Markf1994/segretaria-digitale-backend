@@ -11,7 +11,7 @@ client = TestClient(app)
 
 def test_create_signage_horizontal(setup_db):
     data = {"azienda": "ACME", "descrizione": "Linea"}
-    res = client.post("/inventario/signage-horizontal/", json=data)
+    res = client.post("/segnaletica-orizzontale/", json=data)
     assert res.status_code == 200
     body = res.json()
     assert body["azienda"] == "ACME"
@@ -22,11 +22,11 @@ def test_create_signage_horizontal(setup_db):
 
 def test_update_signage_horizontal(setup_db):
     base = {"azienda": "ACME", "descrizione": "Old"}
-    res = client.post("/inventario/signage-horizontal/", json=base)
+    res = client.post("/segnaletica-orizzontale/", json=base)
     rec_id = res.json()["id"]
     year = res.json()["anno"]
     update = {"azienda": "Beta", "descrizione": "New"}
-    res = client.put(f"/inventario/signage-horizontal/{rec_id}", json=update)
+    res = client.put(f"/segnaletica-orizzontale/{rec_id}", json=update)
     assert res.status_code == 200
     data = res.json()
     assert data["azienda"] == "Beta"
@@ -36,20 +36,20 @@ def test_update_signage_horizontal(setup_db):
 
 def test_list_signage_horizontal(setup_db):
     client.post(
-        "/inventario/signage-horizontal/",
+        "/segnaletica-orizzontale/",
         json={"azienda": "A", "descrizione": "A", "anno": 2023},
     )
     client.post(
-        "/inventario/signage-horizontal/",
+        "/segnaletica-orizzontale/",
         json={"azienda": "B", "descrizione": "B", "anno": 2024},
     )
 
-    res = client.get("/inventario/signage-horizontal/")
+    res = client.get("/segnaletica-orizzontale/")
     assert res.status_code == 200
     data = res.json()
     assert len(data) == 2
 
-    res = client.get("/inventario/signage-horizontal/?year=2023")
+    res = client.get("/segnaletica-orizzontale/?year=2023")
     assert res.status_code == 200
     assert len(res.json()) == 1
     assert res.json()[0]["anno"] == 2023
@@ -57,37 +57,37 @@ def test_list_signage_horizontal(setup_db):
 
 def test_delete_signage_horizontal(setup_db):
     res = client.post(
-        "/inventario/signage-horizontal/",
+        "/segnaletica-orizzontale/",
         json={"azienda": "C", "descrizione": "C", "anno": 2022},
     )
     rec_id = res.json()["id"]
-    del_res = client.delete(f"/inventario/signage-horizontal/{rec_id}")
+    del_res = client.delete(f"/segnaletica-orizzontale/{rec_id}")
     assert del_res.status_code == 200
     assert del_res.json()["ok"] is True
-    assert client.get("/inventario/signage-horizontal/").json() == []
+    assert client.get("/segnaletica-orizzontale/").json() == []
 
 
 def test_get_years(setup_db):
     client.post(
-        "/inventario/signage-horizontal/",
+        "/segnaletica-orizzontale/",
         json={"azienda": "A", "descrizione": "A", "anno": 2022},
     )
     client.post(
-        "/inventario/signage-horizontal/",
+        "/segnaletica-orizzontale/",
         json={"azienda": "B", "descrizione": "B", "anno": 2024},
     )
-    res = client.get("/inventario/signage-horizontal/years")
+    res = client.get("/segnaletica-orizzontale/years")
     assert res.status_code == 200
     assert res.json() == [2022, 2024]
 
 
 def test_plan_pdf_single_azienda(setup_db, tmp_path):
     client.post(
-        "/inventario/signage-horizontal/",
+        "/segnaletica-orizzontale/",
         json={"azienda": "Solo", "descrizione": "Linea 1", "anno": 2024},
     )
     client.post(
-        "/inventario/signage-horizontal/",
+        "/segnaletica-orizzontale/",
         json={"azienda": "Solo", "descrizione": "Linea 2", "anno": 2024},
     )
 
@@ -112,7 +112,7 @@ def test_plan_pdf_single_azienda(setup_db, tmp_path):
             "app.routes.signage_horizontal.build_segnaletica_orizzontale_pdf",
             side_effect=capture_build,
         ):
-            res = client.get("/inventario/signage-horizontal/pdf?year=2024")
+            res = client.get("/segnaletica-orizzontale/pdf?year=2024")
 
     assert res.status_code == 200
     assert "Linea 1" in captured["text"]
@@ -125,11 +125,11 @@ def test_plan_pdf_single_azienda(setup_db, tmp_path):
 
 def test_plan_pdf_multiple_aziende(setup_db, tmp_path):
     client.post(
-        "/inventario/signage-horizontal/",
+        "/segnaletica-orizzontale/",
         json={"azienda": "A", "descrizione": "Desc", "anno": 2023},
     )
     client.post(
-        "/inventario/signage-horizontal/",
+        "/segnaletica-orizzontale/",
         json={"azienda": "B", "descrizione": "Other", "anno": 2023},
     )
 
@@ -154,7 +154,7 @@ def test_plan_pdf_multiple_aziende(setup_db, tmp_path):
             "app.routes.signage_horizontal.build_segnaletica_orizzontale_pdf",
             side_effect=capture_build,
         ):
-            res = client.get("/inventario/signage-horizontal/pdf?year=2023")
+            res = client.get("/segnaletica-orizzontale/pdf?year=2023")
 
     assert res.status_code == 200
     assert "Desc" in captured["text"]
@@ -192,7 +192,7 @@ def test_import_signage_horizontal_creates_records_and_returns_pdf(setup_db, tmp
             dummy.write_bytes(b"data")
             with open(dummy, "rb") as fh:
                 res = client.post(
-                    "/inventario/signage-horizontal/import",
+                    "/segnaletica-orizzontale/import",
                     files={
                         "file": (
                             "imp.xlsx",
@@ -207,7 +207,7 @@ def test_import_signage_horizontal_creates_records_and_returns_pdf(setup_db, tmp
     assert not os.path.exists(captured["xlsx"])
     assert not os.path.exists(captured["pdf"])
     assert not os.path.exists(captured["html"])
-    assert len(client.get("/inventario/signage-horizontal/").json()) == 2
+    assert len(client.get("/segnaletica-orizzontale/").json()) == 2
 
 
 def test_import_signage_horizontal_parse_error_returns_400(tmp_path):
@@ -222,7 +222,7 @@ def test_import_signage_horizontal_parse_error_returns_400(tmp_path):
         dummy.write_bytes(b"data")
         with open(dummy, "rb") as fh:
             res = client.post(
-                "/inventario/signage-horizontal/import",
+                "/segnaletica-orizzontale/import",
                 files={
                     "file": (
                         "imp.xlsx",
@@ -252,7 +252,7 @@ def test_import_signage_horizontal_tmp_removed_on_late_failure(tmp_path):
             dummy.write_bytes(b"data")
             with open(dummy, "rb") as fh:
                 res = client.post(
-                    "/inventario/signage-horizontal/import",
+                    "/segnaletica-orizzontale/import",
                     files={
                         "file": (
                             "imp.xlsx",

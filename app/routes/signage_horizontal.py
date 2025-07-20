@@ -26,7 +26,7 @@ from app.services.segnaletica_orizzontale_import import parse_file
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/inventario/signage-horizontal", tags=["Inventario"])
+router = APIRouter(prefix="/segnaletica-orizzontale", tags=["Segnaletica Orizzontale"])
 
 
 @router.get("/years", response_model=list[int])
