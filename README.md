@@ -321,39 +321,39 @@ curl -H "Authorization: Bearer $TOKEN" \
 ## Inventario endpoints
 
 The `segnaletica_orizzontale` table stores rows describing horizontal
-signage. `/inventario/signage-horizontal/years` lists all distinct `anno`
+signage. `/segnaletica-orizzontale/years` lists all distinct `anno`
 values found in that table. Use this endpoint to discover which years are
 available.
 
-`/inventario/signage-horizontal/pdf` builds a PDF summary of the
+`/segnaletica-orizzontale/pdf` builds a PDF summary of the
 `segnaletica_orizzontale` records for the given `year`, aggregating the
 descriptions and counts. Supply the year as a query parameter. To obtain the
-raw JSON instead of a PDF, call `/inventario/signage-horizontal/?year=<YEAR>`.
+raw JSON instead of a PDF, call `/segnaletica-orizzontale/?year=<YEAR>`.
 
 Example:
 
 ```bash
-GET /inventario/signage-horizontal/pdf?year=2024
+GET /segnaletica-orizzontale/pdf?year=2024
 ```
 
 ## Segnaletica orizzontale endpoints
 
 These routes manage horizontal signage records.
 
-- `POST /inventario/signage-horizontal/` – create an entry.
-- `GET /inventario/signage-horizontal/` – list entries.
-- `PUT /inventario/signage-horizontal/{id}` – update an entry.
-- `DELETE /inventario/signage-horizontal/{id}` – remove an entry.
-- `GET /inventario/signage-horizontal/years` – list stored years.
-- `GET /inventario/signage-horizontal/pdf?year=<YEAR>` – download the inventory PDF.
-- `POST /inventario/signage-horizontal/import` – upload an Excel or CSV file and receive a PDF summary.
+- `POST /segnaletica-orizzontale/` – create an entry.
+- `GET /segnaletica-orizzontale/` – list entries.
+- `PUT /segnaletica-orizzontale/{id}` – update an entry.
+- `DELETE /segnaletica-orizzontale/{id}` – remove an entry.
+- `GET /segnaletica-orizzontale/years` – list stored years.
+- `GET /segnaletica-orizzontale/pdf?year=<YEAR>` – download the inventory PDF.
+- `POST /segnaletica-orizzontale/import` – upload an Excel or CSV file and receive a PDF summary.
 
 Upload a workbook containing `azienda` and `descrizione` columns.
-To receive a PDF summary, call `/inventario/signage-horizontal/import`:
+To receive a PDF summary, call `/segnaletica-orizzontale/import`:
 
 ```bash
 curl -X POST -F "file=@signage.xlsx" \
-  http://localhost:8000/inventario/signage-horizontal/import -o inventory.pdf
+  http://localhost:8000/segnaletica-orizzontale/import -o inventory.pdf
 ```
 
 ## Segnalazioni endpoints
