@@ -324,6 +324,10 @@ The `/inventario/signage-horizontal/pdf` route returns a PDF listing of
 horizontal signage for the specified year. The `year` query parameter is
 required and must be an integer.
 
+Use `/inventario/signage-horizontal/?year=<YEAR>` to obtain the raw JSON
+counts instead of a PDF. The response is a list of objects with `name` and
+`count` fields.
+
 Example:
 
 ```bash

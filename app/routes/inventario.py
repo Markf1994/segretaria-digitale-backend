@@ -7,7 +7,9 @@ from app.dependencies import get_db
 from app.services.signage_horizontal import (
     build_signage_horizontal_pdf,
     get_years,
+    aggregate_items,
 )
+from app.schemas.piano_segnaletica_orizzontale import SignageInventoryItem
 
 router = APIRouter(prefix="/inventario", tags=["Inventario"])
 
@@ -29,3 +31,12 @@ def signage_horizontal_pdf(
     background_tasks.add_task(os.remove, html_path)
     filename = f"signage_horizontal_{year}.pdf"
     return FileResponse(pdf_path, filename=filename)
+
+
+@router.get(
+    "/signage-horizontal/",
+    response_model=list[SignageInventoryItem],
+)
+def signage_horizontal_items(year: int, db: Session = Depends(get_db)):
+    """Return aggregated signage items for the given year."""
+    return aggregate_items(db, year)
