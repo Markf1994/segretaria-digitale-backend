@@ -10,7 +10,7 @@ from fastapi import HTTPException
 from app.database import SessionLocal
 from app.schemas.segnaletica_orizzontale import SegnaleticaOrizzontaleCreate
 from app.crud import segnaletica_orizzontale as crud
-from app.services.segnaletica_orizzontale_import import parse_excel
+from app.services.segnaletica_orizzontale_import import parse_file
 from app.services.segnaletica_orizzontale_pdf import build_segnaletica_orizzontale_pdf
 
 
@@ -22,7 +22,7 @@ def test_parse_and_pdf_generation(setup_db, tmp_path):
     xls = tmp_path / "imp.xlsx"
     df.to_excel(xls, index=False)
 
-    rows = parse_excel(str(xls))
+    rows = parse_file(str(xls))
 
     db = SessionLocal()
     for row in rows:
@@ -50,19 +50,19 @@ def test_parse_and_pdf_generation(setup_db, tmp_path):
     db.close()
 
 
-def test_parse_excel_missing_column(tmp_path):
+def test_parse_file_missing_column(tmp_path):
     df = pd.DataFrame([{"azienda": "ACME"}])
     xls = tmp_path / "bad.xlsx"
     df.to_excel(xls, index=False)
 
     with pytest.raises(HTTPException) as exc:
-        parse_excel(str(xls))
+        parse_file(str(xls))
 
     assert exc.value.status_code == 400
     assert "Missing columns" in exc.value.detail
 
 
-def test_parse_excel_empty_cells(tmp_path):
+def test_parse_file_empty_cells(tmp_path):
     df = pd.DataFrame([
         {"azienda": "", "descrizione": "Segno"},
         {"azienda": "ACME", "descrizione": ""},
@@ -71,8 +71,21 @@ def test_parse_excel_empty_cells(tmp_path):
     df.to_excel(xls, index=False)
 
     with pytest.raises(HTTPException) as exc:
-        parse_excel(str(xls))
+        parse_file(str(xls))
 
     assert exc.value.status_code == 400
     assert "Row 2" in exc.value.detail or "Row 3" in exc.value.detail
+
+
+def test_parse_csv(tmp_path):
+    data = "azienda,descrizione\nA,Linea\nB,Stop\n"
+    csv = tmp_path / "imp.csv"
+    csv.write_text(data)
+
+    rows = parse_file(str(csv))
+
+    assert rows == [
+        {"azienda": "A", "descrizione": "Linea"},
+        {"azienda": "B", "descrizione": "Stop"},
+    ]
 

@@ -183,7 +183,7 @@ def test_import_signage_horizontal_creates_records_and_returns_pdf(setup_db, tmp
         captured["html"] = str(html)
         return str(pdf), str(html)
 
-    with patch("app.routes.signage_horizontal.parse_excel", side_effect=fake_parse):
+    with patch("app.routes.signage_horizontal.parse_file", side_effect=fake_parse):
         with patch(
             "app.routes.signage_horizontal.build_segnaletica_orizzontale_pdf",
             side_effect=fake_build,
@@ -217,7 +217,7 @@ def test_import_signage_horizontal_parse_error_returns_400(tmp_path):
         captured["xlsx"] = path
         raise HTTPException(status_code=400, detail="bad")
 
-    with patch("app.routes.signage_horizontal.parse_excel", side_effect=fake_parse):
+    with patch("app.routes.signage_horizontal.parse_file", side_effect=fake_parse):
         dummy = tmp_path / "imp.xlsx"
         dummy.write_bytes(b"data")
         with open(dummy, "rb") as fh:
@@ -243,7 +243,7 @@ def test_import_signage_horizontal_tmp_removed_on_late_failure(tmp_path):
         captured["xlsx"] = path
         return [{"azienda": "A", "descrizione": "X", "anno": 2024}]
 
-    with patch("app.routes.signage_horizontal.parse_excel", side_effect=fake_parse):
+    with patch("app.routes.signage_horizontal.parse_file", side_effect=fake_parse):
         with patch(
             "app.routes.signage_horizontal.crud.create_segnaletica_orizzontale",
             side_effect=RuntimeError("boom"),
@@ -266,60 +266,3 @@ def test_import_signage_horizontal_tmp_removed_on_late_failure(tmp_path):
     assert not os.path.exists(captured["xlsx"])
 
 
-def test_import_excel_endpoint_creates_records(setup_db, tmp_path):
-    captured = {}
-
-    def fake_parse(path):
-        captured["xlsx"] = path
-        return [
-            {"azienda": "A", "descrizione": "One"},
-            {"azienda": "B", "descrizione": "Two"},
-        ]
-
-    with patch("app.routes.signage_horizontal.parse_excel", side_effect=fake_parse):
-        dummy = tmp_path / "imp.xlsx"
-        dummy.write_bytes(b"data")
-        with open(dummy, "rb") as fh:
-            res = client.post(
-                "/inventario/signage-horizontal/import-excel",
-                files={
-                    "file": (
-                        "imp.xlsx",
-                        fh,
-                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    )
-                },
-            )
-
-    assert res.status_code == 200
-    body = res.json()
-    assert len(body) == 2
-    assert body[0]["azienda"] == "A"
-    assert not os.path.exists(captured["xlsx"])
-    assert len(client.get("/inventario/signage-horizontal/").json()) == 2
-
-
-def test_import_excel_endpoint_validation_error(tmp_path):
-    captured = {}
-
-    def fake_parse(path):
-        captured["xlsx"] = path
-        raise HTTPException(status_code=400, detail="bad")
-
-    with patch("app.routes.signage_horizontal.parse_excel", side_effect=fake_parse):
-        dummy = tmp_path / "imp.xlsx"
-        dummy.write_bytes(b"data")
-        with open(dummy, "rb") as fh:
-            res = client.post(
-                "/inventario/signage-horizontal/import-excel",
-                files={
-                    "file": (
-                        "imp.xlsx",
-                        fh,
-                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    )
-                },
-            )
-
-    assert res.status_code == 400
-    assert not os.path.exists(captured["xlsx"])
