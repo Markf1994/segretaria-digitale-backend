@@ -15,6 +15,12 @@ class SegnaleticaOrizzontaleResponse(SegnaleticaOrizzontaleCreate):
     }
 
 
+class SegnaleticaOrizzontaleUpdate(BaseModel):
+    azienda: str | None = None
+    descrizione: str | None = None
+    anno: int | None = None
+
+
 class SignageInventoryItem(BaseModel):
     """Aggregated inventory entry used by inventory endpoints."""
 

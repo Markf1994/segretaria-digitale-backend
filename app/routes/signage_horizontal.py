@@ -7,6 +7,7 @@ from app.dependencies import get_db
 from app.schemas.segnaletica_orizzontale import (
     SegnaleticaOrizzontaleCreate,
     SegnaleticaOrizzontaleResponse,
+    SegnaleticaOrizzontaleUpdate,
 )
 from app.crud import segnaletica_orizzontale as crud
 from app.services.signage_horizontal import build_signage_horizontal_pdf
@@ -32,7 +33,7 @@ def create_record(data: SegnaleticaOrizzontaleCreate, db: Session = Depends(get_
 
 
 @router.put("/{record_id}", response_model=SegnaleticaOrizzontaleResponse)
-def update_record(record_id: str, data: SegnaleticaOrizzontaleCreate, db: Session = Depends(get_db)):
+def update_record(record_id: str, data: SegnaleticaOrizzontaleUpdate, db: Session = Depends(get_db)):
     db_obj = crud.update_segnaletica_orizzontale(db, record_id, data)
     if not db_obj:
         raise HTTPException(status_code=404, detail="Segnaletica orizzontale not found")
