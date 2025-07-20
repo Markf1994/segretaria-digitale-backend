@@ -20,7 +20,6 @@ async def create_segnalazione(
     current_user: User = Depends(get_current_user),
 ):
     body = await request.json()
-    print("\u26a0\ufe0f PAYLOAD ricevuto:", body)
     data = SegnalazioneCreate(**body)
     return crud.create_segnalazione(db, data, current_user)
 
