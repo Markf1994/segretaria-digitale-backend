@@ -27,6 +27,7 @@ def test_create_todo(setup_db):
     data = response.json()
     assert data["descrizione"] == "Task"
     assert data["user_id"] == user_id
+    assert data["stato"] == "ATTIVO"
     assert "id" in data
 
 
@@ -44,7 +45,9 @@ def test_update_todo(setup_db):
         headers=headers,
     )
     assert response.status_code == 200
-    assert response.json()["descrizione"] == "New"
+    data = response.json()
+    assert data["descrizione"] == "New"
+    assert data["stato"] == "ATTIVO"
 
 
 def test_list_todos(setup_db):
@@ -63,6 +66,7 @@ def test_list_todos(setup_db):
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 2
+    assert all(item["stato"] == "ATTIVO" for item in data)
 
 
 def test_delete_todo(setup_db):
@@ -106,3 +110,4 @@ def test_user_isolated_todos(setup_db):
     assert len(res2.json()) == 1
     assert all(t["user_id"] == id1 for t in res1.json())
     assert all(t["user_id"] == id2 for t in res2.json())
+    assert all(t["stato"] == "ATTIVO" for t in res1.json() + res2.json())
