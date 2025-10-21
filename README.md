@@ -144,8 +144,11 @@ fetch("http://localhost:8000/google-login", { /* as above */ })
 
 Tests are located in the `tests/` directory. The suite requires all
 packages listed in both `requirements.txt` and `requirements-dev.txt`.
-System packages required by **WeasyPrint** (for example **Pango** and **Cairo**) must also be installed and the
-necessary environment variables (for example `DATABASE_URL`) exported.
+To avoid installing the heavy **WeasyPrint** dependencies when running the
+tests, a small stub implementation is provided in `weasyprint_stub/`. The test
+fixtures automatically load this stub in place of the real package. Only the
+runtime dependencies from the requirements files and the environment variables
+(for example `DATABASE_URL`) need to be available.
 You can run the helper script `scripts/test.sh` which sets up a local
 virtual environment, installs these dependencies and executes `pytest`:
 
